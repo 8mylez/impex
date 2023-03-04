@@ -1,0 +1,12 @@
+{
+    "name": "dustin/impex",
+    "description": "A Symfony bundle for data imports and exports",
+    "license": "MIT",
+    "authors": [{ "name": "Dustin Simon" }],
+    "autoload": {
+        "psr-4": { "Dustin\\ImpEx\\": "src/" }
+    },
+    "require": {
+        "php": "^7.4 || ^8"
+    }
+}
