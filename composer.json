@@ -7,6 +7,8 @@
         "psr-4": { "Dustin\\ImpEx\\": "src/" }
     },
     "require": {
-        "php": "^7.4 || ^8"
+        "php": "^7.4 || ^8",
+        "dustin/encapsulation": "~1.2",
+        "symfony/serializer": ">=4.0"
     }
 }
