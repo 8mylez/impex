@@ -65,6 +65,17 @@ abstract class AttributeConverter
         return isset($this->flags[$flag]);
     }
 
+    protected function hasOneOfFlags(string ...$flags): bool
+    {
+        foreach ($flags as $flag) {
+            if (isset($this->flags[$flag])) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /**
      * Validates of a given value is an expected type.
      *
