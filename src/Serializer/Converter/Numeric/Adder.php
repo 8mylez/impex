@@ -8,13 +8,19 @@ use Dustin\ImpEx\Util\Type;
 
 class Adder extends BidirectionalConverter
 {
+    use NumberConversionTrait;
+
     /**
      * @var float
      */
     private $summand;
 
-    public function __construct(float $summand, string ...$flags)
+    public function __construct($summand, string ...$flags)
     {
+        if (!Type::is($summand, Type::NUMERIC)) {
+            throw new \InvalidArgumentException(sprintf('Summand must be integer or float, %s given.', Type::getDebugType($summand)));
+        }
+
         $this->summand = $summand;
 
         parent::__construct(...$flags);
@@ -26,12 +32,10 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        $type = Type::getType($value);
-
-        if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
+        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
             $this->validateNumericConvertable($value, $path, $object->toArray());
 
-            $value = floatval($value);
+            $value = $this->convertToNumeric($value);
         }
 
         $this->validateType($value, Type::NUMERIC, $path, $object->toArray());
@@ -45,12 +49,10 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        $type = Type::getType($value);
-
-        if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
+        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
             $this->validateNumericConvertable($value, $path, $object->toArray());
 
-            $value = floatval($value);
+            $value = $this->convertToNumeric($value);
         }
 
         $this->validateType($value, Type::NUMERIC, $path, $object->toArray());

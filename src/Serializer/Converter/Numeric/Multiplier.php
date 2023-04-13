@@ -9,13 +9,19 @@ use Dustin\ImpEx\Util\Type;
 
 class Multiplier extends BidirectionalConverter
 {
+    use NumberConversionTrait;
+
     /**
      * @var float
      */
     private $factor;
 
-    public function __construct(float $factor, string ...$flags)
+    public function __construct($factor, string ...$flags)
     {
+        if (!Type::is($factor, Type::NUMERIC)) {
+            throw new \InvalidArgumentException(sprintf('Factor must be integer or float, %s given.', Type::getDebugType($factor)));
+        }
+
         $this->factor = $factor;
 
         parent::__construct(...$flags);
@@ -27,12 +33,10 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        $type = Type::getType($value);
-
-        if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
+        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
             $this->validateNumericConvertable($value, $path, $object->toArray());
 
-            $value = floatval($value);
+            $value = $this->convertToNumeric($value);
         }
 
         $this->validateType($value, Type::NUMERIC, $path, $object->toArray());
@@ -46,17 +50,15 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        $type = Type::getType($value);
-
-        if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
+        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
             $this->validateNumericConvertable($value, $path, $object->toArray());
 
-            $value = floatval($value);
+            $value = $this->convertToNumeric($value);
         }
 
         $this->validateType($value, Type::NUMERIC, $path, $object->toArray());
 
-        if ($this->factor === 0.0) {
+        if (floatval($this->factor) === 0.0) {
             throw new ZeroDivisionException($path, $data);
         }
 

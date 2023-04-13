@@ -8,6 +8,8 @@ use Dustin\ImpEx\Util\Type;
 
 class Formatter extends UnidirectionalConverter
 {
+    use NumberConversionTrait;
+
     /**
      * @var string
      */
@@ -47,7 +49,7 @@ class Formatter extends UnidirectionalConverter
         if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
             $this->validateNumericConvertable($value, $path, $data ?? $object->toArray());
 
-            $value = floatval($value);
+            $value = $this->convertToNumeric($value);
         }
 
         $this->validateType($value, Type::NUMERIC, $path, $data ?? $object->toArray());
