@@ -8,9 +8,13 @@ use Dustin\ImpEx\Util\Type;
 
 class Parser extends UnidirectionalConverter
 {
+    use NumberConversionTrait;
+
     public const EMPTY_TO_ZERO = 'empty_to_zero';
 
-    public const NUMBER_REQUIRED = 'number_required';
+    public const IGNORE_LEADING_CHARACTERS = 'ignore_leading_characters';
+
+    public const IGNORE_ALL_CHARACTERS = 'ignore_all_characters';
 
     /**
      * @var string
@@ -27,13 +31,7 @@ class Parser extends UnidirectionalConverter
         string $thousandsSeparator = ',',
         string ...$flags
     ) {
-        if (strlen($decimalSeparator) > 1) {
-            throw new \InvalidArgumentException(sprintf("Decimal separator must have length of 1. '%s' given.", $decimalSeparator));
-        }
-
-        if (strlen($thousandsSeparator) > 1) {
-            throw new \InvalidArgumentException("Thousands separator must have length of 1. '%' given.", $thousandsSeparator);
-        }
+        $this->validateSeparators($decimalSeparator, $thousandsSeparator);
 
         $this->decimalSeparator = $decimalSeparator;
         $this->thousandsSeparator = $thousandsSeparator;
@@ -48,34 +46,96 @@ class Parser extends UnidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $this->validateStringConvertable($value, $path, $data);
+            $this->validateStringConvertable($value, $path, $data ?? $object->toArray());
 
             $value = (string) $value;
         }
 
-        $this->validateType($value, Type::STRING, $path, $data);
+        $this->validateType($value, Type::STRING, $path, $data ?? $object->toArray());
 
         $value = $this->parseNumber($value);
+
+        if ($value === null && $this->hasFlag(self::EMPTY_TO_ZERO)) {
+            $value = 0;
+        }
+
+        if (Type::is($value, Type::NUMERIC)) {
+            $value = $this->convertToNumeric($value);
+        }
+
+        return $value;
     }
 
-    public function parseNumber(string $value): ?float
+    protected function parseNumber(string $value): ?float
     {
         $value = trim($value);
 
-        if (empty($value) && strlen($value) === 0) {
+        if ($this->isEmpty($value)) {
             return null;
         }
 
         $number = '';
+        $hasSign = false;
 
         foreach (\mb_str_split($value) as $character) {
+            // If character is numeric append to number string and continue
             if (\is_numeric($character)) {
                 $number .= $character;
 
                 continue;
             }
 
-            if ($character !== $this->thousandsSeparator && $character !== $this->decimalSeparator && !empty($number)) {
+            // If character is prefix sign (+ or -)
+            if ($this->isSign($character)) {
+                // If $number has no sign yet and is empty
+                if (!$hasSign && $this->isEmpty($number)) {
+                    $number .= $character;
+                    $hasSign = true;
+
+                    continue;
+                }
+
+                // If number is a single sign character
+                if ($this->isSign($number)) {
+                    if ($this->hasOneOfFlags(self::IGNORE_LEADING_CHARACTERS, self::IGNORE_ALL_CHARACTERS)) {
+                        $number = $character;
+                        $hasSign = true;
+
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                    continue;
+                }
+
+                break;
+            }
+
+            // If character is not a decimal separator or thousand separator
+            if (!$this->isMathsCharacter($character)) {
+                if ($this->isSign($number)) {
+                    if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if ($this->isEmpty($number)) {
+                    if ($this->hasOneOfFlags(self::IGNORE_LEADING_CHARACTERS, self::IGNORE_ALL_CHARACTERS)) {
+                        continue;
+                    }
+
+                    break;
+                }
+
+                if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                    continue;
+                }
+
                 break;
             }
 
@@ -98,13 +158,15 @@ class Parser extends UnidirectionalConverter
             }
         }
 
+        // Shorten number if last thousand separator is invalid
         if (strrpos($number, ',') > strlen($number) - 4) {
             $number = substr($number, 0, strrpos($number, ','));
         }
 
+        // Remove all thousand separators
         $number = str_replace(',', '', $number);
 
-        if (empty($number)) {
+        if ($this->isEmpty($number) || $this->isSign($number)) {
             return null;
         }
 
@@ -113,7 +175,7 @@ class Parser extends UnidirectionalConverter
 
     private function isValidThousandSeparator(string $number): bool
     {
-        if ((empty($number) && strlen($number) === 0) || strpos($number, '.') !== false) {
+        if ($this->isEmpty($number) || strpos($number, '.') !== false) {
             return false;
         }
 
@@ -126,7 +188,7 @@ class Parser extends UnidirectionalConverter
 
     private function isValidDecimalSeparator(string $number): bool
     {
-        if (empty($number) && strlen($number) === 0) {
+        if ($this->isEmpty($number)) {
             return true;
         }
 
@@ -139,5 +201,43 @@ class Parser extends UnidirectionalConverter
         }
 
         return strrpos($number, ',') === (strlen($number) - 4);
+    }
+
+    private function isMathsCharacter(string $character): bool
+    {
+        return \in_array($character, ['+', '-', $this->thousandsSeparator, $this->decimalSeparator]);
+    }
+
+    private function isSign(string $character): bool
+    {
+        return \in_array($character, ['+', '-']);
+    }
+
+    private function isEmpty(string $number): bool
+    {
+        return empty($number) && strlen($number) === 0;
+    }
+
+    private function validateSeparators(string $decimalSeparator, string $thousandsSeparator): void
+    {
+        if (strlen($decimalSeparator) > 1) {
+            throw new \InvalidArgumentException(sprintf("Decimal separator must have length of 1. '%s' given.", $decimalSeparator));
+        }
+
+        if ($this->isSign($decimalSeparator)) {
+            throw new \InvalidArgumentException(sprintf("'%s' is not allowed as decimal separator.", $decimalSeparator));
+        }
+
+        if (strlen($thousandsSeparator) > 1) {
+            throw new \InvalidArgumentException("Thousands separator must have length of 1. '%' given.", $thousandsSeparator);
+        }
+
+        if ($this->isSign($thousandsSeparator)) {
+            throw new \InvalidArgumentException(sprintf("'%s' is not allowed as thousands separator.", $thousandsSeparator));
+        }
+
+        if ($decimalSeparator === $thousandsSeparator) {
+            throw new \LogicException(sprintf('Decimal separator and thousand separator cannot be the same. Both (%s) given.', $decimalSeparator));
+        }
     }
 }
