@@ -18,7 +18,7 @@ abstract class AttributeConverter
 {
     public const SKIP_NULL = 'skip_null';
 
-    public const STRICT = 'STRICT';
+    public const STRICT = 'strict';
 
     public const REVERSE = 'reverse';
 
