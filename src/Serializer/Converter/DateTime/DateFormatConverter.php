@@ -39,13 +39,21 @@ class DateFormatConverter extends BidirectionalConverter
     {
         $date = $this->attributeParser->normalize($value, $object, $path, $attributeName);
 
-        return $date->format($this->rawFormat);
+        if ($date instanceof \DateTimeInterface) {
+            return $date->format($this->rawFormat);
+        }
+
+        return $date;
     }
 
     public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
     {
         $date = $this->rawParser->denormalize($value, $object, $path, $attributeName, $data);
 
-        return $date->format($this->attributeFormat);
+        if ($date instanceof \DateTimeInterface) {
+            return $date->format($this->attributeFormat);
+        }
+
+        return $date;
     }
 }
