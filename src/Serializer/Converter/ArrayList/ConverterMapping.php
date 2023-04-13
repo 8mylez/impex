@@ -20,6 +20,14 @@ class ConverterMapping extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
+    public static function getAvailableFlags(): array
+    {
+        return [
+            self::SKIP_NULL,
+            self::STRICT,
+        ];
+    }
+
     public function setConverter(string $field, ?AttributeConverter $converter)
     {
         $this->converters[$field] = $converter;

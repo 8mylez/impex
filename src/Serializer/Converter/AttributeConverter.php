@@ -37,6 +37,14 @@ abstract class AttributeConverter
     }
 
     /**
+     * Returns a list of all flags which can be applied to a converter instance.
+     */
+    public static function getAvailableFlags(): array
+    {
+        return [];
+    }
+
+    /**
      * @param mixed                  $value         The value to convert
      * @param EncapsulationInterface $object        The encapsulation object to be normalized by a normalizer
      * @param string                 $path          The full path of the current attribute in relation to the object to be normalized

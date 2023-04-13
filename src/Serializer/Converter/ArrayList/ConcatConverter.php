@@ -22,6 +22,15 @@ class ConcatConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
+    public static function getAvailableFlags(): array
+    {
+        return [
+            self::SKIP_NULL,
+            self::STRICT,
+            self::REVERSE,
+        ];
+    }
+
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {

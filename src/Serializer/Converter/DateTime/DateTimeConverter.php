@@ -25,6 +25,14 @@ class DateTimeConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
+    public static function getAvailableFlags(): array
+    {
+        return array_unique(array_merge(
+            [self::SKIP_NULL],
+            DateParser::getAvailableFlags()
+        ));
+    }
+
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
