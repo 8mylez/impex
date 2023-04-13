@@ -32,6 +32,12 @@ class Filter extends UnidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $path, $normalizedData ?? $object->toArray());
 
-        return $this->callback !== null ? array_filter($value, $this->callback) : array_filter($value);
+        $value = $this->callback !== null ? array_filter($value, $this->callback) : array_filter($value);
+
+        if ($this->hasFlag(self::REINDEX)) {
+            $value = array_values($value);
+        }
+
+        return $value;
     }
 }

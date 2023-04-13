@@ -22,6 +22,8 @@ abstract class AttributeConverter
 
     public const REVERSE = 'reverse';
 
+    public const REINDEX = 'reindex';
+
     private $flags = [];
 
     /**
