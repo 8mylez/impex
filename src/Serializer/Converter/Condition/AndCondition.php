@@ -18,6 +18,10 @@ class AndCondition extends Condition
 
     public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool
     {
+        if (empty($this->conditions)) {
+            return false;
+        }
+
         foreach ($this->conditions as $condition) {
             if (!$condition->isFullfilled($value, $object, $path, $attributeName)) {
                 return false;

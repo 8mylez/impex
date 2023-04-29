@@ -1,9 +1,10 @@
 <?php
 
-namespace Dustin\ImpEx\Serializer\Converter;
+namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
 use Dustin\Encapsulation\EncapsulationInterface;
-use Dustin\ImpEx\Serializer\Converter\Condition\Condition;
+use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
+use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 
 class ConditionalConverter extends BidirectionalConverter
 {
