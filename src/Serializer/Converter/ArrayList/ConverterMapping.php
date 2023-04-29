@@ -5,6 +5,8 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\Type;
 
 class ConverterMapping extends BidirectionalConverter
@@ -51,10 +53,19 @@ class ConverterMapping extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $path, $object->toArray());
 
         $converted = [];
+        $exceptions = [];
 
         foreach ($data as $name => $value) {
             $converter = $this->getConverter($name);
-            $converted[$name] = $converter !== null ? $converter->normalize($value, $object, $path.'/'.$name, $attributeName) : $value;
+            try {
+                $converted[$name] = $converter !== null ? $converter->normalize($value, $object, $path.'/'.$name, $attributeName) : $value;
+            } catch (AttributeConversionException $e) {
+                $exceptions[] = $e;
+            }
+        }
+
+        if (count($exceptions) > 0) {
+            throw new AttributeConversionExceptionStack($path, $object->toArray(), ...$exceptions);
         }
 
         return $converted;
@@ -73,10 +84,19 @@ class ConverterMapping extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $path, $normalizedData);
 
         $converted = [];
+        $exceptions = [];
 
         foreach ($data as $name => $value) {
             $converter = $this->getConverter($name);
-            $converted[$name] = $converter !== null ? $converter->denormalize($value, $object, $path.'/'.$name, $attributeName, $normalizedData) : $value;
+            try {
+                $converted[$name] = $converter !== null ? $converter->denormalize($value, $object, $path.'/'.$name, $attributeName, $normalizedData) : $value;
+            } catch (AttributeConversionException $e) {
+                $exceptions[] = $e;
+            }
+        }
+
+        if (count($exceptions) > 0) {
+            throw new AttributeConversionExceptionStack($path, $normalizedData, ...$exceptions);
         }
 
         return $converted;
