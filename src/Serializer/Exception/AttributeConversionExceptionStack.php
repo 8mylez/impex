@@ -13,11 +13,22 @@ class AttributeConversionExceptionStack extends AttributeConversionException
     {
         $this->errors = (array) $errors;
 
-        parent::__construct($attributePath, $data, sprintf('Caught %s errors.', count($errors)));
+        parent::__construct($attributePath, $data, static::buildMessage(...$errors));
     }
 
     public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    private static function buildMessage(AttributeConversionException ...$errors): string
+    {
+        $message = sprintf("Caught %s errors.\n", count($errors));
+
+        foreach ($errors as $error) {
+            $message .= sprintf(" • [%s] - %s\n", $error->getAttributePath(), $error->getMessage());
+        }
+
+        return $message;
     }
 }

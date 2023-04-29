@@ -18,9 +18,11 @@ abstract class AttributeConverter
 {
     public const SKIP_NULL = 'skip_null';
 
-    public const STRICT = 'STRICT';
+    public const STRICT = 'strict';
 
     public const REVERSE = 'reverse';
+
+    public const REINDEX = 'reindex';
 
     private $flags = [];
 
@@ -32,6 +34,14 @@ abstract class AttributeConverter
         foreach ($flags as $flag) {
             $this->flags[$flag] = $flag;
         }
+    }
+
+    /**
+     * Returns a list of all flags which can be applied to a converter instance.
+     */
+    public static function getAvailableFlags(): array
+    {
+        return [];
     }
 
     /**
@@ -61,6 +71,20 @@ abstract class AttributeConverter
     protected function hasFlag(string $flag): bool
     {
         return isset($this->flags[$flag]);
+    }
+
+    /**
+     * Returns wether at least one of the given flags is set.
+     */
+    protected function hasOneOfFlags(string ...$flags): bool
+    {
+        foreach ($flags as $flag) {
+            if (isset($this->flags[$flag])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
