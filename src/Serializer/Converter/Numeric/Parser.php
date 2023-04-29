@@ -10,10 +10,21 @@ class Parser extends UnidirectionalConverter
 {
     use NumberConversionTrait;
 
+    /**
+     * Flag. If set, zero will returned if no valid number could be found.
+     */
     public const EMPTY_TO_ZERO = 'empty_to_zero';
 
+    /**
+     * Flag. If set, leading characters will be ignored. E.g. "ABC123" can be parsed to 123.
+     */
     public const IGNORE_LEADING_CHARACTERS = 'ignore_leading_characters';
 
+    /**
+     * Flag. If set, all characters other than numbers, decimal separators and thousand separators will be ignored.
+     * All valid numeric characters will be included in the result. E.g. "ABC123DEF.456" can be parsed to 123.456.
+     * This does not include decimal separators and thousand separators. If one of those appears at invalid position the parsing process will stop.
+     */
     public const IGNORE_ALL_CHARACTERS = 'ignore_all_characters';
 
     /**

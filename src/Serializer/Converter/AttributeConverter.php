@@ -73,6 +73,9 @@ abstract class AttributeConverter
         return isset($this->flags[$flag]);
     }
 
+    /**
+     * Returns wether at least one of the given flags is set.
+     */
     protected function hasOneOfFlags(string ...$flags): bool
     {
         foreach ($flags as $flag) {
