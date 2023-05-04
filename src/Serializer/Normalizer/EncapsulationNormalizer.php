@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\Serializer\Normalizer;
 
 use Dustin\Encapsulation\AbstractEncapsulation;
 use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
@@ -19,7 +20,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class EncapsulationNormalizer extends AbstractNormalizer
+class EncapsulationNormalizer extends AbstractNormalizer implements ContextProviderInterface
 {
     public const ENABLE_MAX_DEPTH = 'enable_max_depth';
 
@@ -44,6 +45,8 @@ class EncapsulationNormalizer extends AbstractNormalizer
      * @var ClassDiscriminatorResolverInterface|null
      */
     protected $classDiscriminatorResolver;
+
+    protected array $currentContext = [];
 
     public function __construct(
         ClassMetadataFactoryInterface $classMetadataFactory = null,
@@ -117,6 +120,11 @@ class EncapsulationNormalizer extends AbstractNormalizer
         return null;
     }
 
+    public function getContext(): array
+    {
+        return $this->currentContext;
+    }
+
     /**
      * @param object $object
      *
@@ -132,9 +140,13 @@ class EncapsulationNormalizer extends AbstractNormalizer
     public function normalize($object, string $format = null, array $context = [])
     {
         $this->validateContext($context);
+        $this->currentContext = $context;
 
         if ($this->isCircularReference($object, $context)) {
-            return $this->handleCircularReference($object, $format, $context);
+            $result = $this->handleCircularReference($object, $format, $context);
+            $this->currentContext = [];
+
+            return $result;
         }
 
         $class = $this->getObjectClass($object);
@@ -191,6 +203,8 @@ class EncapsulationNormalizer extends AbstractNormalizer
             $data[$attribute] = $attributeValue;
         }
 
+        $this->currentContext = [];
+
         if (count($conversionExceptions) > 0) {
             throw new AttributeConversionExceptionStack('', $object->toArray(), ...$conversionExceptions);
         }
@@ -216,6 +230,7 @@ class EncapsulationNormalizer extends AbstractNormalizer
     public function denormalize($data, string $type, string $format = null, array $context = [])
     {
         $this->validateContext($context);
+        $this->currentContext = $context;
 
         $data = $this->prepareForDenormalization($data);
 
@@ -269,6 +284,8 @@ class EncapsulationNormalizer extends AbstractNormalizer
 
             $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
         }
+
+        $this->currentContext = [];
 
         if (count($conversionExceptions) > 0) {
             throw new AttributeConversionExceptionStack('', $data, ...$conversionExceptions);
