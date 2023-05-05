@@ -6,5 +6,8 @@
         <!-- RecordHandlingRegistry -->
         <service id="Dustin\ImpEx\Sequence\Registry\RecordHandlingRegistry" />
 
+        <!-- TransferorRegistry -->
+        <service id="Dustin\ImpEx\Sequence\Registry\TransferorRegistry" />
+
     </services>
 </container>
