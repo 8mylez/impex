@@ -4,31 +4,20 @@ namespace Dustin\ImpEx\Sequence;
 
 use Dustin\Encapsulation\EncapsulationInterface;
 
-class Limiter implements RecordHandling, Transferor
+class Limiter extends DirectPass
 {
     protected int $limit = -1;
-
-    protected ?Transferor $transferor = null;
 
     public function __construct(EncapsulationInterface $config)
     {
         $this->limit = $this->getLimit($config);
     }
 
-    public function handle(Transferor $transferor): void
+    public function passFrom(Transferor $transferor): \Generator
     {
-        $this->transferor = $transferor;
-    }
-
-    public function passRecords(): \Generator
-    {
-        if ($this->transferor === null) {
-            return;
-        }
-
         $fetched = 0;
 
-        foreach ($this->transferor->passRecords() as $record) {
+        foreach ($transferor->passRecords() as $record) {
             ++$fetched;
             yield $record;
 
@@ -38,7 +27,7 @@ class Limiter implements RecordHandling, Transferor
         }
     }
 
-    private function getLimit(EncapsulationInterface $config): int
+    protected function getLimit(EncapsulationInterface $config): int
     {
         $limit = intval($config->get('limit'));
 

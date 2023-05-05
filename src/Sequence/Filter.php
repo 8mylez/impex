@@ -2,28 +2,16 @@
 
 namespace Dustin\ImpEx\Sequence;
 
-abstract class Filter implements RecordHandling, Transferor
+abstract class Filter extends DirectPass
 {
-    protected ?Transferor $transferor = null;
-
     /**
      * @param mixed $record
      */
     abstract public function filter($record): bool;
 
-    public function handle(Transferor $transferor): void
+    public function passFrom(Transferor $transferor): \Generator
     {
-        $this->transferor = $transferor;
-    }
-
-    public function passRecords(): \Generator
-    {
-        if ($this->transferor === null) {
-            return;
-        }
-
-        /** @var mixed $record */
-        foreach ($this->transferor->passRecords() as $record) {
+        foreach ($transferor->passRecords() as $record) {
             if ($this->filter($record)) {
                 yield $record;
             }

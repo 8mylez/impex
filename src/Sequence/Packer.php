@@ -16,12 +16,12 @@ class Packer extends Limiter
         parent::__construct($config);
     }
 
-    public function passRecords(): \Generator
+    public function passFrom(Transferor $transferor): \Generator
     {
         $container = new Container();
 
         /** @var mixed $record */
-        foreach (parent::passRecords() as $record) {
+        foreach (parent::passFrom($transferor) as $record) {
             $container->add($record);
 
             if (count($container) === $this->batchSize) {
