@@ -8,6 +8,7 @@ use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
+use Dustin\ImpEx\Util\Value;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
@@ -183,7 +184,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
                 }
             }
 
-            if ($attributeValue !== null && !is_scalar($attributeValue)) {
+            if (!Value::isNormalized($attributeValue)) {
                 if (!($this->serializer instanceof NormalizerInterface)) {
                     throw new \RuntimeException(sprintf("Cannot normalize attribute '%s'. Use a serializer or add a converter.", $attribute));
                 }
