@@ -6,8 +6,8 @@ class Value
 {
     public static function isNormalized($value): bool
     {
-        if (is_object($value) || is_resource($value) || is_callable($value)) {
-            return false;
+        if (is_scalar($value) || $value === null) {
+            return true;
         }
 
         if (is_array($value)) {
@@ -16,8 +16,10 @@ class Value
                     return false;
                 }
             }
+
+            return true;
         }
 
-        return true;
+        return false;
     }
 }
