@@ -6,14 +6,8 @@ use Dustin\Encapsulation\EncapsulationInterface;
 
 class NotCondition extends Condition
 {
-    /**
-     * @var Condition
-     */
-    private $condition;
-
-    public function __construct(Condition $condition)
+    public function __construct(private Condition $condition)
     {
-        $this->condition = $condition;
     }
 
     public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool

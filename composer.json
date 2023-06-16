@@ -7,9 +7,9 @@
         "psr-4": { "Dustin\\ImpEx\\": "src/" }
     },
     "require": {
-        "php": "^7.4 || ^8",
+        "php": "^8.1",
         "dustin/encapsulation": "~1.2",
-        "symfony/serializer": ">=4.0",
+        "symfony/serializer": "~6.2",
         "symfony/dependency-injection": ">=4.0",
         "symfony/http-kernel": "~4.4.0 || ~5.4.0",
         "symfony/config": ">=2.1"

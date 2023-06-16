@@ -4,21 +4,11 @@ namespace Dustin\ImpEx\Serializer\Exception;
 
 class AttributeConversionException extends \Exception
 {
-    /**
-     * @var string
-     */
-    private $attributePath;
-
-    /**
-     * @var array
-     */
-    private $data;
-
-    public function __construct(string $attributePath, array $data, string $message)
-    {
-        $this->attributePath = $attributePath;
-        $this->data = $data;
-
+    public function __construct(
+        private string $attributePath,
+        private array $data,
+        string $message
+    ) {
         parent::__construct($message);
     }
 

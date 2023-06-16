@@ -12,27 +12,14 @@ class Chunker extends BidirectionalConverter
 {
     public const STRICT_CHUNK_SIZE = 'strict_chunk_size';
 
-    /**
-     * @var int
-     */
-    private $chunkSize;
-
-    /**
-     * @var bool
-     */
-    private $preserveKeys;
-
     public function __construct(
-        int $chunkSize,
-        bool $preserveKeys = false,
+        private int $chunkSize,
+        private bool $preserveKeys = false,
         string ...$flags
     ) {
         if ($chunkSize <= 0) {
             throw new \InvalidArgumentException('Chunk size must be greater than zero.');
         }
-
-        $this->chunkSize = $chunkSize;
-        $this->preserveKeys = $preserveKeys;
 
         parent::__construct(...$flags);
     }

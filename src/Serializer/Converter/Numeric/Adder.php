@@ -10,19 +10,8 @@ class Adder extends BidirectionalConverter
 {
     use NumberConversionTrait;
 
-    /**
-     * @var float
-     */
-    private $summand;
-
-    public function __construct($summand, string ...$flags)
+    public function __construct(private int|float $summand, string ...$flags)
     {
-        if (!Type::is($summand, Type::NUMERIC)) {
-            throw new \InvalidArgumentException(sprintf('Summand must be integer or float, %s given.', Type::getDebugType($summand)));
-        }
-
-        $this->summand = $summand;
-
         parent::__construct(...$flags);
     }
 

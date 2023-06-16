@@ -10,15 +10,8 @@ use Dustin\ImpEx\Util\Type;
 
 class ConcatConverter extends BidirectionalConverter
 {
-    /**
-     * @var string
-     */
-    private $separator;
-
-    public function __construct(string $separator, string ...$flags)
+    public function __construct(private string $separator, string ...$flags)
     {
-        $this->separator = $separator;
-
         parent::__construct(...$flags);
     }
 

@@ -6,18 +6,11 @@ use Dustin\ImpEx\Sequence\RecordHandling;
 
 class HandlingConfig implements PriorityInterface
 {
-    protected RecordHandling $handling;
-
-    protected string $sequence;
-
-    protected int $priority;
-
     public function __construct(
-        RecordHandling $handling, string $sequence, int $priority
+        protected RecordHandling $handling,
+        protected string $sequence,
+        protected int $priority
     ) {
-        $this->handling = $handling;
-        $this->sequence = $sequence;
-        $this->priority = $priority;
     }
 
     public function getHandling(): RecordHandling

@@ -11,17 +11,10 @@ use Dustin\ImpEx\Util\Type;
 
 class ListConverter extends BidirectionalConverter
 {
-    /**
-     * @var AttributeConverter
-     */
-    private $converter;
-
     public function __construct(
-        AttributeConverter $converter,
+        private AttributeConverter $converter,
         string ...$flags
     ) {
-        $this->converter = $converter;
-
         parent::__construct(...$flags);
     }
 

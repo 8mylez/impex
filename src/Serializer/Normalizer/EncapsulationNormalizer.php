@@ -52,8 +52,8 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     public function __construct(
         ClassMetadataFactoryInterface $classMetadataFactory = null,
         NameConverterInterface $nameConverter = null,
-        ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null,
-        callable $objectClassResolver = null,
+        ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver = null,
+        ?callable $objectClassResolver = null,
         array $defaultContext = []
     ) {
         if (!isset($defaultContext[self::GROUPS])) {
@@ -72,10 +72,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         $this->objectClassResolver = $objectClassResolver;
     }
 
-    /**
-     * @param mixed $data
-     */
-    public function supportsNormalization($data, string $format = null): bool
+    public function supportsNormalization(mixed $data, string $format = null): bool
     {
         if (!\is_object($data)) {
             return false;
@@ -94,10 +91,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         return \get_class($data) === $targetClass;
     }
 
-    /**
-     * @param mixed $data
-     */
-    public function supportsDenormalization($data, string $type, string $format = null): bool
+    public function supportsDenormalization(mixed $data, string $type, string $format = null): bool
     {
         $targetClass = $this->getEncapsulationClass();
 
@@ -138,7 +132,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      * @throws \LogicException
      * @throws CircularReferenceException
      */
-    public function normalize($object, string $format = null, array $context = [])
+    public function normalize(mixed $object, string $format = null, array $context = [])
     {
         $this->validateContext($context);
         $this->currentContext = $context;
@@ -218,8 +212,6 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     }
 
     /**
-     * @param mixed $data
-     *
      * @return mixed
      *
      * @throws \RuntimeException
@@ -228,7 +220,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      * @throws \InvalidArgumentException
      * @throws \LogicException
      */
-    public function denormalize($data, string $type, string $format = null, array $context = [])
+    public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
     {
         $this->validateContext($context);
         $this->currentContext = $context;
@@ -303,12 +295,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         return true;
     }
 
-    /**
-     * @param mixed $data
-     *
-     * @return array
-     */
-    protected function prepareForDenormalization($data)
+    protected function prepareForDenormalization(mixed $data): array
     {
         if ($data instanceof EncapsulationInterface) {
             return $data->toArray();
@@ -353,11 +340,9 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     }
 
     /**
-     * @param string|object $classOrObject
-     *
      * @return array|false
      */
-    protected function getAllowedAttributes($classOrObject, array $context, bool $attributesAsString = false)
+    protected function getAllowedAttributes(string|object $classOrObject, array $context, bool $attributesAsString = false)
     {
         if (!$this->classMetadataFactory) {
             return false;
@@ -383,7 +368,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      *
      * @throws NotNormalizableValueException
      */
-    protected function instantiateObject(array &$data, string $class, array &$context, \ReflectionClass $reflectionClass, $allowedAttributes, string $format = null)
+    protected function instantiateObject(array &$data, string $class, array &$context, \ReflectionClass $reflectionClass, array|bool $allowedAttributes, string $format = null)
     {
         if (($object = $this->extractObjectToPopulate($class, $context, self::OBJECT_TO_POPULATE)) !== null) {
             return $object;
@@ -456,10 +441,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         return array_merge($context, $metadata->getDenormalizationContextForGroups($this->getGroups($context)));
     }
 
-    /**
-     * @param string|object $objectOrClass
-     */
-    protected function getAttributeMetadata($objectOrClass, string $attribute): ?AttributeMetadataInterface
+    protected function getAttributeMetadata(object|string $objectOrClass, string $attribute): ?AttributeMetadataInterface
     {
         if (!$this->classMetadataFactory) {
             return null;

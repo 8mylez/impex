@@ -97,7 +97,7 @@ abstract class AttributeConverter
      *
      * @throws InvalidTypeException Thrown if the value is not of the expected type
      */
-    protected function validateType($value, string $expectedType, string $path, array $data)
+    protected function validateType($value, string $expectedType, string $path, array $data): void
     {
         if (!Type::is($value, $expectedType)) {
             throw new InvalidTypeException($path, $data, $expectedType, $value);

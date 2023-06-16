@@ -12,36 +12,12 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class SerializerConverter extends BidirectionalConverter
 {
-    /**
-     * @var SerializerInterface
-     */
-    private $serializer;
-
-    /**
-     * @var string
-     */
-    private $format;
-
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var ContextProviderInterface|null
-     */
-    private $contextProvider;
-
     public function __construct(
-        SerializerInterface $serializer,
-        string $format,
-        string $type,
-        ?ContextProviderInterface $contextProvider = null
+        private SerializerInterface $serializer,
+        private string $format,
+        private string $type,
+        private ?ContextProviderInterface $contextProvider = null
     ) {
-        $this->serializer = $serializer;
-        $this->format = $format;
-        $this->type = $type;
-        $this->contextProvider = $contextProvider;
     }
 
     public static function getAvailableFlags(): array

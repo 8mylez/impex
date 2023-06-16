@@ -8,16 +8,6 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 class DateFormatConverter extends BidirectionalConverter
 {
     /**
-     * @var string
-     */
-    private $attributeFormat;
-
-    /**
-     * @var string
-     */
-    private $rawFormat;
-
-    /**
      * @var DateParser
      */
     private $attributeParser;
@@ -27,10 +17,8 @@ class DateFormatConverter extends BidirectionalConverter
      */
     private $rawParser;
 
-    public function __construct(string $attributeFormat, string $rawFormat, string ...$flags)
+    public function __construct(private string $attributeFormat, private string $rawFormat, string ...$flags)
     {
-        $this->attributeFormat = $attributeFormat;
-        $this->rawFormat = $rawFormat;
         $this->attributeParser = new DateParser($attributeFormat, ...$flags);
         $this->rawParser = new DateParser($rawFormat, ...$flags);
     }

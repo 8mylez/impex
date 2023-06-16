@@ -10,31 +10,12 @@ class Formatter extends UnidirectionalConverter
 {
     use NumberConversionTrait;
 
-    /**
-     * @var string
-     */
-    private $decimalSeparator;
-
-    /**
-     * @var string
-     */
-    private $thousandsSeparator;
-
-    /**
-     * @var int
-     */
-    private $decimals;
-
     public function __construct(
-        string $decimalSeparator = '.',
-        string $thousandsSeparator = ',',
-        int $decimals = 3,
+        private string $decimalSeparator = '.',
+        private string $thousandsSeparator = ',',
+        private int $decimals = 3,
         string ...$flags
     ) {
-        $this->decimalSeparator = $decimalSeparator;
-        $this->thousandsSeparator = $thousandsSeparator;
-        $this->decimals = $decimals;
-
         parent::__construct(...$flags);
     }
 

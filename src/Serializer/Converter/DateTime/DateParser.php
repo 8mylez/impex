@@ -9,15 +9,8 @@ use Dustin\ImpEx\Util\Type;
 
 class DateParser extends UnidirectionalConverter
 {
-    /**
-     * @var string|null
-     */
-    private $format;
-
-    public function __construct(?string $format = null, string ...$flags)
+    public function __construct(private ?string $format = null, string ...$flags)
     {
-        $this->format = $format;
-
         parent::__construct(...$flags);
     }
 

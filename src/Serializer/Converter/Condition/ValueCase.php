@@ -7,26 +7,8 @@ use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 
 class ValueCase extends Condition
 {
-    /**
-     * @var array
-     */
-    private $values = [];
-
-    /**
-     * @var AttributeConverter
-     */
-    private $converter;
-
-    /**
-     * @var bool
-     */
-    private $strict;
-
-    public function __construct(array $values, AttributeConverter $converter, bool $strict = false)
+    public function __construct(private array $values, private AttributeConverter $converter, private bool $strict = false)
     {
-        $this->values = $values;
-        $this->converter = $converter;
-        $this->strict = $strict;
     }
 
     public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool
