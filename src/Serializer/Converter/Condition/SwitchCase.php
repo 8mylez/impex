@@ -13,15 +13,9 @@ class SwitchCase extends BidirectionalConverter
      */
     private $cases = [];
 
-    /**
-     * @var AttributeConverter|null
-     */
-    private $defaultConverter;
-
-    public function __construct(?AttributeConverter $default = null, ValueCase ...$cases)
+    public function __construct(private ?AttributeConverter $defaultConverter = null, ValueCase ...$cases)
     {
         $this->cases = $cases;
-        $this->defaultConverter = $default;
     }
 
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)

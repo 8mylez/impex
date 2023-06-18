@@ -13,43 +13,13 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class NormalizerConverter extends BidirectionalConverter
 {
-    /**
-     * @var NormalizerInterface
-     */
-    private $normalizer;
-
-    /**
-     * @var DenormalizerInterface
-     */
-    private $denormalizer;
-
-    /**
-     * @var string
-     */
-    private $type;
-
-    /**
-     * @var string|null
-     */
-    private $format = null;
-
-    /**
-     * @var ContextProviderInterface|null
-     */
-    private $contextProvider;
-
     public function __construct(
-        NormalizerInterface $normalizer,
-        DenormalizerInterface $denormalizer,
-        string $type,
-        ?string $format = null,
-        ?ContextProviderInterface $contextProvider = null
+        private NormalizerInterface $normalizer,
+        private DenormalizerInterface $denormalizer,
+        private string $type,
+        private ?string $format = null,
+        private ?ContextProviderInterface $contextProvider = null
     ) {
-        $this->normalizer = $normalizer;
-        $this->denormalizer = $denormalizer;
-        $this->type = $type;
-        $this->format = $format;
-        $this->contextProvider = $contextProvider;
     }
 
     public static function getAvailableFlags(): array

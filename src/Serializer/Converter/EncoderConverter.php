@@ -9,36 +9,12 @@ use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
 class EncoderConverter extends BidirectionalConverter
 {
-    /**
-     * @var EncoderInterface
-     */
-    private $encoder;
-
-    /**
-     * @var DecoderInterface
-     */
-    private $decoder;
-
-    /**
-     * @var string
-     */
-    private $format;
-
-    /**
-     * @var ContextProviderInterface|null
-     */
-    private $contextProvider;
-
     public function __construct(
-        EncoderInterface $encoder,
-        DecoderInterface $decoder,
-        string $format,
-        ?ContextProviderInterface $contextProvider = null
+        private EncoderInterface $encoder,
+        private DecoderInterface $decoder,
+        private string $format,
+        private ?ContextProviderInterface $contextProvider = null
     ) {
-        $this->encoder = $encoder;
-        $this->decoder = $decoder;
-        $this->format = $format;
-        $this->contextProvider = $contextProvider;
     }
 
     public static function getAvailableFlags(): array

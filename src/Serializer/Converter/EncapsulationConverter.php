@@ -17,24 +17,17 @@ use Dustin\ImpEx\Util\Type;
 class EncapsulationConverter extends BidirectionalConverter
 {
     /**
-     * @var string
-     */
-    private $encapsulationClass;
-
-    /**
      * @param string $encapsulationClass The class to create an object from. Must inherit from {@see} AbstractEncapsulation
      *
      * @throws \InvalidArgumentException Thrown if the given class does not inherit from {@see} AbstractEncapsulation
      */
     public function __construct(
-        string $encapsulationClass = Encapsulation::class,
+        private string $encapsulationClass = Encapsulation::class,
         string ...$flags
     ) {
         if (!is_subclass_of($encapsulationClass, AbstractEncapsulation::class)) {
             throw new \InvalidArgumentException(sprintf('Class %s does not inherit from %s', $encapsulationClass, AbstractEncapsulation::class));
         }
-
-        $this->encapsulationClass = $encapsulationClass;
 
         parent::__construct(...$flags);
     }

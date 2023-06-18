@@ -27,25 +27,12 @@ class Parser extends UnidirectionalConverter
      */
     public const IGNORE_ALL_CHARACTERS = 'ignore_all_characters';
 
-    /**
-     * @var string
-     */
-    private $decimalSeparator;
-
-    /**
-     * @var string
-     */
-    private $thousandsSeparator;
-
     public function __construct(
-        string $decimalSeparator = '.',
-        string $thousandsSeparator = ',',
+        private string $decimalSeparator = '.',
+        private string $thousandsSeparator = ',',
         string ...$flags
     ) {
         $this->validateSeparators($decimalSeparator, $thousandsSeparator);
-
-        $this->decimalSeparator = $decimalSeparator;
-        $this->thousandsSeparator = $thousandsSeparator;
 
         parent::__construct(...$flags);
     }

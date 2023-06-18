@@ -11,19 +11,8 @@ class Multiplier extends BidirectionalConverter
 {
     use NumberConversionTrait;
 
-    /**
-     * @var float
-     */
-    private $factor;
-
-    public function __construct($factor, string ...$flags)
+    public function __construct(private int|float $factor, string ...$flags)
     {
-        if (!Type::is($factor, Type::NUMERIC)) {
-            throw new \InvalidArgumentException(sprintf('Factor must be integer or float, %s given.', Type::getDebugType($factor)));
-        }
-
-        $this->factor = $factor;
-
         parent::__construct(...$flags);
     }
 

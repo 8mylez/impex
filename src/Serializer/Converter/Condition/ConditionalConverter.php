@@ -8,29 +8,11 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 
 class ConditionalConverter extends BidirectionalConverter
 {
-    /**
-     * @var Condition
-     */
-    private $condition;
-
-    /**
-     * @var AttributeConverter
-     */
-    private $fulfilledConverter;
-
-    /**
-     * @var AttributeConverter|null
-     */
-    private $unfulfilledConverter;
-
     public function __construct(
-        Condition $condition,
-        AttributeConverter $fulfilledConverter,
-        ?AttributeConverter $unfulfilledConverter = null
+        private Condition $condition,
+        private AttributeConverter $fulfilledConverter,
+        private ?AttributeConverter $unfulfilledConverter = null
     ) {
-        $this->condition = $condition;
-        $this->fulfilledConverter = $fulfilledConverter;
-        $this->unfulfilledConverter = $unfulfilledConverter;
     }
 
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
