@@ -46,7 +46,7 @@ class DateParser extends UnidirectionalConverter
         $date = $this->createDateTime($value);
 
         if ($date === null) {
-            throw new DateConversionException($path, $data ?? $object->toArray(), sprintf("Could not create date from string '%s'.", $value));
+            throw new DateConversionException($path, $data ?? $object->toArray(), "Could not create date from string '{{ dateTime }}'.", ['dateTime' => $value]);
         }
 
         return $date;

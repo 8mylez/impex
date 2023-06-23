@@ -6,6 +6,7 @@ use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
+use Dustin\ImpEx\Serializer\Exception\InvalidArrayException;
 use Dustin\ImpEx\Util\Type;
 
 class Chunker extends BidirectionalConverter
@@ -113,7 +114,7 @@ class Chunker extends BidirectionalConverter
     private function validateChunkSize(array $array, string $path, array $data, bool $isLast)
     {
         if (empty($array)) {
-            throw new AttributeConversionException($path, $data, 'Array must not be empty.');
+            throw new InvalidArrayException($path, $data, 'Array must not be empty', []);
         }
 
         $size = count($array);
@@ -122,7 +123,7 @@ class Chunker extends BidirectionalConverter
             ($isLast === false && $size !== $this->chunkSize) ||
             ($isLast === true && $size > $this->chunkSize)
         ) {
-            throw new AttributeConversionException($path, $data, sprintf('Array size must match chunk size of %s. %s elements found.', $this->chunkSize, $size));
+            throw new InvalidArrayException($path, $data, 'Array size must match chunk size of {{ chunkSize }}. {{ elementCount }} elements found.', ['chunkSize' => $this->chunkSize, 'elementCount' => $size]);
         }
     }
 }

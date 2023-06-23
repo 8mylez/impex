@@ -2,9 +2,9 @@
 
 namespace Dustin\ImpEx\Serializer\Exception;
 
-class DateConversionException extends AttributeConversionException
+class InvalidArrayException extends AttributeConversionException
 {
-    public const ERROR_CODE = 'IMPEX_DATE_CONVERSION_ERROR';
+    public const ERROR_CODE = 'IMPEX_INVALID_ARRAY_ERROR';
 
     public function getErrorCode(): string
     {
