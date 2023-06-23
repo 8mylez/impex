@@ -13,7 +13,7 @@ class AttributeConversionExceptionStack extends AttributeConversionException
     {
         $this->errors = (array) $errors;
 
-        parent::__construct($attributePath, $data, static::buildMessage(...$errors));
+        parent::__construct($attributePath, $data, static::createMessage(...$errors), []);
     }
 
     public function getErrors(): array
@@ -21,7 +21,7 @@ class AttributeConversionExceptionStack extends AttributeConversionException
         return $this->errors;
     }
 
-    private static function buildMessage(AttributeConversionException ...$errors): string
+    private static function createMessage(AttributeConversionException ...$errors): string
     {
         $message = sprintf("Caught %s errors.\n", count($errors));
 

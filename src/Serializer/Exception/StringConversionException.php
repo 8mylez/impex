@@ -6,11 +6,21 @@ use Dustin\ImpEx\Util\Type;
 
 class StringConversionException extends AttributeConversionException
 {
+    public const ERROR_CODE = 'IMPEX_STRING_CONVERSION_ERROR';
+
     public function __construct($value, string $path, array $data)
     {
         parent::__construct(
             $path, $data,
-            \sprintf('Value of type %s cannot be converted to string.', Type::getDebugType($value))
+            '{{ value }} cannot be converted to string',
+            [
+                'value' => Type::getDebugType($value),
+            ]
         );
+    }
+
+    public function getErrorCode(): string
+    {
+        return self::ERROR_CODE;
     }
 }
