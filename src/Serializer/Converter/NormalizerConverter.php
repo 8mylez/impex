@@ -34,6 +34,7 @@ class NormalizerConverter extends BidirectionalConverter
         }
 
         $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
+        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
 
         try {
             return $this->normalizer->normalize($value, $this->format, $context);
@@ -49,6 +50,7 @@ class NormalizerConverter extends BidirectionalConverter
         }
 
         $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
+        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
 
         try {
             return $this->denormalizer->denormalize($value, $this->type, $this->format, $context);
