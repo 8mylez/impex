@@ -4,7 +4,7 @@ namespace Dustin\ImpEx\Serializer\Converter;
 
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\ContextProviderInterface;
-use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\SerializationConversionException;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
@@ -38,7 +38,7 @@ class NormalizerConverter extends BidirectionalConverter
         try {
             return $this->normalizer->normalize($value, $this->format, $context);
         } catch (CircularReferenceException|ExtraAttributesException|NotNormalizableValueException $e) {
-            throw new AttributeConversionException($path, $object->toArray(), $e->getMessage());
+            throw new SerializationConversionException($path, $object->toArray(), $e->getMessage(), []);
         }
     }
 
@@ -53,7 +53,7 @@ class NormalizerConverter extends BidirectionalConverter
         try {
             return $this->denormalizer->denormalize($value, $this->type, $this->format, $context);
         } catch (CircularReferenceException|ExtraAttributesException|NotNormalizableValueException $e) {
-            throw new AttributeConversionException($path, $object->toArray(), $e->getMessage());
+            throw new SerializationConversionException($path, $object->toArray(), $e->getMessage(), []);
         }
     }
 }
