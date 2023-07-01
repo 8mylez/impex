@@ -9,7 +9,7 @@ class TransferContainer extends Container implements Transferor
 {
     public function passRecords(): \Generator
     {
-        yield from $this->toArray();
+        yield from $this;
     }
 
     public function accommodate(Transferor $transferor): void
