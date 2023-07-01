@@ -2,46 +2,33 @@
 
 namespace Dustin\ImpEx\Sequence\Registry;
 
+use Dustin\Encapsulation\Container;
 use Dustin\ImpEx\Sequence\AbstractSequence;
 use Dustin\ImpEx\Sequence\Exception\NotASequenceClassException;
-use Dustin\ImpEx\Util\Type;
 
 class SequenceFactory implements SequenceFactoryInterface
 {
-    public function build(SequenceConfig $sequenceConfig, array $handlers, array $subSequences, RecordHandlingRegistry $registry): AbstractSequence
+    public function __construct(private RecordHandlingRegistry $registry)
     {
-        $chain = $this->sortByPriority(array_merge($handlers, $subSequences));
-        $handlingChain = $this->buildHandlingChain($chain, $registry);
+    }
+
+    public function build(SequenceConfig $sequenceConfig, HandlingConfigContainer $handlers, SequenceConfigContainer $subSequences): AbstractSequence
+    {
+        /** @var PriorityContainer $chain */
+        $chain = PriorityContainer::merge($handlers, $subSequences);
+        $chain->sortByPriority();
+
+        $handlingChain = $this->buildHandlingChain($chain);
         $sequenceClass = $this->getSequenceClass($sequenceConfig);
 
-        return new $sequenceClass(...$handlingChain);
+        return new $sequenceClass(...$handlingChain->toArray());
     }
 
-    protected function sortByPriority(array $chain): array
+    protected function buildHandlingChain(Container $chain): Container
     {
-        usort($chain, function (PriorityInterface $config1, PriorityInterface $config2) {
-            return $config1->getPriority() <=> $config2->getPriority();
+        return Container::merge($chain)->map(function (HandlingConfig|SequenceConfig $config) {
+            return $config instanceof HandlingConfig ? $config->getHandling() : $this->registry->createSequence($config->getName());
         });
-
-        return array_reverse($chain);
-    }
-
-    /**
-     * @throws \InvalidArgumentException
-     */
-    protected function buildHandlingChain(array $chain, RecordHandlingRegistry $registry): array
-    {
-        return array_map(function ($config) use ($registry) {
-            if ($config instanceof HandlingConfig) {
-                return $config->getHandling();
-            }
-
-            if ($config instanceof SequenceConfig) {
-                return $registry->createRecordHandling($config->getName());
-            }
-
-            throw new \InvalidArgumentException(sprintf('Config must be %s or %s. Got %s', HandlingConfig::class, SequenceConfig::class, Type::getDebugType($config)));
-        }, $chain);
     }
 
     /**

@@ -4,7 +4,9 @@
     <services>
 
         <!-- RecordHandlingRegistry -->
-        <service id="Dustin\ImpEx\Sequence\Registry\RecordHandlingRegistry" />
+        <service id="Dustin\ImpEx\Sequence\Registry\RecordHandlingRegistry">
+            <argument type="service" id="event_dispatcher" />
+        </service>
 
         <!-- TransferorRegistry -->
         <service id="Dustin\ImpEx\Sequence\Registry\TransferorRegistry" />

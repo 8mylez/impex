@@ -12,14 +12,24 @@ class SequenceConfig implements PriorityInterface
     ) {
     }
 
+    public function getClass(): string
+    {
+        return $this->class;
+    }
+
+    public function setClass(string $class): void
+    {
+        $this->class = $class;
+    }
+
     public function getName(): string
     {
         return $this->name;
     }
 
-    public function getParent(): ?string
+    public function setName(string $name): void
     {
-        return $this->parent;
+        $this->name = $name;
     }
 
     public function getPriority(): int
@@ -27,8 +37,18 @@ class SequenceConfig implements PriorityInterface
         return $this->priority;
     }
 
-    public function getClass(): string
+    public function setPriority(int $priority): void
     {
-        return $this->class;
+        $this->priority = $priority;
+    }
+
+    public function getParent(): ?string
+    {
+        return $this->parent;
+    }
+
+    public function setParent(?string $parent): void
+    {
+        $this->parent = $parent;
     }
 }
