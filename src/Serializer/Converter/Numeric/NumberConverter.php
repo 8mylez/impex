@@ -29,15 +29,6 @@ class NumberConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return array_unique(array_merge(
-            [self::REVERSE],
-            Parser::getAvailableFlags(),
-            Formatter::getAvailableFlags()
-        ));
-    }
-
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
     {
         return !$this->hasFlag(self::REVERSE) ?

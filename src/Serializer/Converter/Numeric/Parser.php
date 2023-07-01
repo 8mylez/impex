@@ -37,17 +37,6 @@ class Parser extends UnidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return [
-            self::SKIP_NULL,
-            self::STRICT,
-            self::EMPTY_TO_ZERO,
-            self::IGNORE_LEADING_CHARACTERS,
-            self::IGNORE_ALL_CHARACTERS,
-        ];
-    }
-
     public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {

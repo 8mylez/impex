@@ -19,14 +19,6 @@ class Formatter extends UnidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return [
-            self::SKIP_NULL,
-            self::STRICT,
-        ];
-    }
-
     public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
