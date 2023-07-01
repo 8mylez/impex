@@ -5,6 +5,7 @@ namespace Dustin\ImpEx\Serializer\Converter;
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Exception\SerializationConversionException;
+use Dustin\ImpEx\Serializer\Normalizer\EncapsulationNormalizer;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
@@ -38,8 +39,12 @@ class NormalizerConverter extends BidirectionalConverter
 
         try {
             return $this->normalizer->normalize($value, $this->format, $context);
-        } catch (CircularReferenceException|ExtraAttributesException|NotNormalizableValueException $e) {
-            throw new SerializationConversionException($path, $object->toArray(), $e->getMessage(), []);
+        } catch (CircularReferenceException $exception) {
+            throw SerializationConversionException::circularReference($path, $object->toArray());
+        } catch (ExtraAttributesException $exception) {
+            throw SerializationConversionException::extraAttributes($path, $object->toArray(), $exception->getExtraAttributes());
+        } catch (NotNormalizableValueException $exception) {
+            throw SerializationConversionException::notNormalizableValue($path, $object->toArray(), $exception->getMessage());
         }
     }
 
@@ -54,8 +59,12 @@ class NormalizerConverter extends BidirectionalConverter
 
         try {
             return $this->denormalizer->denormalize($value, $this->type, $this->format, $context);
-        } catch (CircularReferenceException|ExtraAttributesException|NotNormalizableValueException $e) {
-            throw new SerializationConversionException($path, $object->toArray(), $e->getMessage(), []);
+        } catch (CircularReferenceException $exception) {
+            throw SerializationConversionException::circularReference($path, $normalizedData);
+        } catch (ExtraAttributesException $exception) {
+            throw SerializationConversionException::extraAttributes($path, $normalizedData, $exception->getExtraAttributes());
+        } catch (NotNormalizableValueException $exception) {
+            throw SerializationConversionException::notNormalizableValue($path, $normalizedData, $exception->getMessage());
         }
     }
 }
