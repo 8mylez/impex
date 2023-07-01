@@ -60,9 +60,9 @@ class RecordHandlingRegistry
 
     public function createRecordHandling(string $name): AbstractSequence
     {
-        $handlers = isset($this->recordHandlers[$name]) ? $this->recordHandlers[$name] : [];
+        $handlers = $this->recordHandlers[$name] ?? [];
         $subSequences = $this->getSubSequences($name);
-        $config = isset($this->sequences[$name]) ? $this->sequences[$name] : new SequenceConfig(
+        $config = $this->sequences[$name] ?? new SequenceConfig(
             Sequence::class, $name, 0, null
         );
 
@@ -73,7 +73,7 @@ class RecordHandlingRegistry
 
     public function getFactory(string $sequence): SequenceFactoryInterface
     {
-        return isset($this->factories[$sequence]) ? $this->factories[$sequence] : $this->factory;
+        return $this->factories[$sequence] ?? $this->factory;
     }
 
     private function getSubSequences(string $parent): array

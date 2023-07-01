@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\Sequence\Registry;
 
 use Dustin\ImpEx\Sequence\AbstractSequence;
 use Dustin\ImpEx\Sequence\Exception\NotASequenceClassException;
+use Dustin\ImpEx\Util\Type;
 
 class SequenceFactory implements SequenceFactoryInterface
 {
@@ -31,15 +32,15 @@ class SequenceFactory implements SequenceFactoryInterface
     protected function buildHandlingChain(array $chain, RecordHandlingRegistry $registry): array
     {
         return array_map(function ($config) use ($registry) {
-            if (\is_object($config) && $config instanceof HandlingConfig) {
+            if ($config instanceof HandlingConfig) {
                 return $config->getHandling();
             }
 
-            if (\is_object($config) && $config instanceof SequenceConfig) {
+            if ($config instanceof SequenceConfig) {
                 return $registry->createRecordHandling($config->getName());
             }
 
-            throw new \InvalidArgumentException(sprintf('Config must be %s or %s. Got %s', HandlingConfig::class, SequenceConfig::class, is_object($config) ? get_class($config) : gettype($config)));
+            throw new \InvalidArgumentException(sprintf('Config must be %s or %s. Got %s', HandlingConfig::class, SequenceConfig::class, Type::getDebugType($config)));
         }, $chain);
     }
 
