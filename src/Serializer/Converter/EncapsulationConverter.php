@@ -32,14 +32,6 @@ class EncapsulationConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return [
-            self::SKIP_NULL,
-            self::STRICT,
-        ];
-    }
-
     /**
      * @param Encapsulated|null $value
      *

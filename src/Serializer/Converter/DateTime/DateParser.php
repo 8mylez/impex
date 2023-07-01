@@ -14,14 +14,6 @@ class DateParser extends UnidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return [
-            self::SKIP_NULL,
-            self::STRICT,
-        ];
-    }
-
     public function createDateTime(string $value): ?\DateTimeInterface
     {
         $date = $this->format !== null ? \date_create_from_format($this->format, $value) : \date_create($value);

@@ -21,11 +21,6 @@ class SerializerConverter extends BidirectionalConverter
     ) {
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return [self::SKIP_NULL];
-    }
-
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {

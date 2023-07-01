@@ -3,17 +3,14 @@
 namespace Dustin\ImpEx\Sequence;
 
 use Dustin\Encapsulation\Container;
-use Dustin\Encapsulation\EncapsulationInterface;
 
-class Packer extends Limiter
+class Packer extends DirectPass
 {
-    private int $batchSize = -1;
-
-    public function __construct(EncapsulationInterface $config)
+    public function __construct(protected ?int $batchSize = null)
     {
-        $this->batchSize = $this->getBatchSize($config);
-
-        parent::__construct($config);
+        if ($batchSize !== null && $batchSize <= 0) {
+            throw new \InvalidArgumentException('Batch size must be greater than zero.');
+        }
     }
 
     public function passFrom(Transferor $transferor): \Generator
@@ -21,7 +18,7 @@ class Packer extends Limiter
         $container = new Container();
 
         /** @var mixed $record */
-        foreach (parent::passFrom($transferor) as $record) {
+        foreach ($transferor->passRecords() as $record) {
             $container->add($record);
 
             if (count($container) === $this->batchSize) {
@@ -34,12 +31,5 @@ class Packer extends Limiter
         if (count($container) > 0) {
             yield $container;
         }
-    }
-
-    private function getBatchSize(EncapsulationInterface $config): int
-    {
-        $batchSize = intval($config->get('batchSize'));
-
-        return $batchSize > 0 ? $batchSize : -1;
     }
 }

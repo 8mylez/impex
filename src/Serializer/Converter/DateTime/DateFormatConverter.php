@@ -23,11 +23,6 @@ class DateFormatConverter extends BidirectionalConverter
         $this->rawParser = new DateParser($rawFormat, ...$flags);
     }
 
-    public static function getAvailableFlags(): array
-    {
-        return DateParser::getAvailableFlags();
-    }
-
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
     {
         $date = $this->attributeParser->normalize($value, $object, $path, $attributeName);
