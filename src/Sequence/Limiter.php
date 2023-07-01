@@ -2,15 +2,13 @@
 
 namespace Dustin\ImpEx\Sequence;
 
-use Dustin\Encapsulation\EncapsulationInterface;
-
 class Limiter extends DirectPass
 {
-    protected int $limit = -1;
-
-    public function __construct(EncapsulationInterface $config)
+    public function __construct(protected int $limit)
     {
-        $this->limit = $this->getLimit($config);
+        if ($limit <= 0) {
+            throw new \InvalidArgumentException('Limit must be greater than zero.');
+        }
     }
 
     public function passFrom(Transferor $transferor): \Generator
@@ -25,12 +23,5 @@ class Limiter extends DirectPass
                 break;
             }
         }
-    }
-
-    protected function getLimit(EncapsulationInterface $config): int
-    {
-        $limit = intval($config->get('limit'));
-
-        return $limit > 0 ? $limit : -1;
     }
 }
