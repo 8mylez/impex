@@ -33,15 +33,4 @@ class Sequence extends AbstractSequence
             $recordHandler->handle($this->transferor);
         }
     }
-
-    protected function accommodateRecords(Transferor $transferor, ?TransferContainer $container = null): TransferContainer
-    {
-        if ($container === null) {
-            $container = new TransferContainer();
-        }
-
-        $container->accommodate($transferor);
-
-        return $container;
-    }
 }
