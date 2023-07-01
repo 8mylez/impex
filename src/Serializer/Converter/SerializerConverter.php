@@ -32,6 +32,7 @@ class SerializerConverter extends BidirectionalConverter
         }
 
         $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
+        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
 
         try {
             return $this->serializer->serialize($value, $this->format, $context);
@@ -47,6 +48,7 @@ class SerializerConverter extends BidirectionalConverter
         }
 
         $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
+        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
 
         try {
             return $this->serializer->deserialize($value, $this->type, $this->format, $context);

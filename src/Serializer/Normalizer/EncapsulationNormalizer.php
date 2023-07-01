@@ -37,6 +37,8 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
 
     public const CONVERTERS = 'converters';
 
+    public const CONVERSION_ROOT_PATH = 'conversion_root_path';
+
     /**
      * @var callable
      */
@@ -170,8 +172,10 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
             $attributeValue = $this->applyCallbacks($attributeValue, $object, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
+                $path = trim($this->getConversionRootPath($context), '/').'/'.$attribute;
+
                 try {
-                    $attributeValue = $converter->normalize($attributeValue, $object, '/'.$attribute, $attribute);
+                    $attributeValue = $converter->normalize($attributeValue, $object, $path, $attribute);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
                     continue;
@@ -201,7 +205,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         $this->currentContext = [];
 
         if (count($conversionExceptions) > 0) {
-            throw new AttributeConversionExceptionStack('', $object->toArray(), ...$conversionExceptions);
+            throw new AttributeConversionExceptionStack(trim($this->getConversionRootPath($context), '/'), $object->toArray(), ...$conversionExceptions);
         }
 
         if ($this->preserveEmptyObjects($context) && empty($data)) {
@@ -254,8 +258,10 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
             $value = $this->applyCallbacks($value, $class, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
+                $path = trim($this->getConversionRootPath($context), '/').'/'.$attribute;
+
                 try {
-                    $value = $converter->denormalize($value, $object, '/'.$attribute, $attribute, $data);
+                    $value = $converter->denormalize($value, $object, $path, $attribute, $data);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
                     continue;
@@ -281,7 +287,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         $this->currentContext = [];
 
         if (count($conversionExceptions) > 0) {
-            throw new AttributeConversionExceptionStack('', $data, ...$conversionExceptions);
+            throw new AttributeConversionExceptionStack(trim($this->getConversionRootPath($context), '/'), $data, ...$conversionExceptions);
         }
 
         return $object;
@@ -380,7 +386,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
             }
 
             $type = $data[$mapping->getTypeProperty()];
-            if (null === ($mappedClass = $mapping->getClassForType($type))) {
+            if (($mappedClass = $mapping->getClassForType($type)) === null) {
                 throw NotNormalizableValueException::createForUnexpectedDataType(sprintf('The type "%s" is not a valid value.', $type), $type, ['string'], isset($context['deserialization_path']) ? $context['deserialization_path'].'.'.$mapping->getTypeProperty() : $mapping->getTypeProperty(), true);
             }
 
@@ -509,6 +515,11 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     protected function deepObjectToPopulate(array $context): bool
     {
         return $context[self::DEEP_OBJECT_TO_POPULATE] ?? $this->defaultContext[self::DEEP_OBJECT_TO_POPULATE] ?? false;
+    }
+
+    protected function getConversionRootPath(array $context): string
+    {
+        return $context[self::CONVERSION_ROOT_PATH] ?? $this->defaultContext[self::CONVERSION_ROOT_PATH] ?? '';
     }
 
     private function validateContext(array $context)
