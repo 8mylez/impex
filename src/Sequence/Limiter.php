@@ -4,9 +4,9 @@ namespace Dustin\ImpEx\Sequence;
 
 class Limiter extends DirectPass
 {
-    public function __construct(protected int $limit)
+    public function __construct(protected ?int $limit = null)
     {
-        if ($limit <= 0) {
+        if ($limit !== null && $limit <= 0) {
             throw new \InvalidArgumentException('Limit must be greater than zero.');
         }
     }

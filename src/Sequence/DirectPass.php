@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Sequence;
 
-abstract class DirectPass implements RecordHandling, Transferor
+abstract class DirectPass implements TransferSection
 {
     /**
      * @var Transferor

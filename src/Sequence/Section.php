@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Sequence;
 
-interface RecordHandling
+interface Section
 {
     public function handle(Transferor $transferor): void;
 }
