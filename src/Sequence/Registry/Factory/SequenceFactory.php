@@ -1,9 +1,11 @@
 <?php
 
-namespace Dustin\ImpEx\Sequence\Registry;
+namespace Dustin\ImpEx\Sequence\Registry\Factory;
 
 use Dustin\ImpEx\Sequence\Exception\SequenceBuildException;
 use Dustin\ImpEx\Sequence\Registry\Config\SectionDefinition;
+use Dustin\ImpEx\Sequence\Registry\SequenceDefinition;
+use Dustin\ImpEx\Sequence\Registry\SequenceRegistry;
 use Dustin\ImpEx\Sequence\Registry\Validation\SequenceClassValidator;
 use Dustin\ImpEx\Sequence\Sequence;
 
