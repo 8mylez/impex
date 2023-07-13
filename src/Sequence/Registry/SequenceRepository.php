@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\Sequence\Registry;
 
 use Dustin\Encapsulation\ObjectMapping;
+use Dustin\ImpEx\Sequence\Registry\Config\SequenceDefinition;
 use Dustin\ImpEx\Sequence\Registry\Loader\SequenceLoaderInterface;
 
 class SequenceRepository implements SequenceRepositoryInterface

@@ -7,6 +7,7 @@ use Dustin\ImpEx\Sequence\Event\SequenceCreateEvent;
 use Dustin\ImpEx\Sequence\Exception\SectionNotFoundException;
 use Dustin\ImpEx\Sequence\Exception\SequenceDefinitionNotFoundException;
 use Dustin\ImpEx\Sequence\Registry\Config\SectionDefinition;
+use Dustin\ImpEx\Sequence\Registry\Config\SequenceDefinition;
 use Dustin\ImpEx\Sequence\Registry\Factory\SequenceFactory;
 use Dustin\ImpEx\Sequence\Registry\Factory\SequenceFactoryInterface;
 use Dustin\ImpEx\Sequence\Section;

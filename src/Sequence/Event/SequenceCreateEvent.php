@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Sequence\Event;
 
-use Dustin\ImpEx\Sequence\Registry\SequenceDefinition;
+use Dustin\ImpEx\Sequence\Registry\Config\SequenceDefinition;
 use Symfony\Contracts\EventDispatcher\Event;
 
 class SequenceCreateEvent extends Event

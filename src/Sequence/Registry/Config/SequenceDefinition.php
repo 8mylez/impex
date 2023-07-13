@@ -1,9 +1,8 @@
 <?php
 
-namespace Dustin\ImpEx\Sequence\Registry;
+namespace Dustin\ImpEx\Sequence\Registry\Config;
 
 use Dustin\Encapsulation\PropertyEncapsulation;
-use Dustin\ImpEx\Sequence\Registry\Config\SectionDefinitionContainer;
 
 class SequenceDefinition extends PropertyEncapsulation
 {
