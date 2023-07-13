@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx;
 
-use Dustin\ImpEx\DependencyInjection\Compiler\RecordHandlingPass;
+use Dustin\ImpEx\DependencyInjection\Compiler\SequencePass;
 use Dustin\ImpEx\DependencyInjection\Compiler\TransferorPass;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -13,7 +13,7 @@ class ImpExBundle extends Bundle
 {
     public function build(ContainerBuilder $container): void
     {
-        $container->addCompilerPass(new RecordHandlingPass());
+        $container->addCompilerPass(new SequencePass());
         $container->addCompilerPass(new TransferorPass());
 
         $loader = new XmlFileLoader($container, new FileLocator());

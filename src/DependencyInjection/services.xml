@@ -3,9 +3,19 @@
            xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
     <services>
 
-        <!-- RecordHandlingRegistry -->
-        <service id="Dustin\ImpEx\Sequence\Registry\RecordHandlingRegistry">
+        <!-- SequenceRepository -->
+        <service id="Dustin\ImpEx\Sequence\Registry\SequenceRepository">
+            <argument type="tagged" tag="impex.sequence.loader" />
+        </service>
+
+        <!-- SectionRepository -->
+        <service id="Dustin\ImpEx\Sequence\Registry\SectionRepository" />
+
+        <!-- SequenceRegistry -->
+        <service id="Dustin\ImpEx\Sequence\Registry\SequenceRegistry">
             <argument type="service" id="event_dispatcher" />
+            <argument type="service" id="Dustin\ImpEx\Sequence\Registry\SequenceRepository" />
+            <argument type="service" id="Dustin\ImpEx\Sequence\Registry\SectionRepository" />
         </service>
 
         <!-- TransferorRegistry -->
