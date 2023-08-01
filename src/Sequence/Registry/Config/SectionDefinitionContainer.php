@@ -31,6 +31,6 @@ class SectionDefinitionContainer extends Container
 
     protected function getAllowedClass(): ?string
     {
-        return Section::class;
+        return SectionDefinition::class;
     }
 }
