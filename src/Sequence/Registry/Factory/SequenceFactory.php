@@ -46,7 +46,7 @@ class SequenceFactory implements SequenceFactoryInterface
 
     protected function getSequenceClass(SequenceDefinition $definition): string
     {
-        $class = $definition->getClass();
+        $class = (string) $definition->getClass();
 
         if (!SequenceClassValidator::isSequenceClass($class)) {
             throw SequenceBuildException::invalidSequenceClass($class);

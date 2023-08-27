@@ -23,7 +23,7 @@ class SequenceDefinition extends PropertyEncapsulation
     /**
      * @var string
      */
-    protected $class;
+    protected $class = null;
 
     protected SectionDefinitionContainer $sections;
 
@@ -37,7 +37,7 @@ class SequenceDefinition extends PropertyEncapsulation
         $this->id = $id;
     }
 
-    public function getClass(): string
+    public function getClass(): ?string
     {
         return $this->class;
     }

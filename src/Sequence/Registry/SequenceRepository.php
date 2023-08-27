@@ -20,6 +20,8 @@ class SequenceRepository implements SequenceRepositoryInterface
 
     private bool $loaded = false;
 
+    private bool $isLoading = false;
+
     public function __construct(iterable $loaders)
     {
         foreach ($loaders as $loader) {
@@ -38,12 +40,6 @@ class SequenceRepository implements SequenceRepositoryInterface
     {
         $this->loadSequences();
 
-        $existingDefinition = $this->getSequence($definition->getId());
-
-        if ($existingDefinition !== null) {
-            $definition = $this->mergeDefinitions($existingDefinition, $definition);
-        }
-
         $this->sequences->set($definition->getId(), $definition);
     }
 
@@ -61,22 +57,13 @@ class SequenceRepository implements SequenceRepositoryInterface
         return $this->sequences->has($id);
     }
 
-    protected function mergeDefinitions(SequenceDefinition $existing, SequenceDefinition $new): SequenceDefinition
-    {
-        $existing->setList($new->getList(['id', 'class']));
-
-        foreach ($new->getSections() as $section) {
-            $existing->getSections()->add($section);
-        }
-
-        return $existing;
-    }
-
     private function loadSequences(): void
     {
-        if ($this->loaded === true) {
+        if ($this->loaded === true || $this->isLoading === true) {
             return;
         }
+
+        $this->isLoading = true;
 
         foreach ($this->loaders as $loader) {
             foreach ($loader->load() as $sequence) {
@@ -85,5 +72,6 @@ class SequenceRepository implements SequenceRepositoryInterface
         }
 
         $this->loaded = true;
+        $this->isLoading = false;
     }
 }

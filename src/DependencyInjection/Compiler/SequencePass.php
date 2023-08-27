@@ -69,7 +69,7 @@ class SequencePass implements CompilerPassInterface
 
                 $sequence = trim((string) $config['sequence']);
 
-                $registryDefinition->addMethodCall('setFactory', [
+                $registryDefinition->addMethodCall('setSequenceFactory', [
                     $sequence,
                     new Reference($factoryId),
                 ]);
