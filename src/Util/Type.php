@@ -4,9 +4,9 @@ namespace Dustin\ImpEx\Util;
 
 class Type
 {
-    public const INT = 'integer';
+    public const INT = 'int';
 
-    public const BOOL = 'boolean';
+    public const BOOL = 'bool';
 
     public const FLOAT = 'float';
 
@@ -28,36 +28,48 @@ class Type
 
     public static function getType($value): string
     {
-        $type = gettype($value);
-
-        switch ($type) {
-            case 'integer':
-                return self::INT;
-            case 'boolean':
-                return self::BOOL;
-            case 'double':
-                return self::FLOAT;
-            case 'string':
-                return self::STRING;
-            case 'array':
-                return self::ARRAY;
-            case 'object':
-                return self::OBJECT;
-            case 'resource':
-            case 'resource (closed)':
-                return self::RESOURCE;
-            case 'NULL':
-                return self::NULL;
-            default:
-                return is_callable($value) ? self::CALLABLE : self::UNKNOWN;
+        if (is_int($value)) {
+            return self::INT;
         }
+
+        if (is_bool($value)) {
+            return self::BOOL;
+        }
+
+        if (is_float($value)) {
+            return self::FLOAT;
+        }
+
+        if (is_string($value)) {
+            return self::STRING;
+        }
+
+        if (is_array($value)) {
+            return self::ARRAY;
+        }
+
+        if (is_object($value)) {
+            return self::OBJECT;
+        }
+
+        if (is_resource($value)) {
+            return self::RESOURCE;
+        }
+
+        if (is_null($value)) {
+            return self::NULL;
+        }
+
+        if (is_callable($value)) {
+            return self::CALLABLE;
+        }
+
+        return self::UNKNOWN;
     }
 
     public static function getDebugType($value): string
     {
-        $type = self::getType($value);
-
-        return $type === self::OBJECT ? get_class($value) : $type;
+        return get_debug_type($value);
     }
 
     public static function is($value, string $type): bool
@@ -72,7 +84,13 @@ class Type
             return self::isNumericType($valueType);
         }
 
-        return $valueType === $type;
+        $isFunction = 'is_'.$type;
+
+        if (function_exists($isFunction)) {
+            return $isFunction($value);
+        }
+
+        return $type === $valueType;
     }
 
     public static function isStringConvertable(string $type): bool
