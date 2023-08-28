@@ -4,33 +4,30 @@ namespace Dustin\ImpEx\Sequence;
 
 use Dustin\ImpEx\Encapsulation\TransferContainer;
 
-class Sequence extends AbstractSequence
+abstract class Sequence implements Section
 {
-    public function handle(Transferor $rootTransferor): void
+    protected ?Transferor $transferor = null;
+
+    protected SectionContainer $sections;
+
+    final public function __construct(Section ...$sections)
     {
-        $this->transferor = $rootTransferor;
-        $count = count($this->handlers);
-        $i = 0;
+        $this->sections = new SectionContainer($sections);
+    }
 
-        /** @var RecordHandling $recordHandler */
-        foreach ($this->handlers as $recordHandler) {
-            ++$i;
-            if ($recordHandler instanceof Transferor) {
-                $recordHandler->handle($this->transferor);
-                $this->setTransferor($recordHandler);
+    protected function setTransferor(?Transferor $transferor): void
+    {
+        $this->transferor = $transferor;
+    }
 
-                continue;
-            }
-
-            if (
-                !($this->transferor instanceof TransferContainer) &&
-                $i < $count
-            ) {
-                $container = $this->accommodateRecords($this->transferor);
-                $this->setTransferor($container);
-            }
-
-            $recordHandler->handle($this->transferor);
+    protected function accommodateRecords(Transferor $transferor, ?TransferContainer $container = null): TransferContainer
+    {
+        if ($container === null) {
+            $container = new TransferContainer();
         }
+
+        $container->accommodate($transferor);
+
+        return $container;
     }
 }

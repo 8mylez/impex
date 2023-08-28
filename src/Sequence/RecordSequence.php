@@ -4,7 +4,7 @@ namespace Dustin\ImpEx\Sequence;
 
 use Dustin\ImpEx\Encapsulation\TransferContainer;
 
-class SeparatorSequence extends Sequence
+class RecordSequence extends SectionSequence
 {
     public function handle(Transferor $rootTransferor): void
     {
