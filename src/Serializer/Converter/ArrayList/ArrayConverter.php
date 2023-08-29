@@ -7,7 +7,7 @@ use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 
 class ArrayConverter extends UnidirectionalConverter
 {
-    public const INCLUDE_ARRAYS = 'wrap_arrays';
+    public const INCLUDE_ARRAYS = 'include_arrays';
 
     public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
     {
