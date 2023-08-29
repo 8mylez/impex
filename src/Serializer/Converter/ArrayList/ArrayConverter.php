@@ -7,13 +7,17 @@ use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 
 class ArrayConverter extends UnidirectionalConverter
 {
+    public const INCLUDE_ARRAYS = 'wrap_arrays';
+
     public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
     {
         if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        $value = (array) $value;
+        if (!is_array($value) || $this->hasFlag(self::INCLUDE_ARRAYS)) {
+            $value = [$value];
+        }
 
         if ($this->hasFlag(self::REINDEX)) {
             $value = array_values($value);
