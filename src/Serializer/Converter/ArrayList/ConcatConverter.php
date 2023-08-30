@@ -6,6 +6,7 @@ use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class ConcatConverter extends BidirectionalConverter
@@ -34,7 +35,7 @@ class ConcatConverter extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $value = (array) $value;
+            $value = ArrayUtil::cast($value);
         }
 
         $this->validateType($value, Type::ARRAY, $path, $object->toArray());
@@ -51,7 +52,7 @@ class ConcatConverter extends BidirectionalConverter
 
         if ($this->hasFlag(self::REVERSE)) {
             if (!$this->hasFlag(self::STRICT)) {
-                $value = (array) $value;
+                $value = ArrayUtil::cast($value);
             }
 
             $this->validateType($value, Type::ARRAY, $path, $normalizedData);

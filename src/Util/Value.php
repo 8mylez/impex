@@ -23,7 +23,7 @@ class Value
         return false;
     }
 
-    public static function isEmpty($value, bool $considerWhitespacesAsEmpty = true): bool
+    public static function isEmpty(mixed $value, bool $considerWhitespacesAsEmpty = true): bool
     {
         if (is_string($value) && $considerWhitespacesAsEmpty) {
             $value = trim($value);

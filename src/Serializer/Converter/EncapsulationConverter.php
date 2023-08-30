@@ -6,6 +6,7 @@ use Dustin\Encapsulation\AbstractEncapsulation;
 use Dustin\Encapsulation\Encapsulation;
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 /**
@@ -64,7 +65,7 @@ class EncapsulationConverter extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $data = (array) $data;
+            $data = ArrayUtil::cast($data);
         }
 
         $this->validateType($data, Type::ARRAY, $path, $normalizedData);

@@ -10,6 +10,7 @@ use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 use Dustin\ImpEx\Util\Value;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
@@ -311,7 +312,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
             return $data->toArray();
         }
 
-        return (array) $data;
+        return ArrayUtil::cast($data);
     }
 
     protected function getObjectClass(object $object): string

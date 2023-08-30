@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Filter extends UnidirectionalConverter
@@ -27,7 +28,7 @@ class Filter extends UnidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $value = (array) $value;
+            $value = ArrayUtil::cast($value);
         }
 
         $this->validateType($value, Type::ARRAY, $path, $normalizedData ?? $object->toArray());

@@ -7,6 +7,7 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Serializer\Exception\InvalidArrayException;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Chunker extends BidirectionalConverter
@@ -32,7 +33,7 @@ class Chunker extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $value = (array) $value;
+            $value = ArrayUtil::cast($value);
         }
 
         $this->validateType($value, Type::ARRAY, $path, $object->toArray());
@@ -53,7 +54,7 @@ class Chunker extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $value = (array) $value;
+            $value = ArrayUtil::cast($value);
         }
 
         $this->validateType($value, Type::ARRAY, $path, $data);
