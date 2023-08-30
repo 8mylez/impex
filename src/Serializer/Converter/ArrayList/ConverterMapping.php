@@ -7,6 +7,7 @@ use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class ConverterMapping extends BidirectionalConverter
@@ -39,7 +40,7 @@ class ConverterMapping extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $data = (array) $data;
+            $data = ArrayUtil::cast($data);
         }
 
         $this->validateType($data, Type::ARRAY, $path, $object->toArray());
@@ -70,7 +71,7 @@ class ConverterMapping extends BidirectionalConverter
         }
 
         if (!$this->hasFlag(self::STRICT)) {
-            $data = (array) $data;
+            $data = ArrayUtil::cast($data);
         }
 
         $this->validateType($data, Type::ARRAY, $path, $normalizedData);

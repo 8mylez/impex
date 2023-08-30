@@ -8,6 +8,7 @@ use Dustin\ImpEx\Sequence\Registry\Config\SequenceDefinition;
 use Dustin\ImpEx\Sequence\Registry\Config\SequenceDefinitionContainer;
 use Dustin\ImpEx\Sequence\Registry\Validation\SectionValidator;
 use Dustin\ImpEx\Sequence\Registry\Validation\SequenceClass;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Symfony\Component\Filesystem\Exception\FileNotFoundException;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
@@ -58,7 +59,7 @@ class FileSequenceLoader implements SequenceLoaderInterface
 
         foreach ($decoded as $id => $data) {
             $data = array_merge(
-                (array) $data,
+                ArrayUtil::cast($data),
                 ['id' => $id]
             );
 

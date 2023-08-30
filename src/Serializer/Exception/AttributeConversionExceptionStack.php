@@ -11,7 +11,7 @@ class AttributeConversionExceptionStack extends AttributeConversionException
 
     public function __construct(string $attributePath, array $data, AttributeConversionException ...$errors)
     {
-        $this->errors = (array) $errors;
+        $this->errors = $errors;
 
         parent::__construct($attributePath, $data, static::createMessage(...$errors), []);
     }

@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\Encapsulation;
 
 use Dustin\Encapsulation\ArrayEncapsulation;
+use Dustin\ImpEx\Util\ArrayUtil;
 
 class Header extends ArrayEncapsulation
 {
@@ -37,6 +38,6 @@ class Header extends ArrayEncapsulation
 
     private function getCurrentFlags(): array
     {
-        return (array) $this->get('flags');
+        return ArrayUtil::cast($this->get('flags'));
     }
 }
