@@ -15,7 +15,6 @@ use Dustin\ImpEx\Util\Value;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
-use Symfony\Component\Serializer\Mapping\AttributeMetadataInterface;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorFromClassMetadata;
 use Symfony\Component\Serializer\Mapping\ClassDiscriminatorResolverInterface;
 use Symfony\Component\Serializer\Mapping\Factory\ClassMetadataFactoryInterface;
@@ -438,35 +437,6 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         $accessor = $this->getPropertyAccessor($attribute, $context);
 
         return $accessor->getValue($data);
-    }
-
-    protected function getAttributeNormalizationContext(object $object, string $attribute, array $context): array
-    {
-        if (($metadata = $this->getAttributeMetadata($object, $attribute)) === null) {
-            return $context;
-        }
-
-        return array_merge($context, $metadata->getNormalizationContextForGroups($this->getGroups($context)));
-    }
-
-    protected function getAttributeDenormalizationContext(string $class, string $attribute, array $context): array
-    {
-        $context['deserialization_path'] = ($context['deserialization_path'] ?? false) ? $context['deserialization_path'].'.'.$attribute : $attribute;
-
-        if (($metadata = $this->getAttributeMetadata($class, $attribute)) === null) {
-            return $context;
-        }
-
-        return array_merge($context, $metadata->getDenormalizationContextForGroups($this->getGroups($context)));
-    }
-
-    protected function getAttributeMetadata(object|string $objectOrClass, string $attribute): ?AttributeMetadataInterface
-    {
-        if (!$this->classMetadataFactory) {
-            return null;
-        }
-
-        return $this->classMetadataFactory->getMetadataFor($objectOrClass)->getAttributesMetadata()[$attribute] ?? null;
     }
 
     protected function getConverter(string $attribute, array $context): ?AttributeConverter
