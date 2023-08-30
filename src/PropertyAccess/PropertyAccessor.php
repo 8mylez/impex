@@ -122,7 +122,7 @@ class PropertyAccessor
         return $property->getValue($data);
     }
 
-    public function get($data): mixed
+    public function getValue($data): mixed
     {
         return static::access($this->path, $data, ...$this->flags);
     }
