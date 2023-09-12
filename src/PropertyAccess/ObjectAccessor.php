@@ -12,18 +12,22 @@ class ObjectAccessor extends Accessor
         return [Type::OBJECT];
     }
 
-    public static function get(string $field, mixed $value, string ...$flags): mixed
+    public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
     {
-        return static::fromObject($field, $value, ...$flags);
+        return static::fromObject($field, $value, $path, ...$flags);
     }
 
-    public static function fromObject(string $field, object $value, string ...$flags): mixed
+    public static function fromObject(string $field, object $value, ?string $path, string ...$flags): mixed
     {
+        if ($path === null) {
+            $path = $field;
+        }
+
         $reflectionObject = new \ReflectionObject($value);
 
         if (!$reflectionObject->hasProperty($field)) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($field);
+                throw new PropertyNotFoundException($path);
             }
 
             return null;

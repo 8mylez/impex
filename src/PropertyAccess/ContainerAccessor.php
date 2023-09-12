@@ -12,26 +12,30 @@ class ContainerAccessor extends Accessor
         return [Container::class];
     }
 
-    public static function get(string $field, mixed $value, string ...$flags): mixed
+    public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
     {
         if (!is_numeric($field)) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($field);
+                throw new PropertyNotFoundException($path);
             }
 
             return null;
         }
 
-        return static::fromContainer(intval($field), $value, ...$flags);
+        return static::fromContainer(intval($field), $value, $path, ...$flags);
     }
 
-    public static function fromContainer(int $index, Container $container, string ...$flags): mixed
+    public static function fromContainer(int $index, Container $container, ?string $path, string ...$flags): mixed
     {
+        if ($path === null) {
+            $path = (string) $index;
+        }
+
         $elements = $container->toArray();
 
         if (!array_key_exists($index, $elements)) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($index);
+                throw new PropertyNotFoundException($path);
             }
 
             return null;
