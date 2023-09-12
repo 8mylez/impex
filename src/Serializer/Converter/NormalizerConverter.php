@@ -19,8 +19,10 @@ class NormalizerConverter extends BidirectionalConverter
         private DenormalizerInterface $denormalizer,
         private string $type,
         private ?string $format = null,
-        private ?ContextProviderInterface $contextProvider = null
+        private ?ContextProviderInterface $contextProvider = null,
+        string ...$flags
     ) {
+        parent::__construct(...$flags);
     }
 
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)

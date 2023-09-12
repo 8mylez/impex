@@ -17,8 +17,10 @@ class SerializerConverter extends BidirectionalConverter
         private SerializerInterface $serializer,
         private string $format,
         private string $type,
-        private ?ContextProviderInterface $contextProvider = null
+        private ?ContextProviderInterface $contextProvider = null,
+        string ...$flags
     ) {
+        parent::__construct(...$flags);
     }
 
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
