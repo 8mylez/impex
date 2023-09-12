@@ -25,4 +25,9 @@ class PropertyNotFoundException extends ErrorCodeException
     {
         return $this->property;
     }
+
+    public function getPropertyAsPath(): array
+    {
+        return explode('.', $this->property);
+    }
 }
