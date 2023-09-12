@@ -13,8 +13,10 @@ class EncoderConverter extends BidirectionalConverter
         private EncoderInterface $encoder,
         private DecoderInterface $decoder,
         private string $format,
-        private ?ContextProviderInterface $contextProvider = null
+        private ?ContextProviderInterface $contextProvider = null,
+        string ...$flags
     ) {
+        parent::__construct(...$flags);
     }
 
     public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
