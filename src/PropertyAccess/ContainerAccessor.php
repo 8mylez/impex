@@ -4,12 +4,13 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\Encapsulation\Container;
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
+use Dustin\ImpEx\Util\Type;
 
 class ContainerAccessor extends Accessor
 {
-    public static function getSupportedTypes(): array
+    public static function supportsAccess(mixed $value): bool
     {
-        return [Container::class];
+        return Type::is($value, Container::class);
     }
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
@@ -27,6 +28,10 @@ class ContainerAccessor extends Accessor
 
     public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
     {
+        if ($path === null) {
+            $path = $field;
+        }
+
         if (!is_numeric($field)) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
                 throw new PropertyNotFoundException($path);

@@ -33,14 +33,12 @@ final class PropertyAccessor extends Accessor
 
         static::validateAccessor($accessor);
 
-        foreach ($accessor::getSupportedTypes() as $type) {
-            static::$accessors[$type] = $accessor;
-        }
+        static::$accessors[$accessor] = $accessor;
     }
 
-    public static function getSupportedTypes(): array
+    public static function supportsAccess(mixed $value): bool
     {
-        return array_keys(static::$accessors);
+        return static::getAccessor($value) !== null;
     }
 
     public static function get(string $path, mixed $data, string ...$flags): mixed
@@ -84,8 +82,10 @@ final class PropertyAccessor extends Accessor
 
         $chain = [];
 
+        $currentPath = [];
         foreach (explode('.', $path) as $field) {
-            $pointer = static::getValueOf($field, $pointer, $path, ...$flags);
+            $currentPath[] = $field;
+            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
             $chain[] = [
                 'field' => $field,
                 'value' => $pointer,
@@ -94,17 +94,22 @@ final class PropertyAccessor extends Accessor
 
         $element = array_pop($chain);
         $element['value'] = $value;
+        $currentPath = [];
 
         foreach (array_reverse($chain) as $record) {
-            $holder = $record['value'];
-            static::setValueOf($element['field'], $element['value'], $holder, $path);
+            $currentValue = $record['value'];
+            $field = $element['field'];
+
+            static::setValueOf($field, $element['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+
+            $currentPath[] = $field;
             $element = [
                 'field' => $record['field'],
-                'value' => $holder,
+                'value' => $currentValue,
             ];
         }
 
-        static::setValueOf($element['field'], $element['value'], $data, $path);
+        static::setValueOf($element['field'], $element['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
     }
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
@@ -151,8 +156,8 @@ final class PropertyAccessor extends Accessor
 
     public static function getAccessor(mixed $value): ?string
     {
-        foreach (array_reverse(static::$accessors) as $type => $accessor) {
-            if (Type::is($value, $type)) {
+        foreach (array_reverse(static::$accessors) as $accessor) {
+            if ($accessor::supportsAccess($value)) {
                 return $accessor;
             }
         }
@@ -179,6 +184,13 @@ final class PropertyAccessor extends Accessor
         ) {
             throw new \InvalidArgumentException(sprintf('Accessor must be class inheriting from %s. Got %s.', Accessor::class, Type::getDebugType($accessor)));
         }
+    }
+
+    private static function createPathFromReverse(string $path, string $subPath): string
+    {
+        $subPath = implode('.', array_reverse(explode('.', $subPath)));
+
+        return trim(substr($path, 0, strrpos($path, $subPath)), '.');
     }
 
     public function getValue(mixed $data): mixed

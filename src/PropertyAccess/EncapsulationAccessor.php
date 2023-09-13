@@ -5,12 +5,13 @@ namespace Dustin\ImpEx\PropertyAccess;
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\Encapsulation\Exception\PropertyNotExistsException;
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
+use Dustin\ImpEx\Util\Type;
 
 class EncapsulationAccessor extends Accessor
 {
-    public static function getSupportedTypes(): array
+    public static function supportsAccess(mixed $value): bool
     {
-        return [EncapsulationInterface::class];
+        return Type::is($value, EncapsulationInterface::class);
     }
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed

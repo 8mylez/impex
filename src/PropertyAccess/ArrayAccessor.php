@@ -7,9 +7,9 @@ use Dustin\ImpEx\Util\Type;
 
 class ArrayAccessor extends Accessor
 {
-    public static function getSupportedTypes(): array
+    public static function supportsAccess(mixed $value): bool
     {
-        return [Type::ARRAY];
+        return Type::is($value, Type::ARRAY);
     }
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
