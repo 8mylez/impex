@@ -14,16 +14,29 @@ class ObjectAccessor extends Accessor
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
     {
-        return static::fromObject($field, $value, $path, ...$flags);
+        return static::get($field, $value, $path, ...$flags);
     }
 
-    public static function fromObject(string $field, object $value, ?string $path, string ...$flags): mixed
+    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    {
+        static::set($field, $value, $data, $path, ...$flags);
+    }
+
+    public static function get(string $field, object $value, ?string $path, string ...$flags): mixed
     {
         if ($path === null) {
             $path = $field;
         }
 
         $reflectionObject = new \ReflectionObject($value);
+        $getterMethodName = 'get'.\ucfirst($field);
+
+        if (
+            $reflectionObject->hasMethod($getterMethodName) &&
+            !$reflectionObject->getMethod($getterMethodName)->isStatic()
+        ) {
+            return $value->$getterMethodName();
+        }
 
         if (!$reflectionObject->hasProperty($field)) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
@@ -34,6 +47,15 @@ class ObjectAccessor extends Accessor
         }
 
         $property = $reflectionObject->getProperty($field);
+
+        if ($property->isStatic()) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new PropertyNotFoundException($path);
+            }
+
+            return null;
+        }
+
         $property->setAccessible(true);
 
         if ($property->hasType() && !$property->isInitialized($value)) {
@@ -41,5 +63,45 @@ class ObjectAccessor extends Accessor
         }
 
         return $property->getValue($value);
+    }
+
+    public static function set(string $field, mixed $value, object $data, ?string $path, string ...$flags): void
+    {
+        if ($path === null) {
+            $path = $field;
+        }
+
+        $reflectionObject = new \ReflectionObject($data);
+        $setterMethodName = 'set'.\ucfirst($field);
+
+        if (
+            $reflectionObject->hasMethod($setterMethodName) &&
+            !$reflectionObject->getMethod($setterMethodName)->isStatic()
+        ) {
+            $data->$setterMethodName($value);
+
+            return;
+        }
+
+        if (!$reflectionObject->hasProperty($field)) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new PropertyNotFoundException($path);
+            }
+
+            return;
+        }
+
+        $property = $reflectionObject->getProperty($field);
+
+        if ($property->isStatic()) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new PropertyNotFoundException($path);
+            }
+
+            return;
+        }
+
+        $property->setAccessible(true);
+        $property->setValue($data, $value);
     }
 }

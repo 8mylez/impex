@@ -70,6 +70,43 @@ final class PropertyAccessor extends Accessor
         return $pointer;
     }
 
+    public static function set(string $path, mixed $value, mixed &$data, string ...$flags): void
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        $pointer = $data;
+
+        if (empty($path) || $pointer === null) {
+            return;
+        }
+
+        $chain = [];
+
+        foreach (explode('.', $path) as $field) {
+            $pointer = static::getValueOf($field, $pointer, $path, ...$flags);
+            $chain[] = [
+                'field' => $field,
+                'value' => $pointer,
+            ];
+        }
+
+        $element = array_pop($chain);
+        $element['value'] = $value;
+
+        foreach (array_reverse($chain) as $record) {
+            $holder = $record['value'];
+            static::setValueOf($element['field'], $element['value'], $holder, $path);
+            $element = [
+                'field' => $record['field'],
+                'value' => $holder,
+            ];
+        }
+
+        static::setValueOf($element['field'], $element['value'], $data, $path);
+    }
+
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
     {
         if (!static::$initialized) {
@@ -91,6 +128,25 @@ final class PropertyAccessor extends Accessor
         }
 
         return $accessor::getValueOf($field, $value, $path, ...$flags);
+    }
+
+    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        $accessor = static::getAccessor($data);
+
+        if ($accessor === null) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new NotAccessableException($path, Type::getType($data));
+            }
+
+            return;
+        }
+
+        $accessor::setValueOf($field, $value, $data, $path, ...$flags);
     }
 
     public static function getAccessor(mixed $value): ?string

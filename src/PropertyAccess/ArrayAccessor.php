@@ -18,10 +18,19 @@ class ArrayAccessor extends Accessor
             $field = intval($field);
         }
 
-        return static::fromArray($field, $value, $path, ...$flags);
+        return static::get($field, $value, $path, ...$flags);
     }
 
-    public static function fromArray(int|string $field, array $value, ?string $path, string ...$flags): mixed
+    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    {
+        if (is_numeric($field)) {
+            $field = intval($field);
+        }
+
+        static::set($field, $value, $data);
+    }
+
+    public static function get(int|string $field, array $value, ?string $path, string ...$flags): mixed
     {
         if ($path === null) {
             $path = (string) $field;
@@ -36,5 +45,10 @@ class ArrayAccessor extends Accessor
         }
 
         return $value[$field];
+    }
+
+    public static function set(int|string $field, mixed $value, array &$data): void
+    {
+        $data[$field] = $value;
     }
 }

@@ -22,10 +22,21 @@ class ContainerAccessor extends Accessor
             return null;
         }
 
-        return static::fromContainer(intval($field), $value, $path, ...$flags);
+        return static::get(intval($field), $value, $path, ...$flags);
     }
 
-    public static function fromContainer(int $index, Container $container, ?string $path, string ...$flags): mixed
+    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    {
+        if (!is_numeric($field)) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new PropertyNotFoundException($path);
+            }
+        }
+
+        static::set(intval($field), $value, $data);
+    }
+
+    public static function get(int $index, Container $container, ?string $path, string ...$flags): mixed
     {
         if ($path === null) {
             $path = (string) $index;
@@ -42,5 +53,10 @@ class ContainerAccessor extends Accessor
         }
 
         return $elements[$index];
+    }
+
+    public static function set(int $index, mixed $value, Container $container): void
+    {
+        $container->splice($index, 1, [$value]);
     }
 }
