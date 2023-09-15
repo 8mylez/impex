@@ -86,36 +86,10 @@ final class PropertyAccessor
             return;
         }
 
-        $chain = [];
+        $chain = static::readChain($path, $data, ...$flags);
+        $chain[count($chain) - 1]['value'] = $value;
 
-        $currentPath = [];
-        foreach (explode('.', $path) as $field) {
-            $currentPath[] = $field;
-            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
-            $chain[] = [
-                'field' => $field,
-                'value' => $pointer,
-            ];
-        }
-
-        $element = array_pop($chain);
-        $element['value'] = $value;
-        $currentPath = [];
-
-        foreach (array_reverse($chain) as $record) {
-            $currentValue = $record['value'];
-            $field = $element['field'];
-
-            static::setValueOf($field, $element['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
-
-            $currentPath[] = $field;
-            $element = [
-                'field' => $record['field'],
-                'value' => $currentValue,
-            ];
-        }
-
-        static::setValueOf($element['field'], $element['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+        static::writeChain($chain, $data, $path, ...$flags);
     }
 
     public static function push(string $path, mixed $value, mixed &$data, string ...$flags): void
@@ -131,38 +105,11 @@ final class PropertyAccessor
             return;
         }
 
-        $chain = [];
-        $currentPath = [];
-
-        foreach (explode('.', $path) as $field) {
-            $currentPath[] = $field;
-            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
-            $chain[] = [
-                'field' => $field,
-                'value' => $pointer,
-            ];
-        }
+        $chain = static::readChain($path, $data, ...$flags);
+        $pointer = $chain[count($chain) - 1]['value'];
 
         static::pushValue($value, $pointer, $path, ...$flags);
-
-        $element = array_pop($chain);
-        $element['value'] = $pointer;
-        $currentPath = [];
-
-        foreach (array_reverse($chain) as $record) {
-            $currentValue = $record['value'];
-            $field = $element['field'];
-
-            static::setValueOf($field, $element['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
-
-            $currentPath[] = $field;
-            $element = [
-                'field' => $record['field'],
-                'value' => $currentValue,
-            ];
-        }
-
-        static::setValueOf($element['field'], $element['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+        static::writeChain($chain, $data, $path, ...$flags);
     }
 
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
@@ -259,5 +206,44 @@ final class PropertyAccessor
     private static function hasFlag(string $flag, array $flags): bool
     {
         return \in_array($flag, $flags);
+    }
+
+    private static function readChain(string $path, mixed $data, string ...$flags): array
+    {
+        $chain = [];
+        $currentPath = [];
+        $pointer = $data;
+
+        foreach (explode('.', $path) as $field) {
+            $currentPath[] = $field;
+            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
+            $chain[] = [
+                'field' => $field,
+                'value' => $pointer,
+            ];
+        }
+
+        return $chain;
+    }
+
+    private static function writeChain(array $chain, mixed &$data, string $path, string ...$flags): void
+    {
+        $currentElement = array_pop($chain);
+        $currentPath = [];
+
+        foreach (array_reverse($chain) as $record) {
+            $currentValue = $record['value'];
+            $field = $currentElement['field'];
+
+            static::setValueOf($field, $currentElement['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+
+            $currentPath[] = $field;
+            $currentElement = [
+                'field' => $record['field'],
+                'value' => $currentValue,
+            ];
+        }
+
+        static::setValueOf($currentElement['field'], $currentElement['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
     }
 }
