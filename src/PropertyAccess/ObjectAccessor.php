@@ -7,12 +7,8 @@ use Dustin\ImpEx\Util\Type;
 
 class ObjectAccessor extends Accessor
 {
-    public static function get(string $field, object $value, ?string $path, string ...$flags): mixed
+    public static function get(string $field, object $value, AccessContext $context): mixed
     {
-        if ($path === null) {
-            $path = $field;
-        }
-
         $reflectionObject = new \ReflectionObject($value);
         $getterMethodName = 'get'.\ucfirst($field);
 
@@ -24,8 +20,8 @@ class ObjectAccessor extends Accessor
         }
 
         if (!$reflectionObject->hasProperty($field)) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new PropertyNotFoundException($context->getPath());
             }
 
             return null;
@@ -34,8 +30,8 @@ class ObjectAccessor extends Accessor
         $property = $reflectionObject->getProperty($field);
 
         if ($property->isStatic()) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new PropertyNotFoundException($context->getPath());
             }
 
             return null;
@@ -50,12 +46,8 @@ class ObjectAccessor extends Accessor
         return $property->getValue($value);
     }
 
-    public static function set(string $field, mixed $value, object $data, ?string $path, string ...$flags): void
+    public static function set(string $field, mixed $value, object $data, AccessContext $context): void
     {
-        if ($path === null) {
-            $path = $field;
-        }
-
         $reflectionObject = new \ReflectionObject($data);
         $setterMethodName = 'set'.\ucfirst($field);
 
@@ -69,8 +61,8 @@ class ObjectAccessor extends Accessor
         }
 
         if (!$reflectionObject->hasProperty($field)) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new PropertyNotFoundException($context->getPath());
             }
 
             return;
@@ -79,8 +71,8 @@ class ObjectAccessor extends Accessor
         $property = $reflectionObject->getProperty($field);
 
         if ($property->isStatic()) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new PropertyNotFoundException($context->getPath());
             }
 
             return;
@@ -90,28 +82,22 @@ class ObjectAccessor extends Accessor
         $property->setValue($data, $value);
     }
 
-    public function supportsSet(mixed $value): bool
+    public function supports(string $operation, mixed $value): bool
     {
+        if ($operation === AccessContext::PUSH) {
+            return false;
+        }
+
         return Type::is($value, Type::OBJECT);
     }
 
-    public function supportsGet(mixed $value): bool
+    public function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
-        return Type::is($value, Type::OBJECT);
+        return static::get($field, $value, $context);
     }
 
-    public function supportsPush(mixed $value): bool
+    public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
-        return false;
-    }
-
-    public function getValue(string $field, mixed $value, ?string $path, string ...$flags): mixed
-    {
-        return static::get($field, $value, $path, ...$flags);
-    }
-
-    public function setValue(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
-    {
-        static::set($field, $value, $data, $path, ...$flags);
+        static::set($field, $value, $data, $context);
     }
 }

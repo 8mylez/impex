@@ -9,60 +9,46 @@ use Dustin\ImpEx\Util\Type;
 
 class EncapsulationAccessor extends Accessor
 {
-    public static function get(string $field, EncapsulationInterface $value, ?string $path, string ...$flags): mixed
+    public static function get(string $field, EncapsulationInterface $value, AccessContext $context): mixed
     {
-        if ($path === null) {
-            $path = $field;
-        }
-
         if (!$value->has($field)) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (AccessContext::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                return null;
             }
 
-            return null;
+            throw new PropertyNotFoundException($context->getPath());
         }
 
         return $value->get($field);
     }
 
-    public static function set(string $field, mixed $value, EncapsulationInterface $data, ?string $path, string ...$flags): void
+    public static function set(string $field, mixed $value, EncapsulationInterface $data, AccessContext $context): void
     {
-        if ($path === null) {
-            $path = $field;
-        }
-
         try {
             $data->set($field, $value);
         } catch (PropertyNotExistsException $e) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new PropertyNotFoundException($context->getPath());
             }
         }
     }
 
-    public function supportsSet(mixed $value): bool
+    public function supports(string $operation, mixed $value): bool
     {
+        if ($operation === AccessContext::PUSH) {
+            return false;
+        }
+
         return Type::is($value, EncapsulationInterface::class);
     }
 
-    public function supportsGet(mixed $value): bool
+    public function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
-        return Type::is($value, EncapsulationInterface::class);
+        return static::get($field, $value, $context);
     }
 
-    public function supportsPush(mixed $value): bool
+    public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
-        return false;
-    }
-
-    public function getValue(string $field, mixed $value, ?string $path, string ...$flags): mixed
-    {
-        return static::get($field, $value, $path, ...$flags);
-    }
-
-    public function setValue(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
-    {
-        static::set($field, $value, $data, $path, ...$flags);
+        static::set($field, $value, $data, $context);
     }
 }

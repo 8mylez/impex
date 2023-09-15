@@ -7,31 +7,21 @@ use Dustin\ImpEx\Util\Type;
 
 class ArrayAccessor extends Accessor
 {
-    public static function get(int|string $field, array $value, ?string $path, string ...$flags): mixed
+    public static function get(int|string $field, array $value, AccessContext $context): mixed
     {
-        if ($path === null) {
-            $path = (string) $field;
-        }
-
         if (!array_key_exists($field, $value)) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new PropertyNotFoundException($path);
+            if (AccessContext::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                return null;
             }
 
-            return null;
+            throw new PropertyNotFoundException($context->getPath());
         }
 
         return $value[$field];
     }
 
-    public static function set(int|string $field, mixed $value, array &$data, ?string $path, string ...$flags): void
+    public static function set(int|string $field, mixed $value, array &$data): void
     {
-        if ($field === Field::OPERATOR_PUSH) {
-            static::push($value, $data);
-
-            return;
-        }
-
         $data[$field] = $value;
     }
 
@@ -40,36 +30,31 @@ class ArrayAccessor extends Accessor
         $data[] = $value;
     }
 
-    public function supportsSet(mixed $value): bool
+    public function supports(string $operation, mixed $value): bool
     {
         return Type::is($value, Type::ARRAY);
     }
 
-    public function supportsGet(mixed $value): bool
-    {
-        return Type::is($value, Type::ARRAY);
-    }
-
-    public function supportsPush(mixed $value): bool
-    {
-        return Type::is($value, Type::ARRAY);
-    }
-
-    public function getValue(string $field, mixed $value, ?string $path, string ...$flags): mixed
+    public function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
         if (is_numeric($field)) {
             $field = intval($field);
         }
 
-        return static::get($field, $value, $path, ...$flags);
+        return static::get($field, $value, $context);
     }
 
-    public function setValue(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         if (is_numeric($field)) {
             $field = intval($field);
         }
 
-        static::set($field, $value, $data, $path, ...$flags);
+        static::set($field, $value, $data);
+    }
+
+    public function pushValue(mixed $value, mixed &$data, AccessContext $context): void
+    {
+        static::push($value, $data);
     }
 }

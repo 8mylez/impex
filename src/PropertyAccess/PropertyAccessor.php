@@ -7,14 +7,6 @@ use Dustin\ImpEx\Util\Type;
 
 final class PropertyAccessor
 {
-    public const NULL_ON_ERROR = 'null_on_error';
-
-    private const MODE_GET = 'Get';
-
-    private const MODE_SET = 'Set';
-
-    private const MODE_PUSH = 'Push';
-
     private static $accessors = [];
 
     private static bool $initialized = false;
@@ -28,22 +20,9 @@ final class PropertyAccessor
         static::$accessors[] = $accessor;
     }
 
-    public static function supportsSetAccess(mixed $value, string $field): bool
+    public static function supports(string $operation, mixed $value): bool
     {
-        if (strpos($field, '.') !== false) {
-            throw new \RuntimeException('Support for paths cannot be detected.');
-        }
-
-        return static::getAccessor($value, self::MODE_SET) !== null;
-    }
-
-    public static function supportsGetAccess(mixed $value, string $field): bool
-    {
-        if (strpos($field, '.') !== false) {
-            throw new \RuntimeException('Support for paths cannot be detected.');
-        }
-
-        return static::getAccessor($value, self::MODE_GET) !== null;
+        return static::getAccessor($value, $operation) !== null;
     }
 
     public static function get(string $path, mixed $data, string ...$flags): mixed
@@ -58,12 +37,19 @@ final class PropertyAccessor
             return $pointer;
         }
 
-        $currentPath = '';
+        $context = new AccessContext(
+            AccessContext::GET,
+            AccessContext::GET,
+            $path,
+            ...$flags
+        );
+
+        $currentPath = [];
 
         foreach (explode('.', $path) as $field) {
-            $currentPath = trim($currentPath .= ".$field", '.');
+            $currentPath[] = $field;
 
-            $pointer = static::getValueOf($field, $pointer, $currentPath, ...$flags);
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, implode('.', $currentPath)));
 
             if ($pointer === null) {
                 return null;
@@ -73,112 +59,82 @@ final class PropertyAccessor
         return $pointer;
     }
 
-    public static function set(string $path, mixed $value, mixed &$data, string ...$flags): void
+    public static function set(string $path, mixed &$data, mixed $value, string ...$flags): void
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        $pointer = $data;
-
-        if (empty($path) || $pointer === null) {
-            // Todo: exception
-            return;
+        if (empty($path)) {
+            throw new \InvalidArgumentException('Path cannot be empty.');
         }
 
-        $chain = static::readChain($path, $data, ...$flags);
+        if ($data === null) {
+            throw new \InvalidArgumentException('Cannot set value to null.');
+        }
+
+        $context = new AccessContext(
+            AccessContext::SET,
+            AccessContext::SET,
+            $path,
+            ...$flags
+        );
+
+        $chain = static::readChain($path, $data, $context);
+
         $chain[count($chain) - 1]['value'] = $value;
 
-        static::writeChain($chain, $data, $path, ...$flags);
+        static::writeChain($chain, $data, $context);
     }
 
-    public static function push(string $path, mixed $value, mixed &$data, string ...$flags): void
+    public static function push(string $path, mixed &$data, mixed $value, string ...$flags): void
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        $pointer = $data;
-
-        if (empty($path) || $pointer === null) {
-            // Todo: exception
-            return;
+        if ($data === null) {
+            throw new \InvalidArgumentException('Cannot push to null value.');
         }
 
-        $chain = static::readChain($path, $data, ...$flags);
+        $context = new AccessContext(
+            AccessContext::PUSH,
+            AccessContext::PUSH,
+            $path,
+            ...$flags
+        );
+
+        $chain = static::readChain($path, $data, $context);
+
         $pointer = $chain[count($chain) - 1]['value'];
 
-        static::pushValue($value, $pointer, $path, ...$flags);
-        static::writeChain($chain, $data, $path, ...$flags);
+        static::access(null, $pointer, $value, $context);
+        static::writeChain($chain, $data, $context);
     }
 
-    public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
+    private static function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        if ($path === null) {
-            $path = $field;
-        }
-
-        $accessor = static::getAccessor($value, self::MODE_GET);
+        $accessor = static::getAccessor($data, $context->getOperation());
 
         if ($accessor === null) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new NotAccessableException($path, Type::getDebugType($value));
+            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                throw new NotAccessableException($context->getPath(), Type::getDebugType($value));
             }
 
             return null;
         }
 
-        return $accessor->getValue($field, $value, $path, ...$flags);
+        return $accessor->access($field, $data, $value, $context);
     }
 
-    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    private static function getAccessor(mixed $value, string $operation): ?Accessor
     {
-        if (!static::$initialized) {
-            static::initialize();
-        }
-
-        $accessor = static::getAccessor($data, self::MODE_SET);
-
-        if ($accessor === null) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new NotAccessableException($path, Type::getDebugType($data));
-            }
-
-            return;
-        }
-
-        $accessor->setValue($field, $value, $data, $path, ...$flags);
-    }
-
-    public static function pushValue(mixed $value, mixed &$data, string $path, string ...$flags): void
-    {
-        if (!static::$initialized) {
-            static::initialize();
-        }
-
-        $accessor = static::getAccessor($data, self::MODE_PUSH);
-
-        if ($accessor === null) {
-            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new NotAccessableException($path, Type::getDebugType($data));
-            }
-
-            return;
-        }
-
-        $accessor->setValue(Field::OPERATOR_PUSH, $value, $data, $path, ...$flags);
-    }
-
-    private static function getAccessor(mixed $value, string $mode = self::MODE_GET): ?Accessor
-    {
-        $supportsMethod = 'supports'.$mode;
-
         foreach (array_reverse(static::$accessors) as $accessor) {
-            if ($accessor->$supportsMethod($value)) {
+            if ($accessor->supports($operation, $value)) {
                 return $accessor;
             }
         }
@@ -203,12 +159,7 @@ final class PropertyAccessor
         return trim(substr($path, 0, strrpos($path, $subPath)), '.');
     }
 
-    private static function hasFlag(string $flag, array $flags): bool
-    {
-        return \in_array($flag, $flags);
-    }
-
-    private static function readChain(string $path, mixed $data, string ...$flags): array
+    private static function readChain(string $path, mixed $data, AccessContext $context): array
     {
         $chain = [];
         $currentPath = [];
@@ -216,7 +167,7 @@ final class PropertyAccessor
 
         foreach (explode('.', $path) as $field) {
             $currentPath[] = $field;
-            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, implode('.', $currentPath)));
             $chain[] = [
                 'field' => $field,
                 'value' => $pointer,
@@ -226,7 +177,7 @@ final class PropertyAccessor
         return $chain;
     }
 
-    private static function writeChain(array $chain, mixed &$data, string $path, string ...$flags): void
+    private static function writeChain(array $chain, mixed &$data, AccessContext $context): void
     {
         $currentElement = array_pop($chain);
         $currentPath = [];
@@ -235,7 +186,7 @@ final class PropertyAccessor
             $currentValue = $record['value'];
             $field = $currentElement['field'];
 
-            static::setValueOf($field, $currentElement['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), implode('.', $currentPath))));
 
             $currentPath[] = $field;
             $currentElement = [
@@ -244,6 +195,6 @@ final class PropertyAccessor
             ];
         }
 
-        static::setValueOf($currentElement['field'], $currentElement['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), implode('.', $currentPath))));
     }
 }

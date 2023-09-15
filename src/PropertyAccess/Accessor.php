@@ -2,22 +2,39 @@
 
 namespace Dustin\ImpEx\PropertyAccess;
 
+use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;
+use Dustin\ImpEx\PropertyAccess\Exception\OperationNotSupportedException;
+
 abstract class Accessor
 {
-    public const NULL_ON_ERROR = 'null_on_error';
+    abstract public function supports(string $operation, mixed $value): bool;
 
-    abstract public function supportsSet(mixed $value): bool;
+    abstract public function getValue(string $field, mixed $value, AccessContext $context): mixed;
 
-    abstract public function supportsGet(mixed $value): bool;
+    abstract public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void;
 
-    abstract public function supportsPush(mixed $value): bool;
-
-    abstract public function getValue(string $field, mixed $value, ?string $path, string ...$flags): mixed;
-
-    abstract public function setValue(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void;
-
-    protected static function hasFlag(string $flag, array $flags): bool
+    public function pushValue(mixed $value, mixed &$data, AccessContext $context): void
     {
-        return \in_array($flag, $flags);
+        throw new \RuntimeException(sprintf('%s::pushValue is not implemented.', get_class($this)));
+    }
+
+    public function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
+    {
+        switch ($context->getOperation()) {
+            case AccessContext::GET:
+                return $this->getValue($field, $data, $context);
+
+            case AccessContext::SET:
+                return $this->setValue($field, $value, $data, $context);
+
+            case AccessContext::PUSH:
+                if (!$this->supports(AccessContext::PUSH, $data)) {
+                    throw new OperationNotSupportedException(AccessContext::PUSH);
+                }
+
+                return $this->pushValue($value, $data, $context);
+        }
+
+        throw new InvalidOperationException($context->getOperation());
     }
 }
