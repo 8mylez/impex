@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\PropertyAccess;
 
+use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
 use Dustin\ImpEx\Util\Type;
 
@@ -25,15 +26,19 @@ final class PropertyAccessor
         return static::getAccessor($value, $operation) !== null;
     }
 
-    public static function get(string $path, mixed $data, string ...$flags): mixed
+    public static function get(string|array|Path $path, mixed $data, string ...$flags): mixed
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
         $pointer = $data;
 
-        if (empty($path) || $pointer === null) {
+        if ($pointer === null) {
             return $pointer;
         }
 
@@ -44,12 +49,12 @@ final class PropertyAccessor
             ...$flags
         );
 
-        $currentPath = [];
+        $currentPath = new Path();
 
-        foreach (explode('.', $path) as $field) {
-            $currentPath[] = $field;
+        foreach ($path as $field) {
+            $currentPath->add($field);
 
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, implode('.', $currentPath)));
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, $currentPath));
 
             if ($pointer === null) {
                 return null;
@@ -59,18 +64,22 @@ final class PropertyAccessor
         return $pointer;
     }
 
-    public static function set(string $path, mixed &$data, mixed $value, string ...$flags): void
+    public static function set(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        if (empty($path)) {
-            throw new \InvalidArgumentException('Path cannot be empty.');
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        if ($path->isEmpty()) {
+            throw InvalidPathException::emptyPath();
         }
 
         if ($data === null) {
-            throw new \InvalidArgumentException('Cannot set value to null.');
+            throw new \InvalidArgumentException('Cannot set value to a null.');
         }
 
         $context = new AccessContext(
@@ -87,10 +96,14 @@ final class PropertyAccessor
         static::writeChain($chain, $data, $context);
     }
 
-    public static function push(string $path, mixed &$data, mixed $value, string ...$flags): void
+    public static function push(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
     {
         if (!static::$initialized) {
             static::initialize();
+        }
+
+        if (!$path instanceof Path) {
+            $path = new Path($path);
         }
 
         if ($data === null) {
@@ -142,32 +155,15 @@ final class PropertyAccessor
         return null;
     }
 
-    private static function initialize(): void
-    {
-        static::$initialized = true;
-
-        static::registerAccessor(new ObjectAccessor());
-        static::registerAccessor(new ArrayAccessor());
-        static::registerAccessor(new ContainerAccessor());
-        static::registerAccessor(new EncapsulationAccessor());
-    }
-
-    private static function createPathFromReverse(string $path, string $subPath): string
-    {
-        $subPath = implode('.', array_reverse(explode('.', $subPath)));
-
-        return trim(substr($path, 0, strrpos($path, $subPath)), '.');
-    }
-
-    private static function readChain(string $path, mixed $data, AccessContext $context): array
+    private static function readChain(Path $path, mixed $data, AccessContext $context): array
     {
         $chain = [];
-        $currentPath = [];
+        $currentPath = new Path();
         $pointer = $data;
 
-        foreach (explode('.', $path) as $field) {
-            $currentPath[] = $field;
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, implode('.', $currentPath)));
+        foreach ($path as $field) {
+            $currentPath->add($field);
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, $currentPath));
             $chain[] = [
                 'field' => $field,
                 'value' => $pointer,
@@ -180,21 +176,38 @@ final class PropertyAccessor
     private static function writeChain(array $chain, mixed &$data, AccessContext $context): void
     {
         $currentElement = array_pop($chain);
-        $currentPath = [];
+        $currentPath = new Path();
 
         foreach (array_reverse($chain) as $record) {
             $currentValue = $record['value'];
             $field = $currentElement['field'];
 
-            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), implode('.', $currentPath))));
+            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
 
-            $currentPath[] = $field;
+            $currentPath->add($field);
             $currentElement = [
                 'field' => $record['field'],
                 'value' => $currentValue,
             ];
         }
 
-        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), implode('.', $currentPath))));
+        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
+    }
+
+    private static function initialize(): void
+    {
+        static::$initialized = true;
+
+        static::registerAccessor(new ObjectAccessor());
+        static::registerAccessor(new ArrayAccessor());
+        static::registerAccessor(new ContainerAccessor());
+        static::registerAccessor(new EncapsulationAccessor());
+    }
+
+    private static function createPathFromReverse(Path $path, Path $subPath): Path
+    {
+        $subPath = (string) new Path(array_reverse($subPath->toArray()));
+
+        return new Path(trim(substr($path, 0, strrpos($path, $subPath)), '.'));
     }
 }

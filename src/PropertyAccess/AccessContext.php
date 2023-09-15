@@ -26,7 +26,7 @@ class AccessContext
     public function __construct(
         private string $operation,
         private string $rootOperation,
-        private string $path,
+        private Path $path,
         string ...$flags
     ) {
         $this->flags = $flags;
@@ -52,7 +52,7 @@ class AccessContext
         return $this->rootOperation;
     }
 
-    public function getPath(): string
+    public function getPath(): Path
     {
         return $this->path;
     }
@@ -67,7 +67,7 @@ class AccessContext
         return in_array($flag, $this->flags);
     }
 
-    public function createSubContext(string $operation, string $path): self
+    public function createSubContext(string $operation, Path $path): self
     {
         return new AccessContext(
             $operation,
