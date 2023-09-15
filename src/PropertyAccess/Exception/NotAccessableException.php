@@ -11,7 +11,7 @@ class NotAccessableException extends ErrorCodeException
     public function __construct(private string $property, private string $type)
     {
         parent::__construct(
-            'Value of type {{ type }} at {{ property }} is not accessable.',
+            'Value of type {{ type }} at \'{{ property }}\' is not accessable.',
             ['type' => $type, 'property' => $property]
         );
     }

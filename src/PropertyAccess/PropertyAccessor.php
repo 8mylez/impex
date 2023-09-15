@@ -5,40 +5,45 @@ namespace Dustin\ImpEx\PropertyAccess;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
 use Dustin\ImpEx\Util\Type;
 
-final class PropertyAccessor extends Accessor
+final class PropertyAccessor
 {
     public const NULL_ON_ERROR = 'null_on_error';
+
+    private const MODE_GET = 'Get';
+
+    private const MODE_SET = 'Set';
+
+    private const MODE_PUSH = 'Push';
 
     private static $accessors = [];
 
     private static bool $initialized = false;
 
-    /**
-     * @var string[]
-     */
-    private $flags = [];
-
-    public function __construct(
-        private string $path,
-        string ...$flags
-    ) {
-        $this->flags = $flags;
-    }
-
-    public static function registerAccessor(string $accessor): void
+    public static function registerAccessor(Accessor $accessor): void
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        static::validateAccessor($accessor);
-
-        static::$accessors[$accessor] = $accessor;
+        static::$accessors[] = $accessor;
     }
 
-    public static function supportsAccess(mixed $value): bool
+    public static function supportsSetAccess(mixed $value, string $field): bool
     {
-        return static::getAccessor($value) !== null;
+        if (strpos($field, '.') !== false) {
+            throw new \RuntimeException('Support for paths cannot be detected.');
+        }
+
+        return static::getAccessor($value, self::MODE_SET) !== null;
+    }
+
+    public static function supportsGetAccess(mixed $value, string $field): bool
+    {
+        if (strpos($field, '.') !== false) {
+            throw new \RuntimeException('Support for paths cannot be detected.');
+        }
+
+        return static::getAccessor($value, self::MODE_GET) !== null;
     }
 
     public static function get(string $path, mixed $data, string ...$flags): mixed
@@ -77,6 +82,7 @@ final class PropertyAccessor extends Accessor
         $pointer = $data;
 
         if (empty($path) || $pointer === null) {
+            // Todo: exception
             return;
         }
 
@@ -112,6 +118,53 @@ final class PropertyAccessor extends Accessor
         static::setValueOf($element['field'], $element['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
     }
 
+    public static function push(string $path, mixed $value, mixed &$data, string ...$flags): void
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        $pointer = $data;
+
+        if (empty($path) || $pointer === null) {
+            // Todo: exception
+            return;
+        }
+
+        $chain = [];
+        $currentPath = [];
+
+        foreach (explode('.', $path) as $field) {
+            $currentPath[] = $field;
+            $pointer = static::getValueOf($field, $pointer, implode('.', $currentPath), ...$flags);
+            $chain[] = [
+                'field' => $field,
+                'value' => $pointer,
+            ];
+        }
+
+        static::pushValue($value, $pointer, $path, ...$flags);
+
+        $element = array_pop($chain);
+        $element['value'] = $pointer;
+        $currentPath = [];
+
+        foreach (array_reverse($chain) as $record) {
+            $currentValue = $record['value'];
+            $field = $element['field'];
+
+            static::setValueOf($field, $element['value'], $currentValue, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+
+            $currentPath[] = $field;
+            $element = [
+                'field' => $record['field'],
+                'value' => $currentValue,
+            ];
+        }
+
+        static::setValueOf($element['field'], $element['value'], $data, static::createPathFromReverse($path, implode('.', $currentPath)), ...$flags);
+    }
+
     public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
     {
         if (!static::$initialized) {
@@ -122,17 +175,17 @@ final class PropertyAccessor extends Accessor
             $path = $field;
         }
 
-        $accessor = static::getAccessor($value);
+        $accessor = static::getAccessor($value, self::MODE_GET);
 
         if ($accessor === null) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new NotAccessableException($path, Type::getType($value));
+                throw new NotAccessableException($path, Type::getDebugType($value));
             }
 
             return null;
         }
 
-        return $accessor::getValueOf($field, $value, $path, ...$flags);
+        return $accessor->getValue($field, $value, $path, ...$flags);
     }
 
     public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
@@ -141,23 +194,44 @@ final class PropertyAccessor extends Accessor
             static::initialize();
         }
 
-        $accessor = static::getAccessor($data);
+        $accessor = static::getAccessor($data, self::MODE_SET);
 
         if ($accessor === null) {
             if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
-                throw new NotAccessableException($path, Type::getType($data));
+                throw new NotAccessableException($path, Type::getDebugType($data));
             }
 
             return;
         }
 
-        $accessor::setValueOf($field, $value, $data, $path, ...$flags);
+        $accessor->setValue($field, $value, $data, $path, ...$flags);
     }
 
-    public static function getAccessor(mixed $value): ?string
+    public static function pushValue(mixed $value, mixed &$data, string $path, string ...$flags): void
     {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        $accessor = static::getAccessor($data, self::MODE_PUSH);
+
+        if ($accessor === null) {
+            if (!static::hasFlag(self::NULL_ON_ERROR, $flags)) {
+                throw new NotAccessableException($path, Type::getDebugType($data));
+            }
+
+            return;
+        }
+
+        $accessor->setValue(Field::OPERATOR_PUSH, $value, $data, $path, ...$flags);
+    }
+
+    private static function getAccessor(mixed $value, string $mode = self::MODE_GET): ?Accessor
+    {
+        $supportsMethod = 'supports'.$mode;
+
         foreach (array_reverse(static::$accessors) as $accessor) {
-            if ($accessor::supportsAccess($value)) {
+            if ($accessor->$supportsMethod($value)) {
                 return $accessor;
             }
         }
@@ -169,21 +243,10 @@ final class PropertyAccessor extends Accessor
     {
         static::$initialized = true;
 
-        static::registerAccessor(ObjectAccessor::class);
-        static::registerAccessor(ArrayAccessor::class);
-        static::registerAccessor(ContainerAccessor::class);
-        static::registerAccessor(EncapsulationAccessor::class);
-    }
-
-    private static function validateAccessor(string $accessor): void
-    {
-        if (
-            !class_exists($accessor) ||
-            !is_subclass_of($accessor, Accessor::class) ||
-            (new \ReflectionClass($accessor))->isAbstract()
-        ) {
-            throw new \InvalidArgumentException(sprintf('Accessor must be class inheriting from %s. Got %s.', Accessor::class, Type::getDebugType($accessor)));
-        }
+        static::registerAccessor(new ObjectAccessor());
+        static::registerAccessor(new ArrayAccessor());
+        static::registerAccessor(new ContainerAccessor());
+        static::registerAccessor(new EncapsulationAccessor());
     }
 
     private static function createPathFromReverse(string $path, string $subPath): string
@@ -193,8 +256,8 @@ final class PropertyAccessor extends Accessor
         return trim(substr($path, 0, strrpos($path, $subPath)), '.');
     }
 
-    public function getValue(mixed $data): mixed
+    private static function hasFlag(string $flag, array $flags): bool
     {
-        return static::get($this->path, $data, ...$this->flags);
+        return \in_array($flag, $flags);
     }
 }

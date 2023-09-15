@@ -7,21 +7,6 @@ use Dustin\ImpEx\Util\Type;
 
 class ObjectAccessor extends Accessor
 {
-    public static function supportsAccess(mixed $value): bool
-    {
-        return Type::is($value, Type::OBJECT);
-    }
-
-    public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed
-    {
-        return static::get($field, $value, $path, ...$flags);
-    }
-
-    public static function setValueOf(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
-    {
-        static::set($field, $value, $data, $path, ...$flags);
-    }
-
     public static function get(string $field, object $value, ?string $path, string ...$flags): mixed
     {
         if ($path === null) {
@@ -103,5 +88,30 @@ class ObjectAccessor extends Accessor
 
         $property->setAccessible(true);
         $property->setValue($data, $value);
+    }
+
+    public function supportsSet(mixed $value): bool
+    {
+        return Type::is($value, Type::OBJECT);
+    }
+
+    public function supportsGet(mixed $value): bool
+    {
+        return Type::is($value, Type::OBJECT);
+    }
+
+    public function supportsPush(mixed $value): bool
+    {
+        return false;
+    }
+
+    public function getValue(string $field, mixed $value, ?string $path, string ...$flags): mixed
+    {
+        return static::get($field, $value, $path, ...$flags);
+    }
+
+    public function setValue(string $field, mixed $value, mixed &$data, ?string $path, string ...$flags): void
+    {
+        static::set($field, $value, $data, $path, ...$flags);
     }
 }
