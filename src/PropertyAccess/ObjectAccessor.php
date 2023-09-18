@@ -98,7 +98,7 @@ class ObjectAccessor extends Accessor
 
     public function supports(string $operation, mixed $value): bool
     {
-        if ($operation === AccessContext::PUSH) {
+        if (\in_array($operation, [AccessContext::PUSH, AccessContext::COLLECT])) {
             return false;
         }
 

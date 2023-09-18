@@ -12,9 +12,15 @@ class AccessContext
 
     public const MERGE = 'merge';
 
+    public const COLLECT = 'collect';
+
     public const FLAG_NULL_ON_ERROR = 'null_on_error';
 
     public const FLAG_PUSH_ON_MERGE = 'push_on_merge';
+
+    public const FLAG_COLLECT_NESTED = 'collect_nested';
+
+    public const COLLECTOR_FIELD = '[]';
 
     public const WRITE_OPERATIONS = [
         self::PUSH,
@@ -24,6 +30,7 @@ class AccessContext
 
     public const READ_OPERATIONS = [
         self::GET,
+        self::COLLECT,
     ];
 
     private $flags = [];
@@ -34,7 +41,7 @@ class AccessContext
         private Path $path,
         string ...$flags
     ) {
-        $this->flags = $flags;
+        $this->flags = array_combine($flags, $flags);
     }
 
     public static function isWriteOperation(string $operation): bool
@@ -69,7 +76,21 @@ class AccessContext
 
     public function hasFlag(string $flag): bool
     {
-        return in_array($flag, $this->flags);
+        return isset($this->flags[$flag]);
+    }
+
+    public function setFlag(string $flag): self
+    {
+        $this->flags[$flag] = $flag;
+
+        return $this;
+    }
+
+    public function removeFlag(string $flag): self
+    {
+        unset($this->flags[$flag]);
+
+        return $this;
     }
 
     public function createSubContext(string $operation, Path $path): self

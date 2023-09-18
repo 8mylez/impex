@@ -5,7 +5,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
 use Dustin\ImpEx\Util\Value;
 
-class Path implements \IteratorAggregate
+class Path implements \IteratorAggregate, \Countable
 {
     /**
      * @var array
@@ -24,15 +24,22 @@ class Path implements \IteratorAggregate
         yield from $this->path;
     }
 
+    public function count(): int
+    {
+        return count($this->path);
+    }
+
     public function isEmpty(): bool
     {
         return empty($this->path);
     }
 
-    public function add(string $field): void
+    public function add(string $field): self
     {
         $this->validateField($field);
         $this->path[] = $field;
+
+        return $this;
     }
 
     public function toArray(): array
@@ -42,7 +49,13 @@ class Path implements \IteratorAggregate
 
     public function __toString()
     {
-        return implode('.', $this->path);
+        $path = [];
+
+        foreach ($this->path as $field) {
+            $path[] = str_replace('.', "\.", $field);
+        }
+
+        return implode('.', $path);
     }
 
     private function setPath(array|string $path): void

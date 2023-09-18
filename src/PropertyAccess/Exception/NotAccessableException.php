@@ -9,7 +9,7 @@ class NotAccessableException extends ErrorCodeException
 {
     public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_NOT_ACCESSABLE';
 
-    public function __construct(private Path $path, private string $type)
+    public function __construct(private Path $path, private string $type, private string $operation)
     {
         $message = 'Value of type {{ type }} ';
 
@@ -17,11 +17,15 @@ class NotAccessableException extends ErrorCodeException
             $message .= "at '{{ path }}' ";
         }
 
-        $message .= 'is not accessable.';
+        $message .= "is not accessable for operation '{{ operation }}'.";
 
         parent::__construct(
             $message,
-            ['type' => $type, 'path' => (string) $path]
+            [
+                'type' => $type,
+                'path' => (string) $path,
+                'operation' => $operation,
+            ]
         );
     }
 

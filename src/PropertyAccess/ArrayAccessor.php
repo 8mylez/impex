@@ -48,6 +48,11 @@ class ArrayAccessor extends Accessor
         }
     }
 
+    public static function collect(array $data): array
+    {
+        return $data;
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         return Type::is($value, Type::ARRAY);
@@ -79,5 +84,10 @@ class ArrayAccessor extends Accessor
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         static::merge($value, $data, $context);
+    }
+
+    protected function collectValues(mixed &$data, AccessContext $context): array
+    {
+        return static::collect($data);
     }
 }

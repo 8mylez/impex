@@ -57,6 +57,11 @@ class ContainerAccessor extends Accessor
         }
     }
 
+    public static function collect(Container $container): array
+    {
+        return $container->toArray();
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         if (!Type::is($value, Container::class)) {
@@ -98,5 +103,10 @@ class ContainerAccessor extends Accessor
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         static::merge($value, $data, $context);
+    }
+
+    protected function collectValues(mixed &$data, AccessContext $context): array
+    {
+        return static::collect($data);
     }
 }

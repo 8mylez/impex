@@ -56,6 +56,13 @@ abstract class Accessor
                 }
 
                 return $this->mergeValue($value, $data, $context);
+
+            case AccessContext::COLLECT:
+                if (!$this->supports(AccessContext::COLLECT, $data)) {
+                    throw new OperationNotSupportedException(AccessContext::COLLECT);
+                }
+
+                return $this->collectValues($data, $context);
         }
 
         throw new InvalidOperationException($context->getOperation());
@@ -79,5 +86,10 @@ abstract class Accessor
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         throw new \RuntimeException(sprintf('%s::mergeValue is not implemented.', get_class($this)));
+    }
+
+    protected function collectValues(mixed &$data, AccessContext $context): array
+    {
+        throw new \RuntimeException(sprintf('%s::collectValues is not implemented.', get_class($this)));
     }
 }

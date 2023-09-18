@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
+use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 final class PropertyAccessor
@@ -164,6 +165,86 @@ final class PropertyAccessor
         static::writeChain($chain, $data, $context);
     }
 
+    public static function collect(string|array|Path $path, mixed &$data, string ...$flags): array
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        if ($data === null) {
+            throw new \InvalidArgumentException('Cannot collect from a null value.');
+        }
+
+        $context = new AccessContext(
+            AccessContext::COLLECT,
+            AccessContext::COLLECT,
+            $path,
+            ...$flags
+        );
+
+        $result = [];
+
+        if (!static::hasCollector($path)) {
+            $result[(string) $path] = static::get($path, $data, ...$flags);
+
+            return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+        }
+
+        $pointer = $data;
+        $currentPath = new Path();
+        $path = $path->toArray();
+
+        while (($field = array_shift($path)) !== null) {
+            if ($field !== AccessContext::COLLECTOR_FIELD) {
+                $pointer = static::get($field, $pointer, ...$context->getFlags());
+
+                if ($pointer === null) {
+                    return $result;
+                }
+
+                $currentPath->add($field);
+
+                continue;
+            }
+
+            try {
+                $pointer = static::access(null, $pointer, null, $context->createSubContext(AccessContext::COLLECT, $currentPath));
+            } catch (NotAccessableException $e) {
+                if ($context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                    return $result;
+                }
+
+                throw $e;
+            }
+
+            foreach ($pointer as $index => $item) {
+                $itemPath = (new Path($currentPath->toArray()))->add($index);
+
+                if (empty($path)) {
+                    $result[(string) $itemPath] = $item;
+
+                    continue;
+                }
+
+                $subContext = $context->createSubContext(AccessContext::COLLECT, $itemPath)->removeFlag(AccessContext::FLAG_COLLECT_NESTED);
+                $itemResult = static::collect($path, $item, ...$subContext->getFlags());
+
+                foreach ($itemResult as $itemResultIndex => $value) {
+                    $itemResultPath = (new Path($itemPath->toArray()))->add($itemResultIndex);
+                    $result[(string) $itemResultPath] = $value;
+                }
+            }
+
+            return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+        }
+
+        return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+    }
+
     private static function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         if (!static::$initialized) {
@@ -174,7 +255,7 @@ final class PropertyAccessor
 
         if ($accessor === null) {
             if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
-                throw new NotAccessableException($context->getPath(), Type::getDebugType($data));
+                throw new NotAccessableException($context->getPath(), Type::getDebugType($data), $context->getOperation());
             }
 
             return null;
@@ -248,5 +329,16 @@ final class PropertyAccessor
         $subPath = (string) new Path(array_reverse($subPath->toArray()));
 
         return new Path(trim(substr($path, 0, strrpos($path, $subPath)), '.'));
+    }
+
+    private static function hasCollector(Path $path): bool
+    {
+        foreach ($path as $field) {
+            if ($field === AccessContext::COLLECTOR_FIELD) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
