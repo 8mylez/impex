@@ -135,7 +135,7 @@ final class PropertyAccessor
 
         if ($accessor === null) {
             if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
-                throw new NotAccessableException($context->getPath(), Type::getDebugType($value));
+                throw new NotAccessableException($context->getPath(), Type::getDebugType($data));
             }
 
             return null;
