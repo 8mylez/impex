@@ -30,6 +30,8 @@ class AccessOperation
                 return PropertyAccessor::push($this->getPath(), $data, $value, ...$this->getFlags());
             case AccessContext::MERGE:
                 return PropertyAccessor::merge($this->getPath(), $data, $value, ...$this->getFlags());
+            case AccessContext::COLLECT:
+                return PropertyAccessor::collect($this->getPath(), $data, ...$this->getFlags());
         }
 
         throw new InvalidOperationException($this->operation);
