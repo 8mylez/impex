@@ -117,8 +117,13 @@ final class PropertyAccessor
             ...$flags
         );
 
-        $chain = static::readChain($path, $data, $context);
+        if ($path->isEmpty()) {
+            static::access(null, $data, $value, $context);
 
+            return;
+        }
+
+        $chain = static::readChain($path, $data, $context);
         $pointer = $chain[count($chain) - 1]['value'];
 
         static::access(null, $pointer, $value, $context);
