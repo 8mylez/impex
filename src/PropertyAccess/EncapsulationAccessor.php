@@ -33,6 +33,20 @@ class EncapsulationAccessor extends Accessor
         }
     }
 
+    public static function merge(mixed $value, EncapsulationInterface $data, AccessContext $context): void
+    {
+        foreach (static::valueToMerge($value) as $key => $valueToMerge) {
+            $dataValue = static::get($key, $data, $context->createSubContext(AccessContext::GET, new Path($key)));
+
+            if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
+                static::set($key, $dataValue, $data, $context->createSubContext(AccessContext::SET, new Path($key)));
+            } else {
+                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessContext::SET, new Path($key)));
+            }
+        }
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         if ($operation === AccessContext::PUSH) {
@@ -42,13 +56,18 @@ class EncapsulationAccessor extends Accessor
         return Type::is($value, EncapsulationInterface::class);
     }
 
-    public function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
         return static::get($field, $value, $context);
     }
 
-    public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         static::set($field, $value, $data, $context);
+    }
+
+    protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
+    {
+        static::merge($value, $data, $context);
     }
 }

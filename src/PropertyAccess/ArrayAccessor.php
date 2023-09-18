@@ -30,12 +30,30 @@ class ArrayAccessor extends Accessor
         $data[] = $value;
     }
 
+    public static function merge(mixed $value, array &$data, AccessContext $context): void
+    {
+        foreach (static::valueToMerge($value) as $key => $valueToMerge) {
+            $dataValue = static::get($key, $data, new AccessContext(AccessContext::GET, AccessContext::MERGE, new Path($key), AccessContext::FLAG_NULL_ON_ERROR));
+
+            if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
+                static::set($key, $dataValue, $data);
+            } else {
+                if (is_numeric($key) && $context->hasFlag(AccessContext::FLAG_PUSH_ON_MERGE)) {
+                    static::push($valueToMerge, $data);
+                } else {
+                    static::set($key, $valueToMerge, $data);
+                }
+            }
+        }
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         return Type::is($value, Type::ARRAY);
     }
 
-    public function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
         if (is_numeric($field)) {
             $field = intval($field);
@@ -44,7 +62,7 @@ class ArrayAccessor extends Accessor
         return static::get($field, $value, $context);
     }
 
-    public function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         if (is_numeric($field)) {
             $field = intval($field);
@@ -53,8 +71,13 @@ class ArrayAccessor extends Accessor
         static::set($field, $value, $data);
     }
 
-    public function pushValue(mixed $value, mixed &$data, AccessContext $context): void
+    protected function pushValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         static::push($value, $data);
+    }
+
+    protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
+    {
+        static::merge($value, $data, $context);
     }
 }

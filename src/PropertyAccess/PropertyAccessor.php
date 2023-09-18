@@ -23,7 +23,7 @@ final class PropertyAccessor
 
     public static function supports(string $operation, mixed $value): bool
     {
-        return static::getAccessor($value, $operation) !== null;
+        return static::getAccessor($operation, $value) !== null;
     }
 
     public static function get(string|array|Path $path, mixed $data, string ...$flags): mixed
@@ -107,7 +107,7 @@ final class PropertyAccessor
         }
 
         if ($data === null) {
-            throw new \InvalidArgumentException('Cannot push to null value.');
+            throw new \InvalidArgumentException('Cannot push to a null value.');
         }
 
         $context = new AccessContext(
@@ -124,7 +124,41 @@ final class PropertyAccessor
         }
 
         $chain = static::readChain($path, $data, $context);
-        $pointer = $chain[count($chain) - 1]['value'];
+        $pointer = &$chain[count($chain) - 1]['value'];
+
+        static::access(null, $pointer, $value, $context);
+        static::writeChain($chain, $data, $context);
+    }
+
+    public static function merge(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        if ($data === null) {
+            throw new \InvalidArgumentException('Cannot merge to a null value.');
+        }
+
+        $context = new AccessContext(
+            AccessContext::MERGE,
+            AccessContext::MERGE,
+            $path,
+            ...$flags
+        );
+
+        if ($path->isEmpty()) {
+            static::access(null, $data, $value, $context);
+
+            return;
+        }
+
+        $chain = static::readChain($path, $data, $context);
+        $pointer = &$chain[count($chain) - 1]['value'];
 
         static::access(null, $pointer, $value, $context);
         static::writeChain($chain, $data, $context);
@@ -136,7 +170,7 @@ final class PropertyAccessor
             static::initialize();
         }
 
-        $accessor = static::getAccessor($data, $context->getOperation());
+        $accessor = static::getAccessor($context->getOperation(), $data);
 
         if ($accessor === null) {
             if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
@@ -149,7 +183,7 @@ final class PropertyAccessor
         return $accessor->access($field, $data, $value, $context);
     }
 
-    private static function getAccessor(mixed $value, string $operation): ?Accessor
+    private static function getAccessor(string $operation, mixed $value): ?Accessor
     {
         foreach (array_reverse(static::$accessors) as $accessor) {
             if ($accessor->supports($operation, $value)) {

@@ -10,11 +10,16 @@ class AccessContext
 
     public const PUSH = 'push';
 
+    public const MERGE = 'merge';
+
     public const FLAG_NULL_ON_ERROR = 'null_on_error';
+
+    public const FLAG_PUSH_ON_MERGE = 'push_on_merge';
 
     public const WRITE_OPERATIONS = [
         self::PUSH,
         self::SET,
+        self::MERGE,
     ];
 
     public const READ_OPERATIONS = [
