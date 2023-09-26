@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
@@ -44,8 +45,8 @@ final class PropertyAccessor
         }
 
         $context = new AccessContext(
-            AccessContext::GET,
-            AccessContext::GET,
+            AccessOperation::GET,
+            AccessOperation::GET,
             $path,
             ...$flags
         );
@@ -55,7 +56,7 @@ final class PropertyAccessor
         foreach ($path as $field) {
             $currentPath->add($field);
 
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, $currentPath));
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessOperation::GET, $currentPath));
 
             if ($pointer === null) {
                 return null;
@@ -84,8 +85,8 @@ final class PropertyAccessor
         }
 
         $context = new AccessContext(
-            AccessContext::SET,
-            AccessContext::SET,
+            AccessOperation::SET,
+            AccessOperation::SET,
             $path,
             ...$flags
         );
@@ -112,8 +113,8 @@ final class PropertyAccessor
         }
 
         $context = new AccessContext(
-            AccessContext::PUSH,
-            AccessContext::PUSH,
+            AccessOperation::PUSH,
+            AccessOperation::PUSH,
             $path,
             ...$flags
         );
@@ -146,8 +147,8 @@ final class PropertyAccessor
         }
 
         $context = new AccessContext(
-            AccessContext::MERGE,
-            AccessContext::MERGE,
+            AccessOperation::MERGE,
+            AccessOperation::MERGE,
             $path,
             ...$flags
         );
@@ -180,8 +181,8 @@ final class PropertyAccessor
         }
 
         $context = new AccessContext(
-            AccessContext::COLLECT,
-            AccessContext::COLLECT,
+            AccessOperation::COLLECT,
+            AccessOperation::COLLECT,
             $path,
             ...$flags
         );
@@ -191,7 +192,7 @@ final class PropertyAccessor
         if (!static::hasCollector($path)) {
             $result[(string) $path] = static::get($path, $data, ...$flags);
 
-            return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+            return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
         }
 
         $pointer = $data;
@@ -212,9 +213,9 @@ final class PropertyAccessor
             }
 
             try {
-                $pointer = static::access(null, $pointer, null, $context->createSubContext(AccessContext::COLLECT, $currentPath));
+                $pointer = static::access(null, $pointer, null, $context->createSubContext(AccessOperation::COLLECT, $currentPath));
             } catch (NotAccessableException $e) {
-                if ($context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+                if ($context->hasFlag(AccessContext::NULL_ON_ERROR)) {
                     return $result;
                 }
 
@@ -230,7 +231,7 @@ final class PropertyAccessor
                     continue;
                 }
 
-                $subContext = $context->createSubContext(AccessContext::COLLECT, $itemPath)->removeFlag(AccessContext::FLAG_COLLECT_NESTED);
+                $subContext = $context->createSubContext(AccessOperation::COLLECT, $itemPath)->removeFlag(AccessContext::COLLECT_NESTED);
                 $itemResult = static::collect($path, $item, ...$subContext->getFlags());
 
                 foreach ($itemResult as $itemResultIndex => $value) {
@@ -239,10 +240,10 @@ final class PropertyAccessor
                 }
             }
 
-            return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+            return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
         }
 
-        return $context->hasFlag(AccessContext::FLAG_COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
+        return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
     }
 
     private static function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
@@ -254,7 +255,7 @@ final class PropertyAccessor
         $accessor = static::getAccessor($context->getOperation(), $data);
 
         if ($accessor === null) {
-            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
                 throw new NotAccessableException($context->getPath(), Type::getDebugType($data), $context->getOperation());
             }
 
@@ -283,7 +284,7 @@ final class PropertyAccessor
 
         foreach ($path as $field) {
             $currentPath->add($field);
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessContext::GET, $currentPath));
+            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessOperation::GET, $currentPath));
             $chain[] = [
                 'field' => $field,
                 'value' => $pointer,
@@ -302,7 +303,7 @@ final class PropertyAccessor
             $currentValue = $record['value'];
             $field = $currentElement['field'];
 
-            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
+            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
 
             $currentPath->add($field);
             $currentElement = [
@@ -311,7 +312,7 @@ final class PropertyAccessor
             ];
         }
 
-        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessContext::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
+        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
     }
 
     private static function initialize(): void

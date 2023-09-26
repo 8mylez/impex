@@ -1,11 +1,33 @@
 <?php
 
-namespace Dustin\ImpEx\PropertyAccess;
+namespace Dustin\ImpEx\PropertyAccess\Operation;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;
+use Dustin\ImpEx\PropertyAccess\PropertyAccessor;
 
 class AccessOperation
 {
+    public const GET = 'get';
+
+    public const SET = 'set';
+
+    public const PUSH = 'push';
+
+    public const MERGE = 'merge';
+
+    public const COLLECT = 'collect';
+
+    public const WRITE_OPERATIONS = [
+        AccessOperation::PUSH,
+        AccessOperation::SET,
+        AccessOperation::MERGE,
+    ];
+
+    public const READ_OPERATIONS = [
+        AccessOperation::GET,
+        AccessOperation::COLLECT,
+    ];
+
     /**
      * @var array
      */
@@ -19,18 +41,32 @@ class AccessOperation
         $this->flags = $flags;
     }
 
+    public static function isWriteOperation(string|self $operation): bool
+    {
+        $operation = is_string($operation) ? $operation : $operation->getOperation();
+
+        return \in_array($operation, self::WRITE_OPERATIONS);
+    }
+
+    public static function isReadOperation(string|self $operation): bool
+    {
+        $operation = is_string($operation) ? $operation : $operation->getOperation();
+
+        return \in_array($operation, self::READ_OPERATIONS);
+    }
+
     public function execute(mixed &$data, mixed $value = null): mixed
     {
         switch ($this->operation) {
-            case AccessContext::GET:
+            case self::GET:
                 return PropertyAccessor::get($this->getPath(), $data, ...$this->getFlags());
-            case AccessContext::SET:
+            case self::SET:
                 return PropertyAccessor::set($this->getPath(), $data, $value, ...$this->getFlags());
-            case AccessContext::PUSH:
+            case self::PUSH:
                 return PropertyAccessor::push($this->getPath(), $data, $value, ...$this->getFlags());
-            case AccessContext::MERGE:
+            case self::MERGE:
                 return PropertyAccessor::merge($this->getPath(), $data, $value, ...$this->getFlags());
-            case AccessContext::COLLECT:
+            case self::COLLECT:
                 return PropertyAccessor::collect($this->getPath(), $data, ...$this->getFlags());
         }
 

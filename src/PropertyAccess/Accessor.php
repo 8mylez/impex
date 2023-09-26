@@ -5,6 +5,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidDataException;
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;
 use Dustin\ImpEx\PropertyAccess\Exception\OperationNotSupportedException;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 
 abstract class Accessor
 {
@@ -29,37 +30,37 @@ abstract class Accessor
     public function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         switch ($context->getOperation()) {
-            case AccessContext::GET:
-                if (!$this->supports(AccessContext::GET, $data)) {
-                    throw new OperationNotSupportedException(AccessContext::GET);
+            case AccessOperation::GET:
+                if (!$this->supports(AccessOperation::GET, $data)) {
+                    throw new OperationNotSupportedException(AccessOperation::GET);
                 }
 
                 return $this->getValue($field, $data, $context);
 
-            case AccessContext::SET:
-                if (!$this->supports(AccessContext::SET, $data)) {
-                    throw new OperationNotSupportedException(AccessContext::SET);
+            case AccessOperation::SET:
+                if (!$this->supports(AccessOperation::SET, $data)) {
+                    throw new OperationNotSupportedException(AccessOperation::SET);
                 }
 
                 return $this->setValue($field, $value, $data, $context);
 
-            case AccessContext::PUSH:
-                if (!$this->supports(AccessContext::PUSH, $data)) {
-                    throw new OperationNotSupportedException(AccessContext::PUSH);
+            case AccessOperation::PUSH:
+                if (!$this->supports(AccessOperation::PUSH, $data)) {
+                    throw new OperationNotSupportedException(AccessOperation::PUSH);
                 }
 
                 return $this->pushValue($value, $data, $context);
 
-            case AccessContext::MERGE:
-                if (!$this->supports(AccessContext::MERGE, $data)) {
-                    throw new OperationNotSupportedException(AccessContext::MERGE);
+            case AccessOperation::MERGE:
+                if (!$this->supports(AccessOperation::MERGE, $data)) {
+                    throw new OperationNotSupportedException(AccessOperation::MERGE);
                 }
 
                 return $this->mergeValue($value, $data, $context);
 
-            case AccessContext::COLLECT:
-                if (!$this->supports(AccessContext::COLLECT, $data)) {
-                    throw new OperationNotSupportedException(AccessContext::COLLECT);
+            case AccessOperation::COLLECT:
+                if (!$this->supports(AccessOperation::COLLECT, $data)) {
+                    throw new OperationNotSupportedException(AccessOperation::COLLECT);
                 }
 
                 return $this->collectValues($data, $context);

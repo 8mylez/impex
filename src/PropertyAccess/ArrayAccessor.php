@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Util\Type;
 
 class ArrayAccessor extends Accessor
@@ -10,7 +11,7 @@ class ArrayAccessor extends Accessor
     public static function get(int|string $field, array $value, AccessContext $context): mixed
     {
         if (!array_key_exists($field, $value)) {
-            if (AccessContext::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+            if (AccessOperation::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::NULL_ON_ERROR)) {
                 return null;
             }
 
@@ -33,13 +34,13 @@ class ArrayAccessor extends Accessor
     public static function merge(mixed $value, array &$data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, new AccessContext(AccessContext::GET, AccessContext::MERGE, new Path($key), AccessContext::FLAG_NULL_ON_ERROR));
+            $dataValue = static::get($key, $data, new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key), AccessContext::NULL_ON_ERROR));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
                 static::set($key, $dataValue, $data);
             } else {
-                if (is_numeric($key) && $context->hasFlag(AccessContext::FLAG_PUSH_ON_MERGE)) {
+                if (is_numeric($key) && $context->hasFlag(AccessContext::PUSH_ON_MERGE)) {
                     static::push($valueToMerge, $data);
                 } else {
                     static::set($key, $valueToMerge, $data);

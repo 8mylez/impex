@@ -5,6 +5,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\Encapsulation\Exception\PropertyNotExistsException;
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Util\Type;
 
 class EncapsulationAccessor extends Accessor
@@ -12,7 +13,7 @@ class EncapsulationAccessor extends Accessor
     public static function get(string $field, EncapsulationInterface $value, AccessContext $context): mixed
     {
         if (!$value->has($field)) {
-            if (AccessContext::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+            if (AccessOperation::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::NULL_ON_ERROR)) {
                 return null;
             }
 
@@ -27,7 +28,7 @@ class EncapsulationAccessor extends Accessor
         try {
             $data->set($field, $value);
         } catch (PropertyNotExistsException $e) {
-            if (!$context->hasFlag(AccessContext::FLAG_NULL_ON_ERROR)) {
+            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
         }
@@ -36,20 +37,20 @@ class EncapsulationAccessor extends Accessor
     public static function merge(mixed $value, EncapsulationInterface $data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, $context->createSubContext(AccessContext::GET, new Path($key)));
+            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, new Path($key)));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, $context->createSubContext(AccessContext::SET, new Path($key)));
+                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
             } else {
-                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessContext::SET, new Path($key)));
+                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
             }
         }
     }
 
     public function supports(string $operation, mixed $value): bool
     {
-        if (\in_array($operation, [AccessContext::PUSH, AccessContext::COLLECT])) {
+        if (\in_array($operation, [AccessOperation::PUSH, AccessOperation::COLLECT])) {
             return false;
         }
 
