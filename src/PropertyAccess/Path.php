@@ -66,7 +66,8 @@ class Path implements \IteratorAggregate, \Countable
 
         $position = 0;
         foreach ($path as $field) {
-            $this->add($field, $position++);
+            $this->validateField($field, $position++);
+            $this->path[] = $field;
         }
     }
 
