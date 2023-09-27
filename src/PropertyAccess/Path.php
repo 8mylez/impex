@@ -42,6 +42,32 @@ class Path implements \IteratorAggregate, \Countable
         return $this;
     }
 
+    public function merge(self $path): self
+    {
+        $new = new Path($this->toArray());
+
+        foreach ($path as $field) {
+            $new->add($field);
+        }
+
+        return $new;
+    }
+
+    public function copy(): self
+    {
+        return new Path($this->toArray());
+    }
+
+    public function pop(): ?string
+    {
+        return array_pop($this->path);
+    }
+
+    public function shift(): ?string
+    {
+        return array_shift($this->path);
+    }
+
     public function toArray(): array
     {
         return $this->path;
