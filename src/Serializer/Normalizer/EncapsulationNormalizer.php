@@ -508,7 +508,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
 
     protected function getPropertyAccessor(string $attribute, array $context): PropertyAccessor
     {
-        return $context[self::PROPERTY_ACCESSORS][$attribute] ?? $this->defaultContext[self::PROPERTY_ACCESSORS][$attribute] ?? new PropertyAccessor($attribute, PropertyAccessor::NULL_ON_ERROR);
+        return $context[self::PROPERTY_ACCESSORS][$attribute] ?? $this->defaultContext[self::PROPERTY_ACCESSORS][$attribute] ?? new PropertyAccessor($attribute, PropertyAccessor::STRICT);
     }
 
     private function validateContext(array $context)

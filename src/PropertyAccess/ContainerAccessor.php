@@ -19,9 +19,11 @@ class ContainerAccessor extends Accessor
     public static function set(int $field, mixed $value, Container $container, AccessContext $context): void
     {
         if ($field < 0 || $field > count($container)) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
+
+            return;
         }
 
         $container->splice($field, 1, [$value]);
@@ -34,9 +36,16 @@ class ContainerAccessor extends Accessor
 
     public static function merge(mixed $value, Container $data, AccessContext $context): void
     {
+        $index = -1;
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
+            ++$index;
+
             if (!is_numeric($key)) {
-                throw InvalidDataException::keyNotNumeric($key);
+                if ($context->hasFlag(AccessContext::STRICT)) {
+                    throw InvalidDataException::keyNotNumeric($key);
+                }
+
+                $key = $index;
             }
 
             if ($context->hasFlag(AccessContext::PUSH_ON_MERGE)) {
@@ -46,14 +55,15 @@ class ContainerAccessor extends Accessor
             }
 
             $key = intval($key);
-            $subContext = new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key), ...$context->getFlags());
-            $dataValue = static::get($key, $data, new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key), AccessContext::NULL_ON_ERROR));
+            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, $context->getPath()->copy()->add((string) $key))->removeFlag(AccessContext::STRICT));
+            $subContext = $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add((string) $key));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                // TODO
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, new AccessContext(AccessOperation::SET, AccessOperation::MERGE, new Path($key), ...$context->getFlags()));
+                static::set($key, $dataValue, $data, $subContext);
             } else {
-                static::set($key, $valueToMerge, $data, new AccessContext(AccessOperation::SET, AccessOperation::MERGE, new Path($key), ...$context->getFlags()));
+                static::set($key, $valueToMerge, $data, $subContext);
             }
         }
     }
@@ -75,7 +85,7 @@ class ContainerAccessor extends Accessor
     protected function getValue(string $field, mixed $value, AccessContext $context): mixed
     {
         if (!is_numeric($field)) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
 
@@ -88,7 +98,7 @@ class ContainerAccessor extends Accessor
     protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         if (!is_numeric($field)) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
         }

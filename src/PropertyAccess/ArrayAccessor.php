@@ -11,11 +11,11 @@ class ArrayAccessor extends Accessor
     public static function get(int|string $field, array $value, AccessContext $context): mixed
     {
         if (!array_key_exists($field, $value)) {
-            if (AccessOperation::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::NULL_ON_ERROR)) {
-                return null;
+            if ($context->hasFlag(AccessContext::STRICT) && !AccessOperation::isWriteOperation($context->getRootOperation())) {
+                throw new PropertyNotFoundException($context->getPath());
             }
 
-            throw new PropertyNotFoundException($context->getPath());
+            return null;
         }
 
         return $value[$field];
@@ -34,9 +34,11 @@ class ArrayAccessor extends Accessor
     public static function merge(mixed $value, array &$data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key), AccessContext::NULL_ON_ERROR));
+            // TODO: Fix context
+            $dataValue = static::get($key, $data, new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key)));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                // TODO
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
                 static::set($key, $dataValue, $data);
             } else {

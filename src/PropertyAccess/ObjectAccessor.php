@@ -21,7 +21,7 @@ class ObjectAccessor extends Accessor
         }
 
         if (!$reflectionObject->hasProperty($field)) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
 
@@ -31,7 +31,7 @@ class ObjectAccessor extends Accessor
         $property = $reflectionObject->getProperty($field);
 
         if ($property->isStatic()) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
 
@@ -62,7 +62,7 @@ class ObjectAccessor extends Accessor
         }
 
         if (!$reflectionObject->hasProperty($field)) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
 
@@ -72,7 +72,7 @@ class ObjectAccessor extends Accessor
         $property = $reflectionObject->getProperty($field);
 
         if ($property->isStatic()) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
 
@@ -86,13 +86,14 @@ class ObjectAccessor extends Accessor
     public static function merge(mixed $value, object $data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, new Path($key)));
+            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, $context->getPath()->copy()->add($key))->removeFlag(AccessContext::STRICT));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                // TODO
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
+                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
             } else {
-                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
+                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
             }
         }
     }

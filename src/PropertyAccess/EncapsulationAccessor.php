@@ -13,7 +13,7 @@ class EncapsulationAccessor extends Accessor
     public static function get(string $field, EncapsulationInterface $value, AccessContext $context): mixed
     {
         if (!$value->has($field)) {
-            if (AccessOperation::isWriteOperation($context->getRootOperation()) || $context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT) && !AccessOperation::isWriteOperation($context->getRootOperation())) {
                 return null;
             }
 
@@ -28,7 +28,7 @@ class EncapsulationAccessor extends Accessor
         try {
             $data->set($field, $value);
         } catch (PropertyNotExistsException $e) {
-            if (!$context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
         }
@@ -37,13 +37,14 @@ class EncapsulationAccessor extends Accessor
     public static function merge(mixed $value, EncapsulationInterface $data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, new Path($key)));
+            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, $context->getPath()->copy()->add($key))->removeFlag(AccessContext::STRICT));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
+                // TODO
                 PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
+                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
             } else {
-                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, new Path($key)));
+                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
             }
         }
     }

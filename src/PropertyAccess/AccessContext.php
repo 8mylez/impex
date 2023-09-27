@@ -4,7 +4,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 class AccessContext
 {
-    public const NULL_ON_ERROR = 'null_on_error';
+    public const STRICT = 'strict';
 
     public const PUSH_ON_MERGE = 'push_on_merge';
 

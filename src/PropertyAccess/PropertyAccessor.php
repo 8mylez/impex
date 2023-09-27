@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
+use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
 use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
@@ -177,17 +178,17 @@ final class PropertyAccessor
         $result = [];
 
         if (!static::hasCollector($path)) {
-            $subContext = $context->createSubContext(AccessOperation::GET, $context->getPath()->copy())->removeFlag(AccessContext::NULL_ON_ERROR);
+            $subContext = $context->createSubContext(AccessOperation::GET, $context->getPath()->copy())->setFlag(AccessContext::STRICT);
 
             $p = $context->getPath()->merge($path);
             try {
                 $result[(string) $p] = static::getValue($path, $data, $subContext);
-            } catch (NotAccessableException $e) {
-                if ($context->hasFlag(AccessContext::NULL_ON_ERROR)) {
-                    return [];
+            } catch (NotAccessableException|PropertyNotFoundException $e) {
+                if ($context->hasFlag(AccessContext::STRICT)) {
+                    throw $e;
                 }
 
-                throw $e;
+                return [];
             }
 
             return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
@@ -212,11 +213,11 @@ final class PropertyAccessor
             try {
                 $pointer = static::access(null, $pointer, null, $context->createSubContext(AccessOperation::COLLECT, $currentPath));
             } catch (NotAccessableException $e) {
-                if ($context->hasFlag(AccessContext::NULL_ON_ERROR)) {
-                    return [];
+                if ($context->hasFlag(AccessContext::STRICT)) {
+                    throw $e;
                 }
 
-                throw $e;
+                return [];
             }
 
             foreach ($pointer as $index => $item) {
@@ -272,7 +273,7 @@ final class PropertyAccessor
         $accessor = static::getAccessor($context->getOperation(), $data);
 
         if ($accessor === null) {
-            if ($context->hasFlag(AccessContext::NULL_ON_ERROR)) {
+            if (!$context->hasFlag(AccessContext::STRICT)) {
                 return null;
             }
 
@@ -349,6 +350,7 @@ final class PropertyAccessor
     {
         $subPath = (string) new Path(array_reverse($subPath->toArray()));
 
+        // TODO: Make compatible with dot-containing-fields
         return new Path(trim(substr($path, 0, strrpos($path, $subPath)), '.'));
     }
 
