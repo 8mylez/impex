@@ -78,16 +78,16 @@ class Type
             return $value instanceof $type;
         }
 
+        $isFunction = 'is_'.$type;
+
+        if ($type !== self::NUMERIC && function_exists($isFunction)) {
+            return $isFunction($value);
+        }
+
         $valueType = self::getType($value);
 
         if ($type === self::NUMERIC) {
             return self::isNumericType($valueType);
-        }
-
-        $isFunction = 'is_'.$type;
-
-        if (function_exists($isFunction)) {
-            return $isFunction($value);
         }
 
         return $type === $valueType;

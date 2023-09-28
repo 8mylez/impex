@@ -4,14 +4,11 @@ namespace Dustin\ImpEx\Serializer\Normalizer;
 
 use Dustin\Encapsulation\AbstractEncapsulation;
 use Dustin\Encapsulation\EncapsulationInterface;
-use Dustin\Encapsulation\Exception\PropertyNotExistsException;
-use Dustin\ImpEx\PropertyAccess\PropertyAccessor;
 use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
-use Dustin\ImpEx\Util\Type;
 use Dustin\ImpEx\Util\Value;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
@@ -41,8 +38,6 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     public const CONVERTERS = 'converters';
 
     public const CONVERSION_ROOT_PATH = 'conversion_root_path';
-
-    public const PROPERTY_ACCESSORS = 'property_accessors';
 
     /**
      * @var callable
@@ -416,13 +411,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      */
     protected function getAttributeValue(object $object, string $attribute, string $format = null, array $context = [])
     {
-        $accessor = $this->getPropertyAccessor($attribute, $context);
-
-        try {
-            return $accessor->getValue($object);
-        } catch (PropertyNotExistsException $e) {
-            return null;
-        }
+        return $object->get($attribute);
     }
 
     protected function setAttributeValue(object $object, string $attribute, $value, string $format = null, array $context = []): void
@@ -435,9 +424,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      */
     protected function fetchValue(string $attribute, array $data, array $context)
     {
-        $accessor = $this->getPropertyAccessor($attribute, $context);
-
-        return $accessor->getValue($data);
+        return $data[$attribute] ?? null;
     }
 
     protected function getConverter(string $attribute, array $context): ?AttributeConverter
@@ -506,11 +493,6 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         return $context[self::CONVERSION_ROOT_PATH] ?? $this->defaultContext[self::CONVERSION_ROOT_PATH] ?? '';
     }
 
-    protected function getPropertyAccessor(string $attribute, array $context): PropertyAccessor
-    {
-        return $context[self::PROPERTY_ACCESSORS][$attribute] ?? $this->defaultContext[self::PROPERTY_ACCESSORS][$attribute] ?? new PropertyAccessor($attribute, PropertyAccessor::NULL_ON_ERROR);
-    }
-
     private function validateContext(array $context)
     {
         $this->validateCallbackContext($context);
@@ -526,19 +508,9 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
 
             foreach ($context[self::CONVERTERS] as $attribute => $converter) {
                 if (!\is_object($converter) || !($converter instanceof AttributeConverter)) {
-                    throw new \InvalidArgumentException(sprintf("Converter for attribute '%s' must be %s. Got %s", $attribute, AttributeConverter::class, Type::getDebugType($converter)));
-                }
-            }
-        }
+                    $type = \is_object($converter) ? get_class($converter) : gettype($converter);
 
-        if (isset($context[self::PROPERTY_ACCESSORS])) {
-            if (!is_array($context[self::PROPERTY_ACCESSORS])) {
-                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of property accessors.", self::PROPERTY_ACCESSORS));
-            }
-
-            foreach ($context[self::PROPERTY_ACCESSORS] as $attribute => $accessor) {
-                if (!$accessor instanceof PropertyAccessor) {
-                    throw new \InvalidArgumentException(sprintf("Property accessor for attribute '%s' must be %s. Got %s.", $attribute, PropertyAccessor::class, Type::getDebugType($accessor)));
+                    throw new \InvalidArgumentException(sprintf("Converter for attribute '%s' must be %s. Got %s", $attribute, AttributeConverter::class, $type));
                 }
             }
         }

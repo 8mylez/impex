@@ -3,16 +3,29 @@
 namespace Dustin\ImpEx\PropertyAccess\Exception;
 
 use Dustin\Exception\ErrorCodeException;
+use Dustin\ImpEx\PropertyAccess\Path;
 
 class NotAccessableException extends ErrorCodeException
 {
     public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_NOT_ACCESSABLE';
 
-    public function __construct(private string $property, private string $type)
+    public function __construct(private Path $path, private string $type, private string $operation)
     {
+        $message = 'Value of type {{ type }} ';
+
+        if (!$path->isEmpty()) {
+            $message .= "at '{{ path }}' ";
+        }
+
+        $message .= "is not accessable for operation '{{ operation }}'.";
+
         parent::__construct(
-            'Value of type {{ type }} at {{ property }} is not accessable.',
-            ['type' => $type, 'property' => $property]
+            $message,
+            [
+                'type' => $type,
+                'path' => (string) $path,
+                'operation' => $operation,
+            ]
         );
     }
 
@@ -26,18 +39,13 @@ class NotAccessableException extends ErrorCodeException
         return $this->type;
     }
 
-    public function getProperty(): string
+    public function getProperty(): ?string
     {
-        return array_pop(explode('.', $this->property));
+        return array_pop($this->path->toArray());
     }
 
-    public function getFullProperty(): string
+    public function getPath(): Path
     {
-        return $this->property;
-    }
-
-    public function getPropertyAsPath(): array
-    {
-        return explode('.', $this->property);
+        return $this->path;
     }
 }

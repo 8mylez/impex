@@ -1,17 +1,78 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
+
+use Dustin\ImpEx\PropertyAccess\Exception\InvalidDataException;
+use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;
+use Dustin\ImpEx\PropertyAccess\Exception\OperationNotSupportedException;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 
 abstract class Accessor
 {
-    public const NULL_ON_ERROR = 'null_on_error';
+    abstract public function supports(string $operation, mixed $value): bool;
 
-    abstract public static function getSupportedTypes(): array;
-
-    abstract public static function getValueOf(string $field, mixed $value, ?string $path, string ...$flags): mixed;
-
-    protected static function hasFlag(string $flag, array $flags): bool
+    protected static function valueToMerge(mixed $data): \Generator
     {
-        return \in_array($flag, $flags);
+        if (!static::isMergable($data)) {
+            throw InvalidDataException::notMergable($data);
+        }
+
+        foreach ($data as $key => $value) {
+            yield $key => $value;
+        }
+    }
+
+    protected static function isMergable(mixed $data): bool
+    {
+        return is_iterable($data);
+    }
+
+    public function access(int|string|null $field, mixed &$data, mixed $value, AccessContext $context): mixed
+    {
+        switch ($context->getOperation()) {
+            case AccessOperation::GET:
+                return $this->getValue($field, $data, $context);
+
+            case AccessOperation::SET:
+                return $this->setValue($field, $value, $data, $context);
+
+            case AccessOperation::PUSH:
+                return $this->pushValue($value, $data, $context);
+
+            case AccessOperation::MERGE:
+                return $this->mergeValue($value, $data, $context);
+
+            case AccessOperation::COLLECT:
+                return $this->collectValues($data, $context);
+        }
+
+        throw new InvalidOperationException($context->getOperation());
+    }
+
+    protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
+    {
+        throw new OperationNotSupportedException(AccessOperation::GET);
+    }
+
+    protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
+    {
+        throw new OperationNotSupportedException(AccessOperation::SET);
+    }
+
+    protected function pushValue(mixed $value, mixed &$data, AccessContext $context): void
+    {
+        throw new OperationNotSupportedException(AccessOperation::PUSH);
+    }
+
+    protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
+    {
+        throw new OperationNotSupportedException(AccessOperation::MERGE);
+    }
+
+    protected function collectValues(mixed &$data, AccessContext $context): array
+    {
+        throw new OperationNotSupportedException(AccessOperation::COLLECT);
     }
 }

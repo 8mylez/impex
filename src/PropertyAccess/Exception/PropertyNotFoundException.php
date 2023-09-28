@@ -3,16 +3,17 @@
 namespace Dustin\ImpEx\PropertyAccess\Exception;
 
 use Dustin\Exception\ErrorCodeException;
+use Dustin\ImpEx\PropertyAccess\Path;
 
 class PropertyNotFoundException extends ErrorCodeException
 {
     public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_PROPERTY_NOT_FOUND';
 
-    public function __construct(private string $property, ?string $customMessage = null)
+    public function __construct(private Path $path, ?string $customMessage = null)
     {
         parent::__construct(
-            $customMessage ?? 'Property {{ property }} was not found.',
-            ['property' => $property]
+            $customMessage ?? 'Property {{ path }} was not found.',
+            ['path' => (string) $path]
         );
     }
 
@@ -21,13 +22,8 @@ class PropertyNotFoundException extends ErrorCodeException
         return self::ERROR_CODE;
     }
 
-    public function getProperty(): string
+    public function getPath(): string
     {
-        return $this->property;
-    }
-
-    public function getPropertyAsPath(): array
-    {
-        return explode('.', $this->property);
+        return $this->path;
     }
 }
