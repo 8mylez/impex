@@ -1,18 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
+
+use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
+use Dustin\ImpEx\Util\Type;
 
 class AccessContext
 {
     public const STRICT = 'strict';
 
-    public const PUSH_ON_MERGE = 'push_on_merge';
-
     public const COLLECT_NESTED = 'collect_nested';
 
     public const COLLECTOR_FIELD = '[]';
 
+    /**
+     * @var array
+     */
     private $flags = [];
+
+    /**
+     * @var array
+     */
+    private $accesses = [];
 
     public function __construct(
         private string $operation,
@@ -28,7 +39,7 @@ class AccessContext
         return $this->operation;
     }
 
-    public function getRootOperation()
+    public function getRootOperation(): string
     {
         return $this->rootOperation;
     }
@@ -62,13 +73,35 @@ class AccessContext
         return $this;
     }
 
-    public function createSubContext(string $operation, Path $path): self
+    public function addAccess(string $operation, Access $access): void
     {
-        return new AccessContext(
+        $this->accesses[$operation] = $access;
+    }
+
+    public function access(string|array|Path $path, mixed &$data, mixed $value = null): mixed
+    {
+        $access = $this->accesses[$this->operation] ?? null;
+
+        if ($access === null) {
+            throw new NotAccessableException($path, Type::getDebugType($data), $this->operation);
+        }
+
+        return $access->access($path, $data, $value, $this);
+    }
+
+    public function subContext(string $operation, Path $appendPath): self
+    {
+        $context = new AccessContext(
             $operation,
             $this->rootOperation,
-            $path,
+            $this->path->merge($appendPath),
             ...$this->flags
         );
+
+        foreach ($this->accesses as $key => $value) {
+            $context->addAccess($key, $value);
+        }
+
+        return $context;
     }
 }

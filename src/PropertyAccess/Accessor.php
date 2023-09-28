@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidDataException;
@@ -27,7 +29,7 @@ abstract class Accessor
         return is_iterable($data);
     }
 
-    public function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
+    public function access(int|string|null $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         switch ($context->getOperation()) {
             case AccessOperation::GET:
@@ -69,12 +71,12 @@ abstract class Accessor
         throw new InvalidOperationException($context->getOperation());
     }
 
-    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
     {
         throw new \RuntimeException(sprintf('%s::getValue is not implemented.', get_class($this)));
     }
 
-    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         throw new \RuntimeException(sprintf('%s::setValue is not implemented.', get_class($this)));
     }

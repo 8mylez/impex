@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\Encapsulation\Container;
@@ -11,6 +13,8 @@ use Dustin\ImpEx\Util\Type;
 
 class ContainerAccessor extends Accessor
 {
+    public const CONTAINER_PUSH = 'container_push';
+
     public static function get(int $field, Container $container, AccessContext $context): mixed
     {
         return ArrayAccessor::get($field, $container->toArray(), $context);
@@ -40,7 +44,13 @@ class ContainerAccessor extends Accessor
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
             ++$index;
 
-            if (!is_numeric($key)) {
+            if ($context->hasFlag(self::CONTAINER_PUSH)) {
+                static::push($valueToMerge, $data);
+
+                continue;
+            }
+
+            if (!is_int($key)) {
                 if ($context->hasFlag(AccessContext::STRICT)) {
                     throw InvalidDataException::keyNotNumeric($key);
                 }
@@ -48,22 +58,15 @@ class ContainerAccessor extends Accessor
                 $key = $index;
             }
 
-            if ($context->hasFlag(AccessContext::PUSH_ON_MERGE)) {
-                static::push($valueToMerge, $data);
-
-                continue;
-            }
-
             $key = intval($key);
-            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, $context->getPath()->copy()->add((string) $key))->removeFlag(AccessContext::STRICT));
-            $subContext = $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add((string) $key));
+
+            $dataValue = static::get($key, $data, $context->subContext(AccessOperation::GET, new Path([$key]))->removeFlag(AccessContext::STRICT));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
-                // TODO
-                PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, $subContext);
+                $context->subContext(AccessOperation::MERGE, new Path([$key]))->access([], $dataValue, $valueToMerge);
+                static::set($key, $dataValue, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
             } else {
-                static::set($key, $valueToMerge, $data, $subContext);
+                static::set($key, $valueToMerge, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
             }
         }
     }
@@ -82,9 +85,9 @@ class ContainerAccessor extends Accessor
         return !(\in_array($operation, AccessOperation::WRITE_OPERATIONS) && Type::is($value, ImmutableContainer::class));
     }
 
-    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
     {
-        if (!is_numeric($field)) {
+        if (!is_int($field)) {
             if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
@@ -95,9 +98,9 @@ class ContainerAccessor extends Accessor
         return static::get(intval($field), $value, $context);
     }
 
-    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
-        if (!is_numeric($field)) {
+        if (!is_int($field)) {
             if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }

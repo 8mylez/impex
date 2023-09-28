@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
@@ -29,34 +31,92 @@ final class PropertyAccessor
         return static::getAccessor($operation, $value) !== null;
     }
 
-    public static function get(string|array|Path $path, mixed $data, string ...$flags): mixed
+    public static function get(string|array|int|Path $path, mixed $data, string ...$flags): mixed
     {
-        if (!static::$initialized) {
-            static::initialize();
-        }
-
         if (!$path instanceof Path) {
             $path = new Path($path);
         }
 
-        $context = new AccessContext(
-            AccessOperation::GET,
-            AccessOperation::GET,
-            new Path(),
-            ...$flags
-        );
+        $context = static::createContext(AccessOperation::GET, ...$flags);
 
         return static::getValue($path, $data, $context);
     }
 
-    public static function set(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    public static function set(string|array|int|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    {
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        $context = static::createContext(AccessOperation::SET, ...$flags);
+
+        static::setValue($path, $data, $value, $context);
+    }
+
+    public static function push(string|array|int|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    {
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        $context = static::createContext(AccessOperation::PUSH, ...$flags);
+
+        static::pushValue($path, $data, $value, $context);
+    }
+
+    public static function merge(string|array|int|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    {
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        $context = static::createContext(AccessOperation::MERGE, ...$flags);
+
+        static::mergeValue($path, $data, $value, $context);
+    }
+
+    public static function collect(string|array|int|Path $path, mixed &$data, string ...$flags): array
+    {
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        $context = static::createContext(AccessOperation::COLLECT, ...$flags);
+
+        return static::collectValues($path, $data, $context);
+    }
+
+    private static function getValue(Path $path, mixed $data, AccessContext $context): mixed
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        if (!$path instanceof Path) {
-            $path = new Path($path);
+        $pointer = $data;
+
+        if ($pointer === null) {
+            return $pointer;
+        }
+
+        $currentPath = new Path();
+
+        foreach ($path as $field) {
+            $currentPath->add($field);
+
+            $pointer = static::access($field, $pointer, null, $context->subContext(AccessOperation::GET, $currentPath));
+
+            if ($pointer === null) {
+                return null;
+            }
+        }
+
+        return $pointer;
+    }
+
+    private static function setValue(Path $path, mixed &$data, mixed $value, AccessContext $context): void
+    {
+        if (!static::$initialized) {
+            static::initialize();
         }
 
         if ($path->isEmpty()) {
@@ -67,13 +127,6 @@ final class PropertyAccessor
             throw new \InvalidArgumentException('Cannot set value to a null.');
         }
 
-        $context = new AccessContext(
-            AccessOperation::SET,
-            AccessOperation::SET,
-            new Path(),
-            ...$flags
-        );
-
         $chain = static::readChain($path, $data, $context);
 
         $chain[count($chain) - 1]['value'] = $value;
@@ -81,27 +134,16 @@ final class PropertyAccessor
         static::writeChain($chain, $data, $context);
     }
 
-    public static function push(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    private static function pushValue(Path $path, mixed &$data, mixed $value, AccessContext $context): void
     {
         if (!static::$initialized) {
             static::initialize();
-        }
-
-        if (!$path instanceof Path) {
-            $path = new Path($path);
         }
 
         if ($data === null) {
             throw new \InvalidArgumentException('Cannot push to a null value.');
         }
 
-        $context = new AccessContext(
-            AccessOperation::PUSH,
-            AccessOperation::PUSH,
-            $path,
-            ...$flags
-        );
-
         if ($path->isEmpty()) {
             static::access(null, $data, $value, $context);
 
@@ -115,27 +157,16 @@ final class PropertyAccessor
         static::writeChain($chain, $data, $context);
     }
 
-    public static function merge(string|array|Path $path, mixed &$data, mixed $value, string ...$flags): void
+    private static function mergeValue(Path $path, mixed &$data, mixed $value, AccessContext $context): void
     {
         if (!static::$initialized) {
             static::initialize();
-        }
-
-        if (!$path instanceof Path) {
-            $path = new Path($path);
         }
 
         if ($data === null) {
             throw new \InvalidArgumentException('Cannot merge to a null value.');
         }
 
-        $context = new AccessContext(
-            AccessOperation::MERGE,
-            AccessOperation::MERGE,
-            new Path(),
-            ...$flags
-        );
-
         if ($path->isEmpty()) {
             static::access(null, $data, $value, $context);
 
@@ -149,28 +180,12 @@ final class PropertyAccessor
         static::writeChain($chain, $data, $context);
     }
 
-    public static function collect(string|array|Path $path, mixed &$data, string ...$flags): array
+    private static function collectValues(Path $path, mixed $data, AccessContext $context): mixed
     {
         if (!static::$initialized) {
             static::initialize();
         }
 
-        if (!$path instanceof Path) {
-            $path = new Path($path);
-        }
-
-        $context = new AccessContext(
-            AccessOperation::COLLECT,
-            AccessOperation::COLLECT,
-            new Path(),
-            ...$flags
-        );
-
-        return static::collectRecursive($path, $data, $context);
-    }
-
-    private static function collectRecursive(Path $path, mixed &$data, AccessContext $context): mixed
-    {
         if ($data === null) {
             throw new \InvalidArgumentException('Cannot collect from a null value.');
         }
@@ -178,11 +193,11 @@ final class PropertyAccessor
         $result = [];
 
         if (!static::hasCollector($path)) {
-            $subContext = $context->createSubContext(AccessOperation::GET, $context->getPath()->copy())->setFlag(AccessContext::STRICT);
+            $subContext = $context->subContext(AccessOperation::GET, new Path())->setFlag(AccessContext::STRICT);
 
-            $p = $context->getPath()->merge($path);
+            $resultPath = $context->getPath()->merge($path);
             try {
-                $result[(string) $p] = static::getValue($path, $data, $subContext);
+                $result[(string) $resultPath] = static::getValue($path, $data, $subContext);
             } catch (NotAccessableException|PropertyNotFoundException $e) {
                 if ($context->hasFlag(AccessContext::STRICT)) {
                     throw $e;
@@ -195,13 +210,13 @@ final class PropertyAccessor
         }
 
         $pointer = $data;
-        $currentPath = $context->getPath()->copy();
+        $currentPath = new Path();
         $path = $path->toArray();
 
         while (($field = array_shift($path)) !== null) {
             if ($field !== AccessContext::COLLECTOR_FIELD) {
                 $currentPath->add($field);
-                $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessOperation::GET, $currentPath));
+                $pointer = static::access($field, $pointer, null, $context->subContext(AccessOperation::GET, $currentPath));
 
                 if ($pointer === null) {
                     return $result;
@@ -211,7 +226,7 @@ final class PropertyAccessor
             }
 
             try {
-                $pointer = static::access(null, $pointer, null, $context->createSubContext(AccessOperation::COLLECT, $currentPath));
+                $pointer = static::access(null, $pointer, null, $context->subContext(AccessOperation::COLLECT, $currentPath));
             } catch (NotAccessableException $e) {
                 if ($context->hasFlag(AccessContext::STRICT)) {
                     throw $e;
@@ -229,8 +244,8 @@ final class PropertyAccessor
                     continue;
                 }
 
-                $subContext = $context->createSubContext(AccessOperation::COLLECT, $itemPath)->removeFlag(AccessContext::COLLECT_NESTED);
-                $itemResult = static::collectRecursive(new Path($path), $item, $subContext);
+                $subContext = $context->subContext(AccessOperation::COLLECT, $itemPath)->removeFlag(AccessContext::COLLECT_NESTED);
+                $itemResult = static::collectValues(new Path($path), $item, $subContext);
 
                 $result = array_merge($result, $itemResult);
             }
@@ -241,30 +256,7 @@ final class PropertyAccessor
         return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
     }
 
-    private static function getValue(Path $path, mixed $data, AccessContext $context): mixed
-    {
-        $pointer = $data;
-
-        if ($pointer === null) {
-            return $pointer;
-        }
-
-        $currentPath = $context->getPath()->copy();
-
-        foreach ($path as $field) {
-            $currentPath->add($field);
-
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessOperation::GET, $currentPath));
-
-            if ($pointer === null) {
-                return null;
-            }
-        }
-
-        return $pointer;
-    }
-
-    private static function access(?string $field, mixed &$data, mixed $value, AccessContext $context): mixed
+    private static function access(int|string|null $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         if (!static::$initialized) {
             static::initialize();
@@ -300,12 +292,12 @@ final class PropertyAccessor
     private static function readChain(Path $path, mixed $data, AccessContext $context): array
     {
         $chain = [];
-        $currentPath = $context->getPath()->copy();
+        $currentPath = new Path();
         $pointer = $data;
 
         foreach ($path as $field) {
             $currentPath->add($field);
-            $pointer = static::access($field, $pointer, null, $context->createSubContext(AccessOperation::GET, $currentPath));
+            $pointer = static::access($field, $pointer, null, $context->subContext(AccessOperation::GET, $currentPath));
             $chain[] = [
                 'field' => $field,
                 'value' => $pointer,
@@ -318,13 +310,13 @@ final class PropertyAccessor
     private static function writeChain(array $chain, mixed &$data, AccessContext $context): void
     {
         $currentElement = array_pop($chain);
-        $currentPath = $context->getPath()->copy();
+        $currentPath = new Path();
 
         foreach (array_reverse($chain) as $record) {
             $currentValue = $record['value'];
             $field = $currentElement['field'];
 
-            static::access($field, $currentValue, $currentElement['value'], $context->createSubContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
+            static::access($field, $currentValue, $currentElement['value'], $context->subContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
 
             $currentPath->add($field);
             $currentElement = [
@@ -333,7 +325,7 @@ final class PropertyAccessor
             ];
         }
 
-        static::access($currentElement['field'], $data, $currentElement['value'], $context->createSubContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
+        static::access($currentElement['field'], $data, $currentElement['value'], $context->subContext(AccessOperation::SET, static::createPathFromReverse($context->getPath(), $currentPath)));
     }
 
     private static function initialize(): void
@@ -348,10 +340,19 @@ final class PropertyAccessor
 
     private static function createPathFromReverse(Path $path, Path $subPath): Path
     {
-        $subPath = (string) new Path(array_reverse($subPath->toArray()));
+        $path = $path->copy();
+        $subPath = new Path(array_reverse($subPath->toArray()));
+        $result = new Path();
 
-        // TODO: Make compatible with dot-containing-fields
-        return new Path(trim(substr($path, 0, strrpos($path, $subPath)), '.'));
+        while (($field = $path->shift()) !== null) {
+            $result->add($field);
+
+            if ($path->equals($subPath)) {
+                return $result;
+            }
+        }
+
+        return $result;
     }
 
     private static function hasCollector(Path $path): bool
@@ -363,5 +364,62 @@ final class PropertyAccessor
         }
 
         return false;
+    }
+
+    private static function createContext(string $operation, string ...$flags): AccessContext
+    {
+        $context = new AccessContext(
+            $operation,
+            $operation,
+            new Path(),
+            ...$flags
+        );
+
+        $context->addAccess(
+            AccessOperation::GET,
+            new Access(
+                function (Path $path, mixed $data, mixed $value = null, AccessContext $context) {
+                    return static::getValue($path, $data, $context);
+                }
+            )
+        );
+
+        $context->addAccess(
+            AccessOperation::SET,
+            new Access(
+                function (Path $path, mixed &$data, mixed $value = null, AccessContext $context) {
+                    return static::setValue($path, $data, $value, $context);
+                }
+            )
+        );
+
+        $context->addAccess(
+            AccessOperation::PUSH,
+            new Access(
+                function (Path $path, mixed &$data, mixed $value = null, AccessContext $context) {
+                    return static::pushValue($path, $data, $value, $context);
+                }
+            )
+        );
+
+        $context->addAccess(
+            AccessOperation::MERGE,
+            new Access(
+                function (Path $path, mixed &$data, mixed $value = null, AccessContext $context) {
+                    return static::mergeValue($path, $data, $value, $context);
+                }
+            )
+        );
+
+        $context->addAccess(
+            AccessOperation::COLLECT,
+            new Access(
+                function (Path $path, mixed $data, mixed $value = null, AccessContext $context) {
+                    return static::collectValues($path, $data, $context);
+                }
+            )
+        );
+
+        return $context;
     }
 }

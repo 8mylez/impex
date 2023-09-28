@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidPathException;
@@ -12,7 +14,7 @@ class Path implements \IteratorAggregate, \Countable
      */
     private $path = [];
 
-    public function __construct(array|string|null $path = null)
+    public function __construct(array|string|int|null $path = null)
     {
         if ($path !== null) {
             $this->setPath($path);
@@ -34,7 +36,7 @@ class Path implements \IteratorAggregate, \Countable
         return empty($this->path);
     }
 
-    public function add(string $field): self
+    public function add(int|string $field): self
     {
         $this->validateField($field);
         $this->path[] = $field;
@@ -73,6 +75,11 @@ class Path implements \IteratorAggregate, \Countable
         return $this->path;
     }
 
+    public function equals(self $path): bool
+    {
+        return empty(array_diff_assoc($this->toArray(), $path->toArray()));
+    }
+
     public function __toString()
     {
         $path = [];
@@ -84,10 +91,12 @@ class Path implements \IteratorAggregate, \Countable
         return implode('.', $path);
     }
 
-    private function setPath(array|string $path): void
+    private function setPath(array|string|int $path): void
     {
         if (is_string($path)) {
             $path = $this->parse($path);
+        } elseif (is_int($path)) {
+            $path = [$path];
         }
 
         $position = 0;
@@ -145,12 +154,18 @@ class Path implements \IteratorAggregate, \Countable
             throw InvalidPathException::unexpectedCharacter($path, '.', $position);
         }
 
+        foreach ($result as &$field) {
+            if (is_numeric($field)) {
+                $field = intval($field);
+            }
+        }
+
         return $result;
     }
 
-    private function validateField(string $field, ?int $position = null): void
+    private function validateField(int|string $field, ?int $position = null): void
     {
-        if (!is_string($field) || Value::isEmpty($field)) {
+        if (Value::isEmpty($field)) {
             throw InvalidPathException::emptyField($position);
         }
     }

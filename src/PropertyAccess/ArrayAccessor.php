@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
@@ -8,6 +10,8 @@ use Dustin\ImpEx\Util\Type;
 
 class ArrayAccessor extends Accessor
 {
+    public const MERGE_OVERWRITE_NUMERIC = 'merge_overwrite_numeric';
+
     public static function get(int|string $field, array $value, AccessContext $context): mixed
     {
         if (!array_key_exists($field, $value)) {
@@ -34,15 +38,13 @@ class ArrayAccessor extends Accessor
     public static function merge(mixed $value, array &$data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            // TODO: Fix context
-            $dataValue = static::get($key, $data, new AccessContext(AccessOperation::GET, AccessOperation::MERGE, new Path($key)));
+            $dataValue = static::get($key, $data, $context->subContext(AccessOperation::GET, new Path([$key])));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
-                // TODO
-                PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
+                $context->subContext(AccessOperation::MERGE, new Path([$key]))->access([], $dataValue, $valueToMerge);
                 static::set($key, $dataValue, $data);
             } else {
-                if (is_numeric($key) && $context->hasFlag(AccessContext::PUSH_ON_MERGE)) {
+                if (is_int($key) && !$context->hasFlag(self::MERGE_OVERWRITE_NUMERIC)) {
                     static::push($valueToMerge, $data);
                 } else {
                     static::set($key, $valueToMerge, $data);
@@ -61,21 +63,13 @@ class ArrayAccessor extends Accessor
         return Type::is($value, Type::ARRAY);
     }
 
-    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
     {
-        if (is_numeric($field)) {
-            $field = intval($field);
-        }
-
         return static::get($field, $value, $context);
     }
 
-    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
-        if (is_numeric($field)) {
-            $field = intval($field);
-        }
-
         static::set($field, $value, $data);
     }
 

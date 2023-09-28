@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess\Operation;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;

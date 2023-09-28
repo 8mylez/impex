@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Dustin\ImpEx\PropertyAccess;
 
 use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
@@ -86,14 +88,13 @@ class ObjectAccessor extends Accessor
     public static function merge(mixed $value, object $data, AccessContext $context): void
     {
         foreach (static::valueToMerge($value) as $key => $valueToMerge) {
-            $dataValue = static::get($key, $data, $context->createSubContext(AccessOperation::GET, $context->getPath()->copy()->add($key))->removeFlag(AccessContext::STRICT));
+            $dataValue = static::get($key, $data, $context->subContext(AccessOperation::GET, new Path([$key]))->removeFlag(AccessContext::STRICT));
 
             if (static::isMergable($dataValue) && static::isMergable($valueToMerge)) {
-                // TODO
-                PropertyAccessor::merge('', $dataValue, $valueToMerge, ...$context->getFlags());
-                static::set($key, $dataValue, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
+                $context->subContext(AccessOperation::MERGE, new Path([$key]))->access([], $dataValue, $valueToMerge);
+                static::set($key, $dataValue, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
             } else {
-                static::set($key, $valueToMerge, $data, $context->createSubContext(AccessOperation::SET, $context->getPath()->copy()->add($key)));
+                static::set($key, $valueToMerge, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
             }
         }
     }
@@ -107,12 +108,12 @@ class ObjectAccessor extends Accessor
         return Type::is($value, Type::OBJECT);
     }
 
-    protected function getValue(string $field, mixed $value, AccessContext $context): mixed
+    protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
     {
         return static::get($field, $value, $context);
     }
 
-    protected function setValue(string $field, mixed $value, mixed &$data, AccessContext $context): void
+    protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
         static::set($field, $value, $data, $context);
     }
