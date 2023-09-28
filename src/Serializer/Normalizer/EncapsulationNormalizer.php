@@ -4,11 +4,13 @@ namespace Dustin\ImpEx\Serializer\Normalizer;
 
 use Dustin\Encapsulation\AbstractEncapsulation;
 use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
+use Dustin\ImpEx\Util\Type;
 use Dustin\ImpEx\Util\Value;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
@@ -38,6 +40,12 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     public const CONVERTERS = 'converters';
 
     public const CONVERSION_ROOT_PATH = 'conversion_root_path';
+
+    public const PROPERTY_ACCESSORS = 'property_accessors';
+
+    public const ACCESS_READ = 'read';
+
+    public const ACCESS_WRITE = 'write';
 
     /**
      * @var callable
@@ -191,15 +199,15 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
                 $attributeValue = $this->serializer->normalize($attributeValue, $format, $childContext);
             }
 
-            if ($attributeValue === null && $this->skipNullValues($context)) {
+            if ($attributeValue === null && $this->skipNullValues($attributeContext)) {
                 continue;
             }
 
             if ($this->nameConverter !== null) {
-                $attribute = $this->nameConverter->normalize($attribute, $class, $format, $context);
+                $attribute = $this->nameConverter->normalize($attribute, $class, $format, $attributeContext);
             }
 
-            $data[$attribute] = $attributeValue;
+            $this->setValue($data, $attribute, $attributeValue, $attributeContext);
         }
 
         $this->currentContext = [];
@@ -254,11 +262,11 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
 
             $attributeContext = $this->getAttributeDenormalizationContext($class, $attribute, $context);
 
-            $value = $this->fetchValue($normalizedAttribute, $data, $context);
+            $value = $this->fetchValue($data, $normalizedAttribute, $attributeContext);
             $value = $this->applyCallbacks($value, $class, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
-                $path = trim($this->getConversionRootPath($context), '/').'/'.$attribute;
+                $path = trim($this->getConversionRootPath($attributeContext), '/').'/'.$attribute;
 
                 try {
                     $value = $converter->denormalize($value, $object, $path, $attribute, $data);
@@ -411,20 +419,33 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      */
     protected function getAttributeValue(object $object, string $attribute, string $format = null, array $context = [])
     {
-        return $object->get($attribute);
+        $operation = $this->getAccess($attribute, $context, self::ACCESS_READ);
+
+        return $operation->execute($object);
     }
 
     protected function setAttributeValue(object $object, string $attribute, $value, string $format = null, array $context = []): void
     {
-        $object->set($attribute, $value);
+        $operation = $this->getAccess($attribute, $context, self::ACCESS_WRITE);
+
+        $operation->execute($object, $value);
     }
 
     /**
      * @return mixed
      */
-    protected function fetchValue(string $attribute, array $data, array $context)
+    protected function fetchValue(array $data, string $attribute, array $context)
     {
-        return $data[$attribute] ?? null;
+        $operation = $this->getAccess($attribute, $context, self::ACCESS_READ);
+
+        return $operation->execute($data);
+    }
+
+    protected function setValue(array &$data, string $attribute, mixed $value, array $context = []): void
+    {
+        $operation = $this->getAccess($attribute, $context, self::ACCESS_WRITE);
+
+        $operation->execute($data, $value);
     }
 
     protected function getConverter(string $attribute, array $context): ?AttributeConverter
@@ -450,6 +471,21 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
     protected function getMaxDepthHandler(array $context): ?callable
     {
         return $context[self::MAX_DEPTH_HANDLER] ?? $this->defaultContext[self::MAX_DEPTH_HANDLER] ?? null;
+    }
+
+    protected function getAccess(string $attribute, array $context, string $access): AccessOperation
+    {
+        $operation = $context[self::PROPERTY_ACCESSORS][$attribute] ??
+            $this->defaultContext[self::PROPERTY_ACCESSORS][$attribute] ??
+            new AccessOperation([$attribute], $access === self::ACCESS_READ ? AccessOperation::GET : AccessOperation::SET);
+
+        $isOperation = 'is'.ucfirst($access).'Operation';
+
+        if (!AccessOperation::$isOperation($operation)) {
+            throw new \LogicException(sprintf('Access must be %s-operation.', $access));
+        }
+
+        return $operation;
     }
 
     protected function isMaxDepthReached(array $attributesMetadata, string $class, string $attribute, array &$context): bool
@@ -498,19 +534,29 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
         $this->validateCallbackContext($context);
 
         if (isset($context[self::MAX_DEPTH_HANDLER]) && !\is_callable($context[self::MAX_DEPTH_HANDLER])) {
-            throw new \InvalidArgumentException(sprintf("Context option '%s' must be callable", self::MAX_DEPTH_HANDLER));
+            throw new \InvalidArgumentException(sprintf("Context option '%s' must be callable.", self::MAX_DEPTH_HANDLER));
         }
 
         if (isset($context[self::CONVERTERS])) {
             if (!\is_array($context[self::CONVERTERS])) {
-                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of converters", self::CONVERTERS));
+                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of converters.", self::CONVERTERS));
             }
 
             foreach ($context[self::CONVERTERS] as $attribute => $converter) {
-                if (!\is_object($converter) || !($converter instanceof AttributeConverter)) {
-                    $type = \is_object($converter) ? get_class($converter) : gettype($converter);
+                if (!$converter instanceof AttributeConverter) {
+                    throw new \InvalidArgumentException(sprintf("Converter for attribute '%s' must be %s. Got '%s'.", $attribute, AttributeConverter::class, Type::getDebugType($converter)));
+                }
+            }
+        }
 
-                    throw new \InvalidArgumentException(sprintf("Converter for attribute '%s' must be %s. Got %s", $attribute, AttributeConverter::class, $type));
+        if (isset($context[self::PROPERTY_ACCESSORS])) {
+            if (!is_array($context[self::PROPERTY_ACCESSORS])) {
+                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of '%s'.", self::PROPERTY_ACCESSORS, AccessOperation::class));
+            }
+
+            foreach ($context[self::PROPERTY_ACCESSORS] as $attribute => $access) {
+                if (!$access instanceof AccessOperation) {
+                    throw new \InvalidArgumentException(sprintf("Accessor for attribute '%s' must be %s. Got '%s'.", $attribute, AccessOperation::class, Type::getDebugType($access)));
                 }
             }
         }
