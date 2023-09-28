@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Dustin\ImpEx\PropertyAccess\Operation;
 
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidOperationException;
+use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\PropertyAccess\PropertyAccessor;
 
 class AccessOperation
@@ -36,7 +37,7 @@ class AccessOperation
     private $flags = [];
 
     public function __construct(
-        private string $path,
+        private string|array|Path $path,
         private string $operation,
         string ...$flags
     ) {
@@ -75,7 +76,7 @@ class AccessOperation
         throw new InvalidOperationException($this->operation);
     }
 
-    public function getPath(): string
+    public function getPath(): string|array|Path
     {
         return $this->path;
     }

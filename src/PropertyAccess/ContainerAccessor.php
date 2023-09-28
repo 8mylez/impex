@@ -104,6 +104,8 @@ class ContainerAccessor extends Accessor
             if ($context->hasFlag(AccessContext::STRICT)) {
                 throw new PropertyNotFoundException($context->getPath());
             }
+
+            return;
         }
 
         static::set($field, $value, $data, $context);

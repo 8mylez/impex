@@ -6,9 +6,8 @@ namespace Dustin\ImpEx\PropertyAccess;
 
 class Access
 {
-    public function __construct(
-        private \Closure $callback
-    ) {
+    public function __construct(private \Closure $callback)
+    {
     }
 
     public function access(string|array|int|Path $path, mixed &$data, mixed $value = null, AccessContext $context): mixed

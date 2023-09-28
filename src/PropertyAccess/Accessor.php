@@ -33,38 +33,18 @@ abstract class Accessor
     {
         switch ($context->getOperation()) {
             case AccessOperation::GET:
-                if (!$this->supports(AccessOperation::GET, $data)) {
-                    throw new OperationNotSupportedException(AccessOperation::GET);
-                }
-
                 return $this->getValue($field, $data, $context);
 
             case AccessOperation::SET:
-                if (!$this->supports(AccessOperation::SET, $data)) {
-                    throw new OperationNotSupportedException(AccessOperation::SET);
-                }
-
                 return $this->setValue($field, $value, $data, $context);
 
             case AccessOperation::PUSH:
-                if (!$this->supports(AccessOperation::PUSH, $data)) {
-                    throw new OperationNotSupportedException(AccessOperation::PUSH);
-                }
-
                 return $this->pushValue($value, $data, $context);
 
             case AccessOperation::MERGE:
-                if (!$this->supports(AccessOperation::MERGE, $data)) {
-                    throw new OperationNotSupportedException(AccessOperation::MERGE);
-                }
-
                 return $this->mergeValue($value, $data, $context);
 
             case AccessOperation::COLLECT:
-                if (!$this->supports(AccessOperation::COLLECT, $data)) {
-                    throw new OperationNotSupportedException(AccessOperation::COLLECT);
-                }
-
                 return $this->collectValues($data, $context);
         }
 
@@ -73,26 +53,26 @@ abstract class Accessor
 
     protected function getValue(int|string $field, mixed $value, AccessContext $context): mixed
     {
-        throw new \RuntimeException(sprintf('%s::getValue is not implemented.', get_class($this)));
+        throw new OperationNotSupportedException(AccessOperation::GET);
     }
 
     protected function setValue(int|string $field, mixed $value, mixed &$data, AccessContext $context): void
     {
-        throw new \RuntimeException(sprintf('%s::setValue is not implemented.', get_class($this)));
+        throw new OperationNotSupportedException(AccessOperation::SET);
     }
 
     protected function pushValue(mixed $value, mixed &$data, AccessContext $context): void
     {
-        throw new \RuntimeException(sprintf('%s::pushValue is not implemented.', get_class($this)));
+        throw new OperationNotSupportedException(AccessOperation::PUSH);
     }
 
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
-        throw new \RuntimeException(sprintf('%s::mergeValue is not implemented.', get_class($this)));
+        throw new OperationNotSupportedException(AccessOperation::MERGE);
     }
 
     protected function collectValues(mixed &$data, AccessContext $context): array
     {
-        throw new \RuntimeException(sprintf('%s::collectValues is not implemented.', get_class($this)));
+        throw new OperationNotSupportedException(AccessOperation::COLLECT);
     }
 }
