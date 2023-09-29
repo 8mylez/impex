@@ -19,14 +19,48 @@ abstract class Accessor
             throw InvalidDataException::notMergable($data);
         }
 
-        foreach ($data as $key => $value) {
-            yield $key => $value;
+        if (is_iterable($data)) {
+            foreach ($data as $key => $value) {
+                yield $key => $value;
+            }
+
+            return;
+        }
+
+        $reflectionObject = new \ReflectionObject($data);
+
+        foreach ($reflectionObject->getProperties() as $reflectionProperty) {
+            if ($reflectionProperty->isStatic()) {
+                continue;
+            }
+
+            $name = $reflectionProperty->getName();
+            $getterMethodName = 'get'.\ucfirst($name);
+
+            if (
+                $reflectionObject->hasMethod($getterMethodName) &&
+                !$reflectionObject->getMethod($getterMethodName)->isStatic()
+            ) {
+                yield $name => $data->$getterMethodName();
+
+                continue;
+            }
+
+            $reflectionProperty->setAccessible(true);
+
+            if ($reflectionProperty->hasType() && !$reflectionProperty->isInitialized($data)) {
+                yield $name => null;
+
+                continue;
+            }
+
+            yield $name => $reflectionProperty->getValue($data);
         }
     }
 
     protected static function isMergable(mixed $data): bool
     {
-        return is_iterable($data);
+        return is_iterable($data) || is_object($data);
     }
 
     public function access(int|string|null $field, mixed &$data, mixed $value, AccessContext $context): mixed
