@@ -236,15 +236,14 @@ final class PropertyAccessor
             }
 
             foreach ($pointer as $index => $item) {
-                $itemPath = $currentPath->copy()->add((string) $index);
-
                 if (empty($path)) {
+                    $itemPath = $context->getPath()->merge($currentPath)->add((string) $index);
                     $result[(string) $itemPath] = $item;
 
                     continue;
                 }
 
-                $subContext = $context->subContext(AccessOperation::COLLECT, $itemPath)->removeFlag(AccessContext::COLLECT_NESTED);
+                $subContext = $context->subContext(AccessOperation::COLLECT, $currentPath->copy()->add((string) $index))->removeFlag(AccessContext::COLLECT_NESTED);
                 $itemResult = static::collectValues(new Path($path), $item, $subContext);
 
                 $result = array_merge($result, $itemResult);
