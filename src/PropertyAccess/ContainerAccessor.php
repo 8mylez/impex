@@ -66,7 +66,11 @@ class ContainerAccessor extends Accessor
                 $context->subContext(AccessOperation::MERGE, new Path([$key]))->access([], $dataValue, $valueToMerge);
                 static::set($key, $dataValue, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
             } else {
-                static::set($key, $valueToMerge, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
+                if ($context->hasFlag(ArrayAccessor::MERGE_OVERWRITE_NUMERIC)) {
+                    static::set($key, $valueToMerge, $data, $context->subContext(AccessOperation::SET, new Path([$key])));
+                } else {
+                    static::push($valueToMerge, $data);
+                }
             }
         }
     }
