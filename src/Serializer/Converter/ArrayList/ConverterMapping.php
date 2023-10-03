@@ -2,9 +2,10 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
@@ -23,73 +24,75 @@ class ConverterMapping extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function setConverter(string $field, ?AttributeConverter $converter)
+    public function setConverter(int|string $field, ?AttributeConverter $converter)
     {
         $this->converters[$field] = $converter;
     }
 
-    public function getConverter(string $field): ?AttributeConverter
+    public function getConverter(int|string $field): ?AttributeConverter
     {
         return $this->converters[$field] ?? null;
     }
 
-    public function normalize($data, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $data, ConversionContext $context): array|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $data === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $data === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $data = ArrayUtil::cast($data);
         }
 
-        $this->validateType($data, Type::ARRAY, $path, $object->toArray());
+        $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = [];
 
-        foreach ($data as $name => $value) {
-            $converter = $this->getConverter($name);
+        foreach ($data as $key => $value) {
+            $converter = $this->getConverter($key);
+
             try {
-                $converted[$name] = $converter !== null ? $converter->normalize($value, $object, $path.'/'.$name, $attributeName) : $value;
+                $converted[$key] = $converter !== null ? $converter->normalize($value, $context->subContext(new Path([$key]))) : $value;
             } catch (AttributeConversionException $e) {
                 $exceptions[] = $e;
             }
         }
 
         if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($path, $object->toArray(), ...$exceptions);
+            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
         }
 
         return $converted;
     }
 
-    public function denormalize($data, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $data, ConversionContext $context): array|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $data === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $data === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $data = ArrayUtil::cast($data);
         }
 
-        $this->validateType($data, Type::ARRAY, $path, $normalizedData);
+        $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = [];
 
-        foreach ($data as $name => $value) {
-            $converter = $this->getConverter($name);
+        foreach ($data as $key => $value) {
+            $converter = $this->getConverter($key);
+
             try {
-                $converted[$name] = $converter !== null ? $converter->denormalize($value, $object, $path.'/'.$name, $attributeName, $normalizedData) : $value;
+                $converted[$key] = $converter !== null ? $converter->denormalize($value, $context->subContext(new Path([$key]))) : $value;
             } catch (AttributeConversionException $e) {
                 $exceptions[] = $e;
             }
         }
 
         if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($path, $normalizedData, ...$exceptions);
+            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
         }
 
         return $converted;

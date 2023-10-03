@@ -2,8 +2,9 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
@@ -16,58 +17,58 @@ class ConcatConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): array|string|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if ($this->hasFlag(self::REVERSE)) {
-            if (!$this->hasFlag(self::STRICT)) {
-                $this->validateStringConvertable($value, $path, $object->toArray());
+        if ($this->hasFlags(self::REVERSE)) {
+            if (!$this->hasFlags(self::STRICT)) {
+                $this->validateStringConvertable($value, $context);
 
                 $value = (string) $value;
             }
 
-            $this->validateType($value, Type::STRING, $path, $object->toArray());
+            $this->validateType($value, Type::STRING, $context);
 
             return $this->explode($value);
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $value = ArrayUtil::cast($value);
         }
 
-        $this->validateType($value, Type::ARRAY, $path, $object->toArray());
-        $this->validateStrings($value, $path, $object->toArray());
+        $this->validateType($value, Type::ARRAY, $context);
+        $this->validateStrings($value, $context);
 
         return $this->implode($value);
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $value, ConversionContext $context): array|string|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if ($this->hasFlag(self::REVERSE)) {
-            if (!$this->hasFlag(self::STRICT)) {
+        if ($this->hasFlags(self::REVERSE)) {
+            if (!$this->hasFlags(self::STRICT)) {
                 $value = ArrayUtil::cast($value);
             }
 
-            $this->validateType($value, Type::ARRAY, $path, $normalizedData);
-            $this->validateStrings($value, $path, $normalizedData);
+            $this->validateType($value, Type::ARRAY, $context);
+            $this->validateStrings($value, $context);
 
             return $this->implode($value);
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
-            $this->validateStringConvertable($value, $path, $normalizedData);
+        if (!$this->hasFlags(self::STRICT)) {
+            $this->validateStringConvertable($value, $context);
 
             $value = (string) $value;
         }
 
-        $this->validateType($value, Type::STRING, $path, $normalizedData);
+        $this->validateType($value, Type::STRING, $context);
 
         return $this->explode($value);
     }
@@ -82,21 +83,20 @@ class ConcatConverter extends BidirectionalConverter
         return implode($this->separator, $value);
     }
 
-    private function validateStrings(array $strings, string $path, array $data): void
+    private function validateStrings(array $strings, ConversionContext $context): void
     {
         $exceptions = [];
 
         foreach ($strings as $key => $v) {
-            $subPath = $path.'/'.$key;
             try {
-                $this->validateStringConvertable($v, $subPath, $data);
+                $this->validateStringConvertable($v, $context->subContext(new Path([$key])));
             } catch (AttributeConversionException $e) {
                 $exceptions[] = $e;
             }
         }
 
         if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($path, $data, ...$exceptions);
+            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
         }
     }
 }

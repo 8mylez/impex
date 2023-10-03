@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 use Dustin\ImpEx\Util\Type;
 
@@ -19,21 +19,21 @@ class Formatter extends UnidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
+    public function convert(mixed $value, ConversionContext $context): string|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
         $type = Type::getType($value);
 
-        if (!$this->hasFlag(self::STRICT) && !Type::isNumericType($type)) {
-            $this->validateNumericConvertable($value, $path, $data ?? $object->toArray());
+        if (!$this->hasFlags(self::STRICT) && !Type::isNumericType($type)) {
+            $this->validateNumericConvertable($value, $context);
 
             $value = $this->convertToNumeric($value);
         }
 
-        $this->validateType($value, Type::NUMERIC, $path, $data ?? $object->toArray());
+        $this->validateType($value, Type::NUMERIC, $context);
 
         return $this->formatNumber($value);
     }

@@ -2,9 +2,9 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 abstract class Condition
 {
-    abstract public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool;
+    abstract public function isFullfilled(mixed $value, ConversionContext $context): bool;
 }

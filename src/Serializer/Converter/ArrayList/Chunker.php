@@ -2,8 +2,9 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Serializer\Exception\InvalidArrayException;
@@ -26,20 +27,20 @@ class Chunker extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): array|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return $value;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $value = ArrayUtil::cast($value);
         }
 
-        $this->validateType($value, Type::ARRAY, $path, $object->toArray());
+        $this->validateType($value, Type::ARRAY, $context);
 
-        if ($this->hasFlag(self::REVERSE)) {
-            $this->validateArrays($value, $path, $object->toArray());
+        if ($this->hasFlags(self::REVERSE)) {
+            $this->validateArrays($value, $context);
 
             return $this->merge(...$value);
         }
@@ -47,23 +48,23 @@ class Chunker extends BidirectionalConverter
         return $this->chunk($value);
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
+    public function denormalize(mixed $value, ConversionContext $context): array|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $value = ArrayUtil::cast($value);
         }
 
-        $this->validateType($value, Type::ARRAY, $path, $data);
+        $this->validateType($value, Type::ARRAY, $context);
 
-        if ($this->hasFlag(self::REVERSE)) {
+        if ($this->hasFlags(self::REVERSE)) {
             return $this->chunk($value);
         }
 
-        $this->validateArrays($value, $path, $data);
+        $this->validateArrays($value, $context);
 
         return $this->merge(...$value);
     }
@@ -78,19 +79,20 @@ class Chunker extends BidirectionalConverter
         return array_merge(...$arrays);
     }
 
-    private function validateArrays(array $arrays, string $path, array $data): void
+    private function validateArrays(array $arrays, ConversionContext $context): void
     {
         $exceptions = [];
         $i = 0;
 
         foreach ($arrays as $key => $value) {
-            $subPath = $path.'/'.$key;
+            $subContext = $context->subContext(new Path([$key]));
+
             ++$i;
             try {
-                $this->validateType($value, Type::ARRAY, $subPath, $data);
+                $this->validateType($value, Type::ARRAY, $subContext);
 
-                if ($this->hasFlag(self::STRICT_CHUNK_SIZE)) {
-                    $this->validateChunkSize($value, $subPath, $data, $i === count($arrays));
+                if ($this->hasFlags(self::STRICT_CHUNK_SIZE)) {
+                    $this->validateChunkSize($value, $subContext, $i === count($arrays));
                 }
             } catch (AttributeConversionException $e) {
                 $exceptions[] = $e;
@@ -98,14 +100,14 @@ class Chunker extends BidirectionalConverter
         }
 
         if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($path, $data, ...$exceptions);
+            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
         }
     }
 
-    private function validateChunkSize(array $array, string $path, array $data, bool $isLast)
+    private function validateChunkSize(array $array, ConversionContext $context, bool $isLast): void
     {
         if (empty($array)) {
-            throw new InvalidArrayException($path, $data, 'Array must not be empty', []);
+            throw new InvalidArrayException($context->getPath(), $context->getRootData(), 'Array must not be empty', []);
         }
 
         $size = count($array);
@@ -114,7 +116,7 @@ class Chunker extends BidirectionalConverter
             ($isLast === false && $size !== $this->chunkSize) ||
             ($isLast === true && $size > $this->chunkSize)
         ) {
-            throw new InvalidArrayException($path, $data, 'Array size must match chunk size of {{ chunkSize }}. {{ elementCount }} elements found.', ['chunkSize' => $this->chunkSize, 'elementCount' => $size]);
+            throw new InvalidArrayException($context->getPath(), $context->getRootData(), 'Array size must match chunk size of {{ chunkSize }}. {{ elementCount }} elements found.', ['chunkSize' => $this->chunkSize, 'elementCount' => $size]);
         }
     }
 }

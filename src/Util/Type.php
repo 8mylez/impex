@@ -26,42 +26,26 @@ class Type
 
     public const NUMERIC = 'numeric';
 
+    private const DATA_TYPES = [
+        self::INT,
+        self::BOOL,
+        self::FLOAT,
+        self::STRING,
+        self::ARRAY,
+        self::OBJECT,
+        self::RESOURCE,
+        self::NULL,
+        self::CALLABLE,
+    ];
+
     public static function getType($value): string
     {
-        if (is_int($value)) {
-            return self::INT;
-        }
+        foreach (self::DATA_TYPES as $type) {
+            $isType = 'is_'.$type;
 
-        if (is_bool($value)) {
-            return self::BOOL;
-        }
-
-        if (is_float($value)) {
-            return self::FLOAT;
-        }
-
-        if (is_string($value)) {
-            return self::STRING;
-        }
-
-        if (is_array($value)) {
-            return self::ARRAY;
-        }
-
-        if (is_object($value)) {
-            return self::OBJECT;
-        }
-
-        if (is_resource($value)) {
-            return self::RESOURCE;
-        }
-
-        if (is_null($value)) {
-            return self::NULL;
-        }
-
-        if (is_callable($value)) {
-            return self::CALLABLE;
+            if ($isType($value)) {
+                return $type;
+            }
         }
 
         return self::UNKNOWN;

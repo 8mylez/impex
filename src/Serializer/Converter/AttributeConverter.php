@@ -2,7 +2,6 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
 use Dustin\ImpEx\Serializer\Exception\NumericConversionException;
 use Dustin\ImpEx\Serializer\Exception\StringConversionException;
@@ -37,32 +36,34 @@ abstract class AttributeConverter
     }
 
     /**
-     * @param mixed                  $value         The value to convert
-     * @param EncapsulationInterface $object        The encapsulation object to be normalized by a normalizer
-     * @param string                 $path          The full path of the current attribute in relation to the object to be normalized
-     * @param string                 $attributeName The name of the attribute or object property
-     *
-     * @return mixed
+     * @param mixed  $value         The value to convert
+     * @param object $object        The object to be normalized by a normalizer
+     * @param string $path          The full path of the current attribute in relation to the object to be normalized
+     * @param string $attributeName The name of the attribute or object property
      */
-    abstract public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName);
+    abstract public function normalize(mixed $value, ConversionContext $context): mixed;
 
     /**
-     * @param mixed                  $value          The value to converter
-     * @param EncapsulationInterface $object         The encapsulation object to be normalized by a normalizer
-     * @param string                 $path           The full path of the attribute in relation to the obejct to be normalized
-     * @param string                 $attributeName  The name of the attribute or object property
-     * @param array                  $normalizedData The data to be denormalized into an object
-     *
-     * @return mixed
+     * @param mixed  $value          The value to converter
+     * @param object $object         The object to be normalized by a normalizer
+     * @param string $path           The full path of the attribute in relation to the obejct to be normalized
+     * @param string $attributeName  The name of the attribute or object property
+     * @param array  $normalizedData The data to be denormalized into an object
      */
-    abstract public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData);
+    abstract public function denormalize(mixed $value, ConversionContext $context): mixed;
 
     /**
      * Checks wether a given flag is set or not.
      */
-    protected function hasFlag(string $flag): bool
+    protected function hasFlags(string ...$flags): bool
     {
-        return isset($this->flags[$flag]);
+        foreach ($flags as $flag) {
+            if (!isset($this->flags[$flag])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -89,10 +90,10 @@ abstract class AttributeConverter
      *
      * @throws InvalidTypeException Thrown if the value is not of the expected type
      */
-    protected function validateType($value, string $expectedType, string $path, array $data): void
+    protected function validateType(mixed $value, string $expectedType, ConversionContext $context): void
     {
         if (!Type::is($value, $expectedType)) {
-            throw new InvalidTypeException($path, $data, $expectedType, $value);
+            throw new InvalidTypeException($context->getPath(), $context->getRootData(), $expectedType, $value);
         }
     }
 
@@ -105,10 +106,10 @@ abstract class AttributeConverter
      *
      * @throws StringConversionException Thrown if the given value cannot be converted to a string (e.g. arrays or objects)
      */
-    protected function validateStringConvertable($value, string $path, array $data): void
+    protected function validateStringConvertable(mixed $value, ConversionContext $context): void
     {
         if (!Type::isStringConvertable(Type::getType($value))) {
-            throw new StringConversionException($value, $path, $data);
+            throw new StringConversionException($value, $context->getPath(), $context->getRootData());
         }
     }
 
@@ -121,10 +122,10 @@ abstract class AttributeConverter
      *
      * @throws NumericConversionException Thrown if the given value cannot be converted into a numeric value
      */
-    protected function validateNumericConvertable($value, string $path, array $data): void
+    protected function validateNumericConvertable(mixed $value, ConversionContext $context): void
     {
         if (!Type::isNumericConvertable(Type::getType($value))) {
-            throw new NumericConversionException($value, $path, $data);
+            throw new NumericConversionException($value, $context->getPath(), $context->getRootData());
         }
     }
 }

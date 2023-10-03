@@ -34,19 +34,19 @@ class EncapsulationConverter extends BidirectionalConverter
     }
 
     /**
-     * @param Encapsulated|null $value
+     * @param EncapsulationInterface|null $value
      *
      * @return array|null
      *
      * @throws \InvalidArgumentException
      */
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): array
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        $this->validateType($value, EncapsulationInterface::class, $path, $object->toArray());
+        $this->validateType($value, EncapsulationInterface::class, $context);
 
         return $value->toArray();
     }
@@ -58,18 +58,20 @@ class EncapsulationConverter extends BidirectionalConverter
      *
      * @throws InvalidTypeException
      */
-    public function denormalize($data, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $data, ConversionContext $context): AbstractEncapsulation
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $data === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $data === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $data = ArrayUtil::cast($data);
         }
 
-        $this->validateType($data, Type::ARRAY, $path, $normalizedData);
+        $this->validateType($data, Type::ARRAY, $context);
 
-        return new $this->encapsulationClass($data);
+        $class = $this->encapsulationClass;
+
+        return new $class($data);
     }
 }

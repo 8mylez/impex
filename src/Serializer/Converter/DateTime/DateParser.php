@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\DateTime;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\DateConversionException;
 use Dustin\ImpEx\Util\Type;
@@ -21,24 +21,24 @@ class DateParser extends UnidirectionalConverter
         return $date !== false ? $date : null;
     }
 
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
+    public function convert(mixed $value, ConversionContext $context): \DateTimeInterface|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
-            $this->validateStringConvertable($value, $path, $data ?? $object->toArray());
+        if (!$this->hasFlags(self::STRICT)) {
+            $this->validateStringConvertable($value, $context);
 
             $value = (string) $value;
         }
 
-        $this->validateType($value, Type::STRING, $path, $data ?? $object->toArray());
+        $this->validateType($value, Type::STRING, $context);
 
         $date = $this->createDateTime($value);
 
         if ($date === null) {
-            throw new DateConversionException($path, $data ?? $object->toArray(), "Could not create date from string '{{ dateTime }}'.", ['dateTime' => $value]);
+            throw new DateConversionException($context->getPath(), $context->getRootData(), "Could not create date from string '{{ dateTime }}'.", ['dateTime' => $value]);
         }
 
         return $date;

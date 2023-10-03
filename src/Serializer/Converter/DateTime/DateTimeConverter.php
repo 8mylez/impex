@@ -2,8 +2,8 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\DateTime;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class DateTimeConverter extends BidirectionalConverter
 {
@@ -19,19 +19,19 @@ class DateTimeConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): string|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        $this->validateType($value, \DateTimeInterface::class, $path, $object->toArray());
+        $this->validateType($value, \DateTimeInterface::class, $context);
 
         return $value->format($this->format);
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
+    public function denormalize(mixed $value, ConversionContext $context): \DateTimeInterface|null
     {
-        return $this->parser->convert($value, $object, $path, $attributeName, $data);
+        return $this->parser->convert($value, $context);
     }
 }

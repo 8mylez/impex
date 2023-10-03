@@ -2,8 +2,8 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class NumberConverter extends BidirectionalConverter
 {
@@ -29,17 +29,17 @@ class NumberConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): string|null|int|float
     {
-        return !$this->hasFlag(self::REVERSE) ?
-            $this->formatter->convert($value, $object, $path, $attributeName) :
-            $this->parser->convert($value, $object, $path, $attributeName);
+        return !$this->hasFlags(self::REVERSE) ?
+            $this->formatter->convert($value, $context) :
+            $this->parser->convert($value, $context);
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
+    public function denormalize(mixed $value, ConversionContext $context): string|null|int|float
     {
-        return !$this->hasFlag(self::REVERSE) ?
-            $this->parser->convert($value, $object, $path, $attributeName, $data) :
-            $this->formatter->convert($value, $object, $path, $attributeName, $data);
+        return !$this->hasFlags(self::REVERSE) ?
+            $this->parser->convert($value, $context) :
+            $this->formatter->convert($value, $context);
     }
 }

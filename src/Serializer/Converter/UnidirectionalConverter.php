@@ -2,8 +2,6 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\EncapsulationInterface;
-
 /**
  * Converts an attribute value in only one direction.
  *
@@ -13,21 +11,21 @@ use Dustin\Encapsulation\EncapsulationInterface;
 abstract class UnidirectionalConverter extends AttributeConverter
 {
     /**
-     * @param mixed                  $value          The value to convert
-     * @param EncapsulationInterface $object         The encapsulation object to be normalized by a normalizer
-     * @param string                 $path           The full path of the current attribute in relation to the object to be normalized
-     * @param string                 $attributeName  The name of the attribute or object property
-     * @param array|null             $normalizedData The origin data only available on denormalization
+     * @param mixed      $value          The value to convert
+     * @param object     $object         The encapsulation object to be normalized by a normalizer
+     * @param string     $path           The full path of the current attribute in relation to the object to be normalized
+     * @param string     $attributeName  The name of the attribute or object property
+     * @param array|null $normalizedData The origin data only available on denormalization
      */
-    abstract public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $normalizedData = null);
+    abstract public function convert(mixed $value, ConversionContext $context): mixed;
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): mixed
     {
-        return $this->convert($value, $object, $path, $attributeName);
+        return $this->convert($value, $context);
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $value, ConversionContext $context): mixed
     {
-        return $this->convert($value, $object, $path, $attributeName, $normalizedData);
+        return $this->convert($value, $context);
     }
 }

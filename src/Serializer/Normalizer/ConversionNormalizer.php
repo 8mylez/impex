@@ -3,8 +3,9 @@
 namespace Dustin\ImpEx\Serializer\Normalizer;
 
 use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
-use Dustin\ImpEx\Serializer\ContextProviderInterface;
+use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
@@ -21,7 +22,7 @@ use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
-class ConversionNormalizer extends AbstractNormalizer implements ContextProviderInterface
+class ConversionNormalizer extends AbstractNormalizer
 {
     public const ENABLE_MAX_DEPTH = 'enable_max_depth';
 
@@ -37,7 +38,7 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
 
     public const CONVERTERS = 'converters';
 
-    public const CONVERSION_ROOT_PATH = 'conversion_root_path';
+    public const CONVERSION_CONTEXT = 'conversion_context';
 
     public const PROPERTY_ACCESSORS = 'property_accessors';
 
@@ -51,8 +52,6 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
     protected \Closure $objectClassResolver;
 
     protected ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver;
-
-    protected array $currentContext = [];
 
     public function __construct(
         ?ClassMetadataFactoryInterface $classMetadataFactory = null,
@@ -77,11 +76,6 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
         $this->objectClassResolver = $objectClassResolver;
     }
 
-    public function getContext(): array
-    {
-        return $this->currentContext;
-    }
-
     public function supportsNormalization(mixed $data, ?string $format = null)
     {
         return is_object($data);
@@ -94,8 +88,6 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
     }
 
     /**
-     * @param object $object
-     *
      * @return array|\ArrayObject
      *
      * @throws \RuntimeException
@@ -108,11 +100,9 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
     public function normalize(mixed $object, string $format = null, array $context = [])
     {
         $this->validateContext($context);
-        $this->currentContext = $context;
 
         if ($this->isCircularReference($object, $context)) {
             $result = $this->handleCircularReference($object, $format, $context);
-            $this->currentContext = [];
 
             return $result;
         }
@@ -143,10 +133,10 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
             $attributeValue = $this->applyCallbacks($attributeValue, $object, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
-                $path = trim($this->getConversionRootPath($context), '/').'/'.$attribute;
+                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::NORMALIZATION, $object, null, $attributeContext);
 
                 try {
-                    $attributeValue = $converter->normalize($attributeValue, $object, $path, $attribute);
+                    $attributeValue = $converter->normalize($attributeValue, $conversionContext);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
                     continue;
@@ -173,10 +163,10 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
             $this->setValue($data, $attribute, $attributeValue, $attributeContext);
         }
 
-        $this->currentContext = [];
-
         if (count($conversionExceptions) > 0) {
-            throw new AttributeConversionExceptionStack(trim($this->getConversionRootPath($context), '/'), $object->toArray(), ...$conversionExceptions);
+            $conversionContext = $this->getConversionContext($context);
+
+            throw new AttributeConversionExceptionStack($conversionContext?->getPath() ?? '', $conversionContext?->getRootData() ?? Value::normalize($object), ...$conversionExceptions);
         }
 
         if ($this->preserveEmptyObjects($context) && empty($data)) {
@@ -198,7 +188,6 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
     public function denormalize(mixed $data, string $type, string $format = null, array $context = [])
     {
         $this->validateContext($context);
-        $this->currentContext = $context;
 
         $data = $this->prepareForDenormalization($data);
 
@@ -229,10 +218,10 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
             $value = $this->applyCallbacks($value, $class, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
-                $path = trim($this->getConversionRootPath($attributeContext), '/').'/'.$attribute;
+                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::DENORMALIZATION, $object, $data, $attributeContext);
 
                 try {
-                    $value = $converter->denormalize($value, $object, $path, $attribute, $data);
+                    $value = $converter->denormalize($value, $conversionContext);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
                     continue;
@@ -255,10 +244,10 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
             $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
         }
 
-        $this->currentContext = [];
-
         if (count($conversionExceptions) > 0) {
-            throw new AttributeConversionExceptionStack(trim($this->getConversionRootPath($context), '/'), $data, ...$conversionExceptions);
+            $conversionContext = $this->getConversionContext($context);
+
+            throw new AttributeConversionExceptionStack($conversionContext?->getPath() ?? '', $conversionContext?->getRootData() ?? $data, ...$conversionExceptions);
         }
 
         return $object;
@@ -336,8 +325,12 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
     protected function instantiateObject(array &$data, string $class, array &$context, \ReflectionClass $reflectionClass, array|bool $allowedAttributes, string $format = null)
     {
         if (($object = $this->extractObjectToPopulate($class, $context, self::OBJECT_TO_POPULATE)) !== null) {
+            unset($context[self::OBJECT_TO_POPULATE]);
+
             return $object;
         }
+
+        unset($context[self::OBJECT_TO_POPULATE]);
 
         if ($this->classDiscriminatorResolver && $mapping = $this->classDiscriminatorResolver->getMappingForClass($class)) {
             if (!isset($data[$mapping->getTypeProperty()])) {
@@ -486,9 +479,27 @@ class ConversionNormalizer extends AbstractNormalizer implements ContextProvider
         return $context[self::DEEP_OBJECT_TO_POPULATE] ?? $this->defaultContext[self::DEEP_OBJECT_TO_POPULATE] ?? false;
     }
 
-    protected function getConversionRootPath(array $context): string
+    protected function createAttributeConversionContext(string $attribute, string $direction, object $object, ?array $normalizedData, array $context): ConversionContext
     {
-        return $context[self::CONVERSION_ROOT_PATH] ?? $this->defaultContext[self::CONVERSION_ROOT_PATH] ?? '';
+        $conversionContext = $this->getConversionContext($context);
+
+        if ($conversionContext !== null) {
+            return $conversionContext->subContext(new Path([$attribute]));
+        }
+
+        return new ConversionContext(
+            $object,
+            new Path([$attribute]),
+            $attribute,
+            $direction,
+            $normalizedData,
+            $context
+        );
+    }
+
+    protected function getConversionContext(array $context): ?ConversionContext
+    {
+        return $context[self::CONVERSION_CONTEXT] ?? null;
     }
 
     private function validateContext(array $context)
