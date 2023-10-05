@@ -29,7 +29,7 @@ class NormalizerConverter extends BidirectionalConverter
         }
 
         $normalizationContext = $context->getNormalizationContext();
-        $normalizationContext[ConversionNormalizer::CONVERSION_ROOT_PATH] = (string) $context->getPath();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
             return $this->normalizer->normalize($value, $this->format, $normalizationContext);
@@ -49,7 +49,7 @@ class NormalizerConverter extends BidirectionalConverter
         }
 
         $normalizationContext = $context->getNormalizationContext();
-        $normalizationContext[ConversionNormalizer::CONVERSION_ROOT_PATH] = (string) $context->getPath();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
             return $this->denormalizer->denormalize($value, $this->type, $this->format, $normalizationContext);

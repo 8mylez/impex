@@ -27,7 +27,7 @@ class SerializerConverter extends BidirectionalConverter
         }
 
         $normalizationContext = $context->getNormalizationContext();
-        $normalizationContext[ConversionNormalizer::CONVERSION_ROOT_PATH] = (string) $context->getPath();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
             return $this->serializer->serialize($value, $this->format, $normalizationContext);
@@ -47,7 +47,7 @@ class SerializerConverter extends BidirectionalConverter
         }
 
         $normalizationContext = $context->getNormalizationContext();
-        $normalizationContext[ConversionNormalizer::CONVERSION_ROOT_PATH] = (string) $context->getPath();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
             return $this->serializer->deserialize($value, $this->type, $this->format, $normalizationContext);

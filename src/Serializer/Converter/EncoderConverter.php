@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
+use Dustin\ImpEx\Serializer\Normalizer\ConversionNormalizer;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
 
@@ -22,7 +23,10 @@ class EncoderConverter extends BidirectionalConverter
             return null;
         }
 
-        return $this->encoder->encode($value, $this->format, $context->getNormalizationContext());
+        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
+
+        return $this->encoder->encode($value, $this->format, $normalizationContext);
     }
 
     public function denormalize(mixed $value, ConversionContext $context): mixed
@@ -31,6 +35,9 @@ class EncoderConverter extends BidirectionalConverter
             return null;
         }
 
-        return $this->decoder->decode($value, $this->format, $context->getNormalizationContext());
+        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
+
+        return $this->decoder->decode($value, $this->format, $normalizationContext);
     }
 }
