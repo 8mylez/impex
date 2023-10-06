@@ -1,0 +1,83 @@
+[
+    {
+        "input": [[1,2], [3,4]],
+        "expected": [1,2,3,4],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": 123,
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["strict"]
+        }
+    }, {
+        "input": [1,2,3,4],
+        "expected": [[1,2], [3,4]],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["reverse"]
+        }
+    }, {
+        "input": [[1,2], [3,4,5]],
+        "expected": [1,2,3,4,5],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": []
+        }
+    }, {
+        "input": [[1,2], [3,4]],
+        "expected": [1,2,3,4],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["strict_chunk_size"]
+        }
+    }, {
+        "input": [[1,2], [3]],
+        "expected": [1,2,3],
+        "strict": null,
+        "exception": null,
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["strict_chunk_size"]
+        }
+    }, {
+        "input": [[1,2], [3,4,5]],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionExceptionStack",
+        "constructorParams": {
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": ["strict_chunk_size"]
+        }
+    }
+]
