@@ -1,0 +1,30 @@
+[
+    {
+        "input": "date|2023-05-04 04:05:33",
+        "expected": "04.05.2023 04:05:33",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "format": "d.m.Y H:i:s",
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "format": "d.m.Y H:i:s",
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "dateTime",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "format": "d.m.Y H:i:s",
+            "flags": []
+        }
+    }
+]
