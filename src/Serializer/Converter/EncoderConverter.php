@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
+use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Normalizer\ConversionNormalizer;
 use Symfony\Component\Serializer\Encoder\DecoderInterface;
 use Symfony\Component\Serializer\Encoder\EncoderInterface;
@@ -12,6 +13,7 @@ class EncoderConverter extends BidirectionalConverter
         private EncoderInterface $encoder,
         private DecoderInterface $decoder,
         private string $format,
+        private ?ContextProviderInterface $contextProvider = null,
         string ...$flags
     ) {
         parent::__construct(...$flags);
@@ -23,7 +25,7 @@ class EncoderConverter extends BidirectionalConverter
             return null;
         }
 
-        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
         $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         return $this->encoder->encode($value, $this->format, $normalizationContext);
@@ -35,7 +37,7 @@ class EncoderConverter extends BidirectionalConverter
             return null;
         }
 
-        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
         $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         return $this->decoder->decode($value, $this->format, $normalizationContext);

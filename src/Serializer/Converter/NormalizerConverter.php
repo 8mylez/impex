@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
+use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Exception\SerializationConversionException;
 use Dustin\ImpEx\Serializer\Normalizer\ConversionNormalizer;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
@@ -17,6 +18,7 @@ class NormalizerConverter extends BidirectionalConverter
         private DenormalizerInterface $denormalizer,
         private string $type,
         private ?string $format = null,
+        private ?ContextProviderInterface $contextProvider = null,
         string ...$flags
     ) {
         parent::__construct(...$flags);
@@ -28,7 +30,7 @@ class NormalizerConverter extends BidirectionalConverter
             return null;
         }
 
-        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
         $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
@@ -48,7 +50,7 @@ class NormalizerConverter extends BidirectionalConverter
             return null;
         }
 
-        $normalizationContext = $context->getNormalizationContext();
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
         $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
