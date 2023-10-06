@@ -36,11 +36,9 @@ class EncapsulationConverter extends BidirectionalConverter
     /**
      * @param EncapsulationInterface|null $value
      *
-     * @return array|null
-     *
-     * @throws \InvalidArgumentException
+     * @throws InvalidTypeException
      */
-    public function normalize(mixed $value, ConversionContext $context): array
+    public function normalize(mixed $value, ConversionContext $context): array|null
     {
         if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
@@ -54,11 +52,9 @@ class EncapsulationConverter extends BidirectionalConverter
     /**
      * @param array|null $data
      *
-     * @return AbstractEncapsulation|null
-     *
      * @throws InvalidTypeException
      */
-    public function denormalize(mixed $data, ConversionContext $context): AbstractEncapsulation
+    public function denormalize(mixed $data, ConversionContext $context): AbstractEncapsulation|null
     {
         if ($this->hasFlags(self::SKIP_NULL) && $data === null) {
             return null;
