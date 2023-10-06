@@ -2,12 +2,12 @@
 
 namespace Dustin\ImpEx\Test\Converter;
 
-use Dustin\ImpEx\PropertyAccess\Path;
-use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use PHPUnit\Framework\TestCase;
 
 abstract class ConverterTestCase extends TestCase
 {
+    use CreateContextTrait;
+
     protected static function createDataFromFile(string $baseFileName): array
     {
         $jsonFile = \dirname((new \ReflectionClass(static::class))->getFileName()).'/'.$baseFileName;
@@ -33,18 +33,6 @@ abstract class ConverterTestCase extends TestCase
                 $testData['constructorParams'][$key] = static::modify($param);
             }
         }
-    }
-
-    protected function createConversionContext(string $direction): ConversionContext
-    {
-        return new ConversionContext(
-            new \stdClass(),
-            new Path(['someAttribute']),
-            'someAttribute',
-            $direction,
-            [],
-            []
-        );
     }
 
     protected static function modify(mixed $value): mixed
