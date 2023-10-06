@@ -8,9 +8,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 abstract class BidirectionalConverterTestCase extends ConverterTestCase
 {
-    abstract public static function normalizeProvider(): array;
+    public static function normalizeProvider(): array
+    {
+        return static::createDataFromFile('normalize.json');
+    }
 
-    abstract public static function denormalizeProvider(): array;
+    public static function denormalizeProvider(): array
+    {
+        return static::createDataFromFile('denormalize.json');
+    }
 
     abstract protected function instantiateConverter(array $params = []): BidirectionalConverter;
 
@@ -30,9 +36,9 @@ abstract class BidirectionalConverterTestCase extends ConverterTestCase
         $result = $converter->normalize($input, $context);
 
         if (boolval($strict) === true) {
-            $this->assertSame($result, $expected);
+            $this->assertSame($expected, $result);
         } else {
-            $this->assertEquals($result, $expected);
+            $this->assertEquals($expected, $result);
         }
     }
 
@@ -52,9 +58,9 @@ abstract class BidirectionalConverterTestCase extends ConverterTestCase
         $result = $converter->denormalize($input, $context);
 
         if (boolval($strict) === true) {
-            $this->assertSame($result, $expected);
+            $this->assertSame($expected, $result);
         } else {
-            $this->assertEquals($result, $expected);
+            $this->assertEquals($expected, $result);
         }
     }
 }

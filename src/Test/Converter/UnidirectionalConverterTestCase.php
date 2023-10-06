@@ -8,12 +8,15 @@ use PHPUnit\Framework\Attributes\DataProvider;
 
 abstract class UnidirectionalConverterTestCase extends ConverterTestCase
 {
-    abstract public static function convertProvider(): array;
+    public static function convertProvider(): array
+    {
+        return static::createDataFromFile('data.json');
+    }
 
     abstract protected function instantiateConverter(array $params = []): UnidirectionalConverter;
 
     #[DataProvider('convertProvider')]
-    public function testConvert(mixed $input, mixed $expectedResult, ?bool $strict = true, ?string $exception = null, array $constructorParams = [])
+    public function testConvert(mixed $input, mixed $expected, ?bool $strict = true, ?string $exception = null, array $constructorParams = [])
     {
         $converter = $this->instantiateConverter($constructorParams);
         $context = $this->createConversionContext(ConversionContext::NORMALIZATION);
@@ -28,9 +31,9 @@ abstract class UnidirectionalConverterTestCase extends ConverterTestCase
         $result = $converter->convert($input, $context);
 
         if (boolval($strict) === true) {
-            $this->assertSame($result, $expectedResult);
+            $this->assertSame($expected, $result);
         } else {
-            $this->assertEquals($result, $expectedResult);
+            $this->assertEquals($expected, $result);
         }
     }
 }
