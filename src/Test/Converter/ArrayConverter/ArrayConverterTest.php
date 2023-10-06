@@ -1,9 +1,10 @@
 <?php
 
-namespace Dustin\ImpEx\Test\Converter;
+namespace Dustin\ImpEx\Test\Converter\ArrayConverter;
 
 use Dustin\ImpEx\Serializer\Converter\ArrayList\ArrayConverter;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
+use Dustin\ImpEx\Test\Converter\UnidirectionalConverterTestCase;
 
 class ArrayConverterTest extends UnidirectionalConverterTestCase
 {

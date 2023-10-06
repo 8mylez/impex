@@ -1,11 +1,12 @@
 <?php
 
-namespace Dustin\ImpEx\Test\Converter;
+namespace Dustin\ImpEx\Test\Converter\ConverterMapping;
 
 use Dustin\ImpEx\Serializer\Converter\ArrayList\ArrayConverter;
 use Dustin\ImpEx\Serializer\Converter\ArrayList\ConcatConverter;
 use Dustin\ImpEx\Serializer\Converter\ArrayList\ConverterMapping;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Test\Converter\BidirectionalConverterTestCase;
 
 class ConverterMappingTest extends BidirectionalConverterTestCase
 {

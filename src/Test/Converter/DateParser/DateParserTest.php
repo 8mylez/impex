@@ -1,9 +1,10 @@
 <?php
 
-namespace Dustin\ImpEx\Test\Converter;
+namespace Dustin\ImpEx\Test\Converter\DateParser;
 
 use Dustin\ImpEx\Serializer\Converter\DateTime\DateParser;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
+use Dustin\ImpEx\Test\Converter\UnidirectionalConverterTestCase;
 
 class DateParserTest extends UnidirectionalConverterTestCase
 {
