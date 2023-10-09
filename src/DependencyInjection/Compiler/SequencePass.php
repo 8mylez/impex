@@ -30,24 +30,35 @@ class SequencePass implements CompilerPassInterface
      */
     public function processSections(ContainerBuilder $container, Definition $registryDefinition): void
     {
-        /** @var array $taggedRecordHandlers */
-        $taggedRecordHandlers = $container->findTaggedServiceIds(self::TAG_SECTION);
+        /** @var array $taggedSections */
+        $taggedSections = $container->findTaggedServiceIds(self::TAG_SECTION);
 
-        foreach ($taggedRecordHandlers as $recordHandlerId => $tags) {
+        foreach ($taggedSections as $sectionId => $tags) {
             foreach ((array) $tags as $config) {
                 $config = (array) $config;
 
-                $this->validateTagAttributes($config, ['sequence', 'priority', 'id']);
+                $this->validateTagAttributes($config, ['id']);
+                $id = trim((string) $config['id']);
+
+                if (!$this->isInlineSectionRegister($config)) {
+                    $registryDefinition->addMethodCall('addSection', [
+                        $id,
+                        new Reference($sectionId),
+                    ]);
+
+                    continue;
+                }
+
+                $this->validateTagAttributes($config, ['id', 'sequence', 'priority']);
 
                 $priority = intval($config['priority']);
                 $sequence = trim((string) $config['sequence']);
-                $id = trim((string) $config['id']);
 
                 $registryDefinition->addMethodCall('registerSection', [
                     $id,
                     $sequence,
                     $priority,
-                    new Reference($recordHandlerId),
+                    new Reference($sectionId),
                 ]);
             }
         }
@@ -87,5 +98,16 @@ class SequencePass implements CompilerPassInterface
                 throw new EmptyTagAttributeException(self::TAG_SECTION, $attribute);
             }
         }
+    }
+
+    private function isInlineSectionRegister(array $data): bool
+    {
+        foreach (['id', 'sequence'] as $key) {
+            if (!array_key_exists($key, $data)) {
+                return false;
+            }
+        }
+
+        return true;
     }
 }
