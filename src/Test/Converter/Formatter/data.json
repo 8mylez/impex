@@ -1,0 +1,69 @@
+[
+    {
+        "input": 123.45,
+        "expected": "123.450",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "decimals": 3,
+            "flags": []
+        }
+    }, {
+        "input": 123456.7800,
+        "expected": "123.456,78",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "decimals": 2,
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "decimals": 2,
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "123",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "decimals": 2,
+            "flags": ["strict"]
+        }
+    }, {
+        "input": "123",
+        "expected": "123.000",
+        "strict": null,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "decimals": 3,
+            "flags": []
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\NumericConversionException",
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "decimals": 2,
+            "flags": []
+        }
+    }
+]
