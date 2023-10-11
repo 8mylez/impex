@@ -46,7 +46,10 @@ class ConversionNormalizer extends AbstractNormalizer
 
     public const ACCESS_WRITE = 'write';
 
-    protected \Closure $objectClassResolver;
+    /**
+     * @var callable
+     */
+    protected $objectClassResolver = null;
 
     protected ?ClassDiscriminatorResolverInterface $classDiscriminatorResolver;
 
