@@ -34,10 +34,10 @@ class AttributeConverterSequence extends BidirectionalConverter
     {
         $steps = 0;
         foreach ($this->converters as $key => $converter) {
-            $path = sprintf('[step#%s]', $steps++);
+            $path = sprintf('step#%s', $steps++);
 
             if (!is_int($key)) {
-                $path .= sprintf(':<%s>', $key);
+                $path .= sprintf('(%s)', $key);
             }
 
             $subContext = $context->subContext(new Path([$path]));
@@ -57,10 +57,10 @@ class AttributeConverterSequence extends BidirectionalConverter
 
         $steps = 0;
         foreach ($converters as $key => $converter) {
-            $path = sprintf('[step#%s]', $steps++);
+            $path = sprintf('step#%s', $steps++);
 
             if (!is_int($key)) {
-                $path .= sprintf(':<%s>', $key);
+                $path .= sprintf('(%s)', $key);
             }
 
             $subContext = $context->subContext(new Path([$path]));
