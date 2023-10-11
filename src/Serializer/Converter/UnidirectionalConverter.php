@@ -11,11 +11,7 @@ namespace Dustin\ImpEx\Serializer\Converter;
 abstract class UnidirectionalConverter extends AttributeConverter
 {
     /**
-     * @param mixed      $value          The value to convert
-     * @param object     $object         The encapsulation object to be normalized by a normalizer
-     * @param string     $path           The full path of the current attribute in relation to the object to be normalized
-     * @param string     $attributeName  The name of the attribute or object property
-     * @param array|null $normalizedData The origin data only available on denormalization
+     * @param mixed $value The value to convert
      */
     abstract public function convert(mixed $value, ConversionContext $context): mixed;
 

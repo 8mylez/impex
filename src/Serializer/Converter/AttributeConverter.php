@@ -35,21 +35,8 @@ abstract class AttributeConverter
         }
     }
 
-    /**
-     * @param mixed  $value         The value to convert
-     * @param object $object        The object to be normalized by a normalizer
-     * @param string $path          The full path of the current attribute in relation to the object to be normalized
-     * @param string $attributeName The name of the attribute or object property
-     */
     abstract public function normalize(mixed $value, ConversionContext $context): mixed;
 
-    /**
-     * @param mixed  $value          The value to converter
-     * @param object $object         The object to be normalized by a normalizer
-     * @param string $path           The full path of the attribute in relation to the obejct to be normalized
-     * @param string $attributeName  The name of the attribute or object property
-     * @param array  $normalizedData The data to be denormalized into an object
-     */
     abstract public function denormalize(mixed $value, ConversionContext $context): mixed;
 
     /**
@@ -83,11 +70,6 @@ abstract class AttributeConverter
     /**
      * Validates of a given value is an expected type.
      *
-     * @param mixed  $value        The value to validate
-     * @param string $expectedType Must be one of the type constants from {@see} Type
-     * @param string $path         The path of the attribute on relation to the object or normalized data
-     * @param array  $data         The data to be denormalized or normalized
-     *
      * @throws InvalidTypeException Thrown if the value is not of the expected type
      */
     protected function validateType(mixed $value, string $expectedType, ConversionContext $context): void
@@ -100,10 +82,6 @@ abstract class AttributeConverter
     /**
      * Validates if a value can be converted into a string.
      *
-     * @param mixed  $value The value to validate
-     * @param string $path  The path of the attribute on relation to the object or normalized data
-     * @param array  $data  The data to be denormalized or normalized
-     *
      * @throws StringConversionException Thrown if the given value cannot be converted to a string (e.g. arrays or objects)
      */
     protected function validateStringConvertable(mixed $value, ConversionContext $context): void
@@ -115,10 +93,6 @@ abstract class AttributeConverter
 
     /**
      * Validates if a value can be converted into an integer or float.
-     *
-     * @param mixed  $value The value to validate
-     * @param string $path  The path of the attribute on relation to the object or normalized data
-     * @param array  $data  The data to be denormalized or normalized
      *
      * @throws NumericConversionException Thrown if the given value cannot be converted into a numeric value
      */
