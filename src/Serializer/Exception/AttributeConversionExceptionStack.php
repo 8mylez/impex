@@ -32,14 +32,29 @@ class AttributeConversionExceptionStack extends AttributeConversionException
         return $count;
     }
 
-    private function createMessage(AttributeConversionException ...$errors): string
+    public function getMessages(): array
     {
-        $message = sprintf("Caught %s errors.\n", $this->getErrorCount());
+        $messages = [];
 
-        foreach ($errors as $error) {
-            $message .= sprintf(" • [%s] - %s\n", $error->getAttributePath(), $error->getMessage());
+        foreach ($this->errors as $error) {
+            foreach ($error->getMessages() as $message) {
+                if (!$error instanceof self) {
+                    $message = sprintf(' • [%s] - %s', $error->getAttributePath(), trim($message));
+                }
+
+                $messages[] = $message;
+            }
         }
 
-        return trim($message);
+        return $messages;
+    }
+
+    private function createMessage(AttributeConversionException ...$errors): string
+    {
+        $messages = [sprintf('Caught %s errors.', $this->getErrorCount())];
+
+        array_push($messages, ...$this->getMessages());
+
+        return implode("\n", $messages);
     }
 }
