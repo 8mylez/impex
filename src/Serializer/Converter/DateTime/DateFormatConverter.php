@@ -2,8 +2,8 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\DateTime;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class DateFormatConverter extends BidirectionalConverter
 {
@@ -23,9 +23,9 @@ class DateFormatConverter extends BidirectionalConverter
         $this->rawParser = new DateParser($rawFormat, ...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): string|null
     {
-        $date = $this->attributeParser->normalize($value, $object, $path, $attributeName);
+        $date = $this->attributeParser->normalize($value, $context);
 
         if ($date instanceof \DateTimeInterface) {
             return $date->format($this->rawFormat);
@@ -34,9 +34,9 @@ class DateFormatConverter extends BidirectionalConverter
         return $date;
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
+    public function denormalize(mixed $value, ConversionContext $context): string|null
     {
-        $date = $this->rawParser->denormalize($value, $object, $path, $attributeName, $data);
+        $date = $this->rawParser->denormalize($value, $context);
 
         if ($date instanceof \DateTimeInterface) {
             return $date->format($this->attributeFormat);

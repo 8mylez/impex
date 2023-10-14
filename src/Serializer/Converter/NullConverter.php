@@ -2,7 +2,6 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Util\Type;
 
 /**
@@ -20,7 +19,7 @@ class NullConverter extends UnidirectionalConverter
 
     public const ALLOW_ZERO_STRING = 'allow_zero_string';
 
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
+    public function convert(mixed $value, ConversionContext $context): mixed
     {
         if (!empty($value)) {
             return $value;
@@ -31,17 +30,17 @@ class NullConverter extends UnidirectionalConverter
         switch ($type) {
             case Type::INT:
             case Type::FLOAT:
-                return $this->hasFlag(self::ALLOW_NUMERIC) ? $value : null;
+                return $this->hasFlags(self::ALLOW_NUMERIC) ? $value : null;
             case Type::BOOL:
-                return $this->hasFlag(self::ALLOW_BOOL) ? $value : null;
+                return $this->hasFlags(self::ALLOW_BOOL) ? $value : null;
             case Type::STRING:
-                if ($this->hasFlag(self::ALLOW_STRING)) {
+                if ($this->hasFlags(self::ALLOW_STRING)) {
                     return $value;
                 }
 
-                return $this->hasFlag(self::ALLOW_ZERO_STRING) && \is_numeric($value) ? $value : null;
+                return $this->hasFlags(self::ALLOW_ZERO_STRING) && \is_numeric($value) ? $value : null;
             case Type::ARRAY:
-                return $this->hasFlag(self::ALLOW_ARRAY) ? $value : null;
+                return $this->hasFlags(self::ALLOW_ARRAY) ? $value : null;
             default:
                 return null;
         }

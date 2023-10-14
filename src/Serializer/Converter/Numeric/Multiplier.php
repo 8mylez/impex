@@ -2,8 +2,8 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\ZeroDivisionException;
 use Dustin\ImpEx\Util\Type;
 
@@ -16,39 +16,39 @@ class Multiplier extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): int|float|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $path, $object->toArray());
+        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
+            $this->validateNumericConvertable($value, $context);
 
             $value = $this->convertToNumeric($value);
         }
 
-        $this->validateType($value, Type::NUMERIC, $path, $object->toArray());
+        $this->validateType($value, Type::NUMERIC, $context);
 
         return $value * $this->factor;
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $data)
+    public function denormalize(mixed $value, ConversionContext $context): int|float|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $path, $object->toArray());
+        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
+            $this->validateNumericConvertable($value, $context);
 
             $value = $this->convertToNumeric($value);
         }
 
-        $this->validateType($value, Type::NUMERIC, $path, $object->toArray());
+        $this->validateType($value, Type::NUMERIC, $context);
 
         if (floatval($this->factor) === 0.0) {
-            throw new ZeroDivisionException($path, $data);
+            throw new ZeroDivisionException($context->getPath(), $context->getRootData());
         }
 
         return $value / $this->factor;

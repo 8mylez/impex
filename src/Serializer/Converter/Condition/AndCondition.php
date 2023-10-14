@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class AndCondition extends Condition
 {
@@ -16,14 +16,14 @@ class AndCondition extends Condition
         $this->conditions = $conditions;
     }
 
-    public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool
+    public function isFullfilled(mixed $value, ConversionContext $context): bool
     {
         if (empty($this->conditions)) {
             return false;
         }
 
         foreach ($this->conditions as $condition) {
-            if (!$condition->isFullfilled($value, $object, $path, $attributeName)) {
+            if (!$condition->isFullfilled($value, $context)) {
                 return false;
             }
         }

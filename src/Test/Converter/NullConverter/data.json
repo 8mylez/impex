@@ -1,0 +1,131 @@
+[
+    {
+        "input": "ABC",
+        "expected": "ABC",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": "",
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": "0",
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": 0,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": 123,
+        "expected": 123,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": ["foo"],
+        "expected": ["foo"],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": true,
+        "expected": true,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": false,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": "",
+        "expected": "",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_string"]
+        }
+    }, {
+        "input": "0",
+        "expected": "0",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_zero_string"]
+        }
+    }, {
+        "input": 0,
+        "expected": 0,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_numeric"]
+        }
+    }, {
+        "input": 0.0,
+        "expected": 0.0,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_numeric"]
+        }
+    }, {
+        "input": [],
+        "expected": [],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_array"]
+        }
+    }, {
+        "input": false,
+        "expected": false,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["allow_bool"]
+        }
+    }
+]

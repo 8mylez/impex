@@ -9,7 +9,11 @@ class ArrayUtil
     public static function cast(mixed $value): array
     {
         if (!is_array($value)) {
-            $value = [$value];
+            if ($value === null) {
+                $value = [];
+            } else {
+                $value = [$value];
+            }
         }
 
         return $value;

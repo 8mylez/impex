@@ -85,7 +85,7 @@ class Path implements \IteratorAggregate, \Countable
         $path = [];
 
         foreach ($this->path as $field) {
-            $path[] = str_replace('.', "\.", $field);
+            $path[] = str_replace('.', "\.", (string) $field);
         }
 
         return implode('.', $path);

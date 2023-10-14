@@ -8,10 +8,8 @@ trait NumberConversionTrait
      * Converts a given value into integer or float.
      *
      * @param mixed $value
-     *
-     * @return int|float
      */
-    protected function convertToNumeric($value)
+    protected function convertToNumeric(string|null|int|float|bool $value): int|float
     {
         $value = floatval($value);
 

@@ -1,0 +1,57 @@
+[
+    {
+        "input": {
+            "foo": ["foo", "foo"],
+            "bar": "bar"
+        },
+        "expected": {
+            "foo": "foo,foo",
+            "bar": ["bar"]
+        },
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "foo",
+        "expected": ["foo"],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": "Hello world",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "flags": ["strict"]
+        }
+    }, {
+        "input": {
+            "foo": ["foo", "foo"],
+            "bar": "bar",
+            "helloworld": "Hello world"
+        },
+        "expected": {
+            "foo": "foo,foo",
+            "bar": ["bar"],
+            "helloworld": "Hello world"
+        },
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }
+]

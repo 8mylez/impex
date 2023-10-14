@@ -2,33 +2,69 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\PropertyAccess\Path;
 
 class AttributeConverterSequence extends BidirectionalConverter
 {
+    public const UNIDIRECTIONAL = 'unidirectional';
+
     /**
-     * @var array
+     * @var AttributeConverter[]
      */
     private $converters = [];
 
-    public function __construct(AttributeConverter ...$converters)
+    /**
+     * @param AttributeConverter[] $converters
+     */
+    public function __construct(array $converters, string ...$flags)
     {
-        $this->converters = $converters;
+        foreach ($converters as $key => $converter) {
+            $this->setConverter($key, $converter);
+        }
+
+        parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function setConverter(int|string $key, AttributeConverter $converter): void
     {
-        foreach ($this->converters as $converter) {
-            $value = $converter->normalize($value, $object, $path, $attributeName);
+        $this->converters[$key] = $converter;
+    }
+
+    public function normalize(mixed $value, ConversionContext $context): mixed
+    {
+        $steps = 0;
+        foreach ($this->converters as $key => $converter) {
+            $path = sprintf('step#%s', $steps++);
+
+            if (!is_int($key)) {
+                $path .= sprintf('(%s)', $key);
+            }
+
+            $subContext = $context->subContext(new Path([$path]));
+            $value = $converter->normalize($value, $subContext);
         }
 
         return $value;
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $value, ConversionContext $context): mixed
     {
-        foreach ($this->converters as $converter) {
-            $value = $converter->denormalize($value, $object, $path, $attributeName, $normalizedData);
+        $converters = $this->converters;
+
+        if (!$this->hasFlags(self::UNIDIRECTIONAL)) {
+            $converters = array_reverse($converters, true);
+        }
+
+        $steps = 0;
+        foreach ($converters as $key => $converter) {
+            $path = sprintf('step#%s', $steps++);
+
+            if (!is_int($key)) {
+                $path .= sprintf('(%s)', $key);
+            }
+
+            $subContext = $context->subContext(new Path([$path]));
+            $value = $converter->denormalize($value, $subContext);
         }
 
         return $value;

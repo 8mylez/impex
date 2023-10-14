@@ -1,0 +1,53 @@
+[
+    {
+        "input": "05.04.2023",
+        "expected": "2023-04-05",
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "attributeFormat": "Y-m-d",
+            "rawFormat": "d.m.Y",
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "attributeFormat": "Y-m-d",
+            "rawFormat": "d.m.Y",
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\DateConversionException",
+        "constructorParams": {
+            "attributeFormat": "Y-m-d",
+            "rawFormat": "d.m.Y",
+            "flags": []
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\StringConversionException",
+        "constructorParams": {
+            "attributeFormat": "Y-m-d",
+            "rawFormat": "d.m.Y",
+            "flags": []
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "attributeFormat": "Y-m-d",
+            "rawFormat": "d.m.Y",
+            "flags": ["strict"]
+        }
+    }
+]

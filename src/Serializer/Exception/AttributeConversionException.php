@@ -29,4 +29,22 @@ abstract class AttributeConversionException extends ErrorCodeException
     {
         return $this->data;
     }
+
+    public function getErrorCount(): int
+    {
+        return 1;
+    }
+
+    public function getSummaryMessage(): string
+    {
+        return $this->getMessage();
+    }
+
+    /**
+     * @return string[]
+     */
+    public function getMessages(): array
+    {
+        return [$this->getMessage()];
+    }
 }

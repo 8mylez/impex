@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
@@ -14,28 +14,28 @@ class Filter extends UnidirectionalConverter
      */
     private $callback = null;
 
-    public function __construct(?callable $callback = null, string ...$flags)
+    public function __construct(?\Closure $callback = null, string ...$flags)
     {
         $this->callback = $callback;
 
         parent::__construct(...$flags);
     }
 
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $normalizedData = null)
+    public function convert(mixed $value, ConversionContext $context): array|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
+        if (!$this->hasFlags(self::STRICT)) {
             $value = ArrayUtil::cast($value);
         }
 
-        $this->validateType($value, Type::ARRAY, $path, $normalizedData ?? $object->toArray());
+        $this->validateType($value, Type::ARRAY, $context);
 
-        $value = $this->callback !== null ? array_filter($value, $this->callback) : array_filter($value);
+        $value = array_filter($value, $this->callback);
 
-        if ($this->hasFlag(self::REINDEX)) {
+        if ($this->hasFlags(self::REINDEX)) {
             $value = array_values($value);
         }
 

@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 use Dustin\ImpEx\Util\Type;
 
@@ -37,23 +37,23 @@ class Parser extends UnidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
+    public function convert(mixed $value, ConversionContext $context): int|float|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        if (!$this->hasFlag(self::STRICT)) {
-            $this->validateStringConvertable($value, $path, $data ?? $object->toArray());
+        if (!$this->hasFlags(self::STRICT)) {
+            $this->validateStringConvertable($value, $context);
 
             $value = (string) $value;
         }
 
-        $this->validateType($value, Type::STRING, $path, $data ?? $object->toArray());
+        $this->validateType($value, Type::STRING, $context);
 
         $value = $this->parseNumber($value);
 
-        if ($value === null && $this->hasFlag(self::EMPTY_TO_ZERO)) {
+        if ($value === null && $this->hasFlags(self::EMPTY_TO_ZERO)) {
             $value = 0;
         }
 
@@ -105,7 +105,7 @@ class Parser extends UnidirectionalConverter
                     break;
                 }
 
-                if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                if ($this->hasFlags(self::IGNORE_ALL_CHARACTERS)) {
                     continue;
                 }
 
@@ -115,7 +115,7 @@ class Parser extends UnidirectionalConverter
             // If character is not a decimal separator or thousand separator
             if (!$this->isMathsCharacter($character)) {
                 if ($this->isSign($number)) {
-                    if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                    if ($this->hasFlags(self::IGNORE_ALL_CHARACTERS)) {
                         continue;
                     }
 
@@ -130,7 +130,7 @@ class Parser extends UnidirectionalConverter
                     break;
                 }
 
-                if ($this->hasFlag(self::IGNORE_ALL_CHARACTERS)) {
+                if ($this->hasFlags(self::IGNORE_ALL_CHARACTERS)) {
                     continue;
                 }
 

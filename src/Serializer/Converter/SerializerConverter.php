@@ -2,10 +2,9 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\ContextProviderInterface;
 use Dustin\ImpEx\Serializer\Exception\SerializationConversionException;
-use Dustin\ImpEx\Serializer\Normalizer\EncapsulationNormalizer;
+use Dustin\ImpEx\Serializer\Normalizer\ConversionNormalizer;
 use Symfony\Component\Serializer\Exception\CircularReferenceException;
 use Symfony\Component\Serializer\Exception\ExtraAttributesException;
 use Symfony\Component\Serializer\Exception\NotNormalizableValueException;
@@ -23,43 +22,43 @@ class SerializerConverter extends BidirectionalConverter
         parent::__construct(...$flags);
     }
 
-    public function normalize($value, EncapsulationInterface $object, string $path, string $attributeName)
+    public function normalize(mixed $value, ConversionContext $context): mixed
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
-        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
-            return $this->serializer->serialize($value, $this->format, $context);
+            return $this->serializer->serialize($value, $this->format, $normalizationContext);
         } catch (CircularReferenceException $exception) {
-            throw SerializationConversionException::circularReference($path, $object->toArray());
+            throw SerializationConversionException::circularReference($context->getPath(), $context->getRootData());
         } catch (ExtraAttributesException $exception) {
-            throw SerializationConversionException::extraAttributes($path, $object->toArray(), $exception->getExtraAttributes());
+            throw SerializationConversionException::extraAttributes($context->getPath(), $context->getRootData(), $exception->getExtraAttributes());
         } catch (NotNormalizableValueException $exception) {
-            throw SerializationConversionException::notNormalizableValue($path, $object->toArray(), $exception->getMessage());
+            throw SerializationConversionException::notNormalizableValue($context->getPath(), $context->getRootData(), $exception->getMessage());
         }
     }
 
-    public function denormalize($value, EncapsulationInterface $object, string $path, string $attributeName, array $normalizedData)
+    public function denormalize(mixed $value, ConversionContext $context): mixed
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 
-        $context = $this->contextProvider ? $this->contextProvider->getContext() : [];
-        $context[EncapsulationNormalizer::CONVERSION_ROOT_PATH] = $path;
+        $normalizationContext = $this->contextProvider?->getContext($context) ?? $context->getNormalizationContext();
+        $normalizationContext[ConversionNormalizer::CONVERSION_CONTEXT] = $context;
 
         try {
-            return $this->serializer->deserialize($value, $this->type, $this->format, $context);
+            return $this->serializer->deserialize($value, $this->type, $this->format, $normalizationContext);
         } catch (CircularReferenceException $exception) {
-            throw SerializationConversionException::circularReference($path, $normalizedData);
+            throw SerializationConversionException::circularReference($context->getPath(), $context->getRootData());
         } catch (ExtraAttributesException $exception) {
-            throw SerializationConversionException::extraAttributes($path, $normalizedData, $exception->getExtraAttributes());
+            throw SerializationConversionException::extraAttributes($context->getPath(), $context->getRootData(), $exception->getExtraAttributes());
         } catch (NotNormalizableValueException $exception) {
-            throw SerializationConversionException::notNormalizableValue($path, $normalizedData, $exception->getMessage());
+            throw SerializationConversionException::notNormalizableValue($context->getPath(), $context->getRootData(), $exception->getMessage());
         }
     }
 }

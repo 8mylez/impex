@@ -1,0 +1,57 @@
+[
+    {
+        "input": "2023-11-01",
+        "expected": "date|2023-11-01 00:00:00",
+        "strict": false,
+        "exception": null,
+        "constructorParams": {
+            "format": null,
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "format": null,
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": true,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "format": null,
+            "flags": ["strict"]
+        }
+    }, {
+        "input": 123,
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\DateConversionException",
+        "constructorParams": {
+            "format": null,
+            "flags": []
+        }
+    }, {
+        "input": "11.2021.19 00:00:00",
+        "expected": "date|2021-11-19 00:00:00",
+        "strict": false,
+        "exception": null,
+        "constructorParams": {
+            "format": "m.Y.d H:i:s",
+            "flags": []
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\StringConversionException",
+        "constructorParams": {
+            "format": "m.Y.d H:i:s",
+            "flags": []
+        }
+    }
+]

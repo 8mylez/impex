@@ -2,7 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class NotCondition extends Condition
 {
@@ -10,8 +10,8 @@ class NotCondition extends Condition
     {
     }
 
-    public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool
+    public function isFullfilled(mixed $value, ConversionContext $context): bool
     {
-        return !$this->condition->isFullfilled($value, $object, $path, $attributeName);
+        return !$this->condition->isFullfilled($value, $context);
     }
 }

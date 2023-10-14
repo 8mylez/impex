@@ -2,14 +2,14 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Bool;
 
-use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 
 class BoolConverter extends UnidirectionalConverter
 {
-    public function convert($value, EncapsulationInterface $object, string $path, string $attributeName, ?array $data = null)
+    public function convert(mixed $value, ConversionContext $context): bool|null
     {
-        if ($this->hasFlag(self::SKIP_NULL) && $value === null) {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
         }
 

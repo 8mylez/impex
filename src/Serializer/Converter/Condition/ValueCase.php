@@ -2,8 +2,8 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 class ValueCase extends Condition
 {
@@ -11,7 +11,7 @@ class ValueCase extends Condition
     {
     }
 
-    public function isFullfilled($value, EncapsulationInterface $object, string $path, string $attributeName): bool
+    public function isFullfilled(mixed $value, ConversionContext $context): bool
     {
         return \in_array($value, $this->values, $this->strict);
     }

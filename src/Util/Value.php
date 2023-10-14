@@ -4,7 +4,7 @@ namespace Dustin\ImpEx\Util;
 
 class Value
 {
-    public static function isNormalized($value): bool
+    public static function isNormalized(mixed $value): bool
     {
         if (is_scalar($value) || $value === null) {
             return true;
@@ -34,5 +34,10 @@ class Value
         }
 
         return !is_numeric($value);
+    }
+
+    public static function normalize(mixed $value): mixed
+    {
+        return json_decode(json_encode($value, JSON_UNESCAPED_UNICODE), true);
     }
 }
