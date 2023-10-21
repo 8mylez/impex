@@ -512,7 +512,8 @@ class ConversionNormalizer extends AbstractNormalizer
             $parentContext[self::CONVERTERS],
             $parentContext[self::PROPERTY_ACCESSORS],
             $parentContext[self::OBJECT_TO_POPULATE],
-            $parentContext[self::CALLBACKS]
+            $parentContext[self::CALLBACKS],
+            $parentContext[self::DEFAULT_CONSTRUCTOR_ARGUMENTS]
         );
 
         return $parentContext;
