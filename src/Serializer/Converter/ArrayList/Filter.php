@@ -28,7 +28,7 @@ class Filter extends UnidirectionalConverter
         }
 
         if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::cast($value);
+            $value = ArrayUtil::ensure($value);
         }
 
         $this->validateType($value, Type::ARRAY, $context);

@@ -4,6 +4,7 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
+use Dustin\ImpEx\Util\ArrayUtil;
 
 class ArrayConverter extends UnidirectionalConverter
 {
@@ -15,11 +16,11 @@ class ArrayConverter extends UnidirectionalConverter
             return null;
         }
 
-        if (!is_array($value) || $this->hasFlags(self::INCLUDE_ARRAYS)) {
-            if ($value === null) {
-                $value = [];
-            } else {
+        if (!is_array($value)) {
+            if ($this->hasFlags(self::INCLUDE_ARRAYS)) {
                 $value = [$value];
+            } else {
+                $value = ArrayUtil::ensure($value);
             }
         }
 

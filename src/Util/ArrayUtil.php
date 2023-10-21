@@ -6,17 +6,13 @@ use Dustin\ImpEx\PropertyAccess\Path;
 
 class ArrayUtil
 {
-    public static function cast(mixed $value): array
+    public static function ensure(mixed $value): array
     {
-        if (!is_array($value)) {
-            if ($value === null) {
-                $value = [];
-            } else {
-                $value = [$value];
-            }
+        if (is_array($value)) {
+            return $value;
         }
 
-        return $value;
+        return $value === null ? [] : [$value];
     }
 
     public static function flatToNested(array $data): array

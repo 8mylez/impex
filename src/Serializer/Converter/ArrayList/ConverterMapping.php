@@ -41,7 +41,7 @@ class ConverterMapping extends BidirectionalConverter
         }
 
         if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::cast($data);
+            $data = ArrayUtil::ensure($data);
         }
 
         $this->validateType($data, Type::ARRAY, $context);
@@ -73,7 +73,7 @@ class ConverterMapping extends BidirectionalConverter
         }
 
         if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::cast($data);
+            $data = ArrayUtil::ensure($data);
         }
 
         $this->validateType($data, Type::ARRAY, $context);

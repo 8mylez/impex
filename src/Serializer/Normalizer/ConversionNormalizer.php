@@ -262,7 +262,7 @@ class ConversionNormalizer extends AbstractNormalizer
 
     protected function prepareForDenormalization(mixed $data): array
     {
-        return ArrayUtil::cast($data);
+        return ArrayUtil::ensure($data);
     }
 
     protected function getObjectClass(object $object): string
