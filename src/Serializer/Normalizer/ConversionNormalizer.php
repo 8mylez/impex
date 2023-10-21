@@ -24,6 +24,9 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 
 class ConversionNormalizer extends AbstractNormalizer
 {
+    /**
+     * Context options.
+     */
     public const ENABLE_MAX_DEPTH = 'enable_max_depth';
 
     public const DEPTH_KEY_PATTERN = 'depth_%s::%s';
@@ -42,12 +45,15 @@ class ConversionNormalizer extends AbstractNormalizer
 
     public const PROPERTY_ACCESSORS = 'property_accessors';
 
+    /**
+     * Access types.
+     */
     public const ACCESS_READ = 'read';
 
     public const ACCESS_WRITE = 'write';
 
     /**
-     * @var callable
+     * @var callable|null
      */
     protected $objectClassResolver = null;
 
@@ -117,6 +123,7 @@ class ConversionNormalizer extends AbstractNormalizer
 
         foreach ($attributes as $attribute) {
             $attributeContext = $this->getAttributeNormalizationContext($object, $attribute, $context);
+            $attributeChildContext = $this->createAttributeChildContext($context, $attributeContext, $attribute, $format);
             $attributeValue = $this->getAttributeValue($object, $attribute, $format, $attributeContext);
 
             if (
@@ -133,7 +140,7 @@ class ConversionNormalizer extends AbstractNormalizer
             $attributeValue = $this->applyCallbacks($attributeValue, $object, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
-                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::NORMALIZATION, $object, null, $attributeContext);
+                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::NORMALIZATION, $object, null, $attributeChildContext);
 
                 try {
                     $attributeValue = $converter->normalize($attributeValue, $conversionContext);
@@ -148,8 +155,7 @@ class ConversionNormalizer extends AbstractNormalizer
                     throw new \RuntimeException(sprintf("Cannot normalize attribute '%s'. Use a serializer or add a converter.", $attribute));
                 }
 
-                $childContext = $this->createChildContext($attributeContext, $attribute, $format);
-                $attributeValue = $this->serializer->normalize($attributeValue, $format, $childContext);
+                $attributeValue = $this->serializer->normalize($attributeValue, $format, $attributeChildContext);
             }
 
             if ($attributeValue === null && $this->skipNullValues($attributeContext)) {
@@ -177,7 +183,7 @@ class ConversionNormalizer extends AbstractNormalizer
     }
 
     /**
-     * @return mixed
+     * @return object
      *
      * @throws \RuntimeException
      * @throws ExtraAttributesException
@@ -213,12 +219,13 @@ class ConversionNormalizer extends AbstractNormalizer
             }
 
             $attributeContext = $this->getAttributeDenormalizationContext($class, $attribute, $context);
+            $attributeChildContext = $this->createAttributeChildContext($context, $attributeContext, $attribute, $format);
 
             $value = $this->fetchValue($data, $normalizedAttribute, $attributeContext);
             $value = $this->applyCallbacks($value, $class, $attribute, $format, $attributeContext);
 
             if ($converter = $this->getConverter($attribute, $attributeContext)) {
-                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::DENORMALIZATION, $object, $data, $attributeContext);
+                $conversionContext = $this->createAttributeConversionContext($attribute, ConversionContext::DENORMALIZATION, $object, $data, $attributeChildContext);
 
                 try {
                     $value = $converter->denormalize($value, $conversionContext);
@@ -236,8 +243,8 @@ class ConversionNormalizer extends AbstractNormalizer
                         throw new \RuntimeException(sprintf("Cannot denormalize deep object attribute '%s'. Use a serializer.", $attribute));
                     }
 
-                    $attributeContext[self::OBJECT_TO_POPULATE] = $deepObject;
-                    $value = $this->serializer->denormalize($value, $this->getObjectClass($deepObject), $format, $attributeContext);
+                    $attributeChildContext[self::OBJECT_TO_POPULATE] = $deepObject;
+                    $value = $this->serializer->denormalize($value, $this->getObjectClass($deepObject), $format, $attributeChildContext);
                 }
             }
 
@@ -495,6 +502,28 @@ class ConversionNormalizer extends AbstractNormalizer
             $normalizedData,
             $context
         );
+    }
+
+    protected function createChildContext(array $parentContext, string $attribute, ?string $format): array
+    {
+        unset(
+            $parentContext[self::ATTRIBUTES],
+            $parentContext[self::IGNORED_ATTRIBUTES],
+            $parentContext[self::CONVERTERS],
+            $parentContext[self::PROPERTY_ACCESSORS],
+            $parentContext[self::OBJECT_TO_POPULATE],
+            $parentContext[self::CALLBACKS],
+            $parentContext[self::DEFAULT_CONSTRUCTOR_ARGUMENTS]
+        );
+
+        return $parentContext;
+    }
+
+    protected function createAttributeChildContext(array $parentContext, array $attributeContext, string $attribute, ?string $format): array
+    {
+        $childContext = $this->createChildContext($parentContext, $attribute, $format);
+
+        return array_merge($attributeContext, $childContext);
     }
 
     protected function getConversionContext(array $context): ?ConversionContext
