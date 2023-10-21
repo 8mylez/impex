@@ -4,11 +4,12 @@ namespace Dustin\ImpEx\Serializer\Exception;
 
 use Dustin\Exception\ErrorCodeException;
 
-abstract class AttributeConversionException extends ErrorCodeException
+class AttributeConversionException extends ErrorCodeException
 {
     public function __construct(
         private string $attributePath,
         private array $data,
+        private string $errorCode,
         string $message,
         array $parameters
     ) {
@@ -17,7 +18,7 @@ abstract class AttributeConversionException extends ErrorCodeException
 
     public function getErrorCode(): string
     {
-        return 'IMPEX_CONVERSION_ERROR';
+        return $this->errorCode;
     }
 
     public function getAttributePath(): string

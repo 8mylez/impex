@@ -23,16 +23,20 @@ abstract class AttributeConverter
 
     public const REINDEX = 'reindex';
 
-    private $flags = [];
+    protected readonly array $flags;
 
     /**
      * @param string ...$flags An optional list of flags to affect conversion behavior
      */
     public function __construct(string ...$flags)
     {
+        $f = [];
+
         foreach ($flags as $flag) {
-            $this->flags[$flag] = $flag;
+            $f[$flag] = $flag;
         }
+
+        $this->flags = $f;
     }
 
     abstract public function normalize(mixed $value, ConversionContext $context): mixed;
