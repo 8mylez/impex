@@ -4,17 +4,7 @@ namespace Dustin\ImpEx\DependencyInjection\Exception;
 
 class EmptyTagAttributeException extends \Exception
 {
-    /**
-     * @var string
-     */
-    private $tag;
-
-    /**
-     * @var string
-     */
-    private $attribute;
-
-    public function __construct(string $tag, string $attribute)
+    public function __construct(private string $tag, private string $attribute)
     {
         parent::__construct(sprintf(
             "Attribute '%s' for container tag '%s' cannot be empty!", $attribute, $tag
