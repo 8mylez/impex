@@ -9,7 +9,7 @@ use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
 use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
-use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\UnknownErrorException;
 
 class AccessOperationConverter extends UnidirectionalConverter
 {
@@ -28,7 +28,7 @@ class AccessOperationConverter extends UnidirectionalConverter
         try {
             $this->operation->execute($value, $writeValue);
         } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
-            throw new AttributeConversionException($context->getPath(), $context->getRootData(), $exception->getErrorCode(), $exception->getMessage(), $exception->getParameters());
+            throw new UnknownErrorException($context->getPath(), $context->getRootData(), $exception->getMessage(), $exception->getParameters(), $exception->getErrorCode());
         }
     }
 }
