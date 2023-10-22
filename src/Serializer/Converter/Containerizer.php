@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\Serializer\Converter;
 
 use Dustin\Encapsulation\Container;
+use Dustin\ImpEx\Serializer\Exception\InvalidContainerElementException;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
@@ -39,7 +40,13 @@ class Containerizer extends BidirectionalConverter
         $containerClass = $this->containerClass;
         $container = new $containerClass();
 
-        $container->add(...$value);
+        try {
+            foreach ($value as $v) {
+                $container->add($v);
+            }
+        } catch (\InvalidArgumentException $exception) {
+            throw new InvalidContainerElementException($context->getPath(), $context->getRootData(), $containerClass, Type::getDebugType($v));
+        }
 
         return $container;
     }
