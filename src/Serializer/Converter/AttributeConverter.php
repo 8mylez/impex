@@ -90,7 +90,10 @@ abstract class AttributeConverter
      */
     protected function validateStringConvertable(mixed $value, ConversionContext $context): void
     {
-        if (!Type::isStringConvertable(Type::getType($value))) {
+        if (
+            !Type::isStringConvertable(Type::getType($value)) &&
+            !(is_object($value) && \method_exists($value, '__toString'))
+        ) {
             throw new StringConversionException($value, $context->getPath(), $context->getRootData());
         }
     }
