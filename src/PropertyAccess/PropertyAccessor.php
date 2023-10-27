@@ -86,6 +86,17 @@ final class PropertyAccessor
         return static::collectValues($path, $data, $context);
     }
 
+    public static function has(string|array|int|Path $path, mixed &$data, string ...$flags): bool
+    {
+        if (!$path instanceof Path) {
+            $path = new Path($path);
+        }
+
+        $context = static::createContext(AccessOperation::HAS, ...$flags);
+
+        return static::hasProperty($path, $data, $context);
+    }
+
     private static function getValue(Path $path, mixed $data, AccessContext $context): mixed
     {
         if (!static::$initialized) {
@@ -255,6 +266,40 @@ final class PropertyAccessor
         return $context->hasFlag(AccessContext::COLLECT_NESTED) ? ArrayUtil::flatToNested($result) : $result;
     }
 
+    private static function hasProperty(Path $path, mixed &$data, AccessContext $context): bool
+    {
+        if (!static::$initialized) {
+            static::initialize();
+        }
+
+        if ($path->isEmpty()) {
+            throw InvalidPathException::emptyPath();
+        }
+
+        if ($data === null) {
+            return false;
+        }
+
+        $pointer = $data;
+        $currentPath = new Path();
+
+        foreach ($path as $field) {
+            if ($pointer === null) {
+                return false;
+            }
+
+            $currentPath->add($field);
+
+            if (!static::access($field, $pointer, null, $context->subContext(AccessOperation::HAS, $currentPath))) {
+                return false;
+            }
+
+            $pointer = static::access($field, $pointer, null, $context->subContext(AccessOperation::GET, $currentPath));
+        }
+
+        return true;
+    }
+
     private static function access(int|string|null $field, mixed &$data, mixed $value, AccessContext $context): mixed
     {
         if (!static::$initialized) {
@@ -415,6 +460,15 @@ final class PropertyAccessor
             new Access(
                 function (Path $path, mixed $data, mixed $value = null, AccessContext $context) {
                     return static::collectValues($path, $data, $context);
+                }
+            )
+        );
+
+        $context->addAccess(
+            AccessOperation::HAS,
+            new Access(
+                function (Path $path, mixed $data, mixed $value = null, AccessContext $context) {
+                    return static::hasProperty($path, $data, $context);
                 }
             )
         );

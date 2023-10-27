@@ -80,6 +80,11 @@ class ContainerAccessor extends Accessor
         return $container->toArray();
     }
 
+    public static function has(int $key, Container $container): bool
+    {
+        return array_key_exists($key, $container->toArray());
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         if (!Type::is($value, Container::class)) {
@@ -128,5 +133,14 @@ class ContainerAccessor extends Accessor
     protected function collectValues(mixed &$data, AccessContext $context): array
     {
         return static::collect($data);
+    }
+
+    protected function hasProperty(int|string $field, mixed $data, AccessContext $context): bool
+    {
+        if (!is_int($field)) {
+            return false;
+        }
+
+        return static::has($field, $data);
     }
 }
