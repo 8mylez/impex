@@ -26,6 +26,8 @@ class Type
 
     public const NUMERIC = 'numeric';
 
+    public const ITERABLE = 'iterable';
+
     private const DATA_TYPES = [
         self::INT,
         self::BOOL,
