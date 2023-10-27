@@ -80,6 +80,9 @@ abstract class Accessor
 
             case AccessOperation::COLLECT:
                 return $this->collectValues($data, $context);
+
+            case AccessOperation::HAS:
+                return $this->hasProperty($field, $data, $context);
         }
 
         throw new InvalidOperationException($context->getOperation());
@@ -108,5 +111,10 @@ abstract class Accessor
     protected function collectValues(mixed &$data, AccessContext $context): array
     {
         throw new OperationNotSupportedException(AccessOperation::COLLECT);
+    }
+
+    protected function hasProperty(int|string $field, mixed $data, AccessContext $context): bool
+    {
+        throw new OperationNotSupportedException(AccessOperation::HAS);
     }
 }

@@ -50,6 +50,11 @@ class EncapsulationAccessor extends Accessor
         }
     }
 
+    public static function has(string $field, EncapsulationInterface $data): bool
+    {
+        return $data->has($field);
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         if (\in_array($operation, [AccessOperation::PUSH, AccessOperation::COLLECT])) {
@@ -72,5 +77,10 @@ class EncapsulationAccessor extends Accessor
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         static::merge($value, $data, $context);
+    }
+
+    protected function hasProperty(int|string $field, mixed $data, AccessContext $context): bool
+    {
+        return static::has((string) $field, $data);
     }
 }

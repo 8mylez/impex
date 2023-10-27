@@ -99,6 +99,17 @@ class ObjectAccessor extends Accessor
         }
     }
 
+    public static function has(string $property, object $data): bool
+    {
+        $reflectionObject = new \ReflectionObject($data);
+
+        if (!$reflectionObject->hasProperty($property)) {
+            return false;
+        }
+
+        return !$reflectionObject->getProperty($property)->isStatic();
+    }
+
     public function supports(string $operation, mixed $value): bool
     {
         if (\in_array($operation, [AccessOperation::PUSH, AccessOperation::COLLECT])) {
@@ -121,5 +132,14 @@ class ObjectAccessor extends Accessor
     protected function mergeValue(mixed $value, mixed &$data, AccessContext $context): void
     {
         static::merge($value, $data, $context);
+    }
+
+    protected function hasProperty(int|string $field, mixed $data, AccessContext $context): bool
+    {
+        if (is_int($field)) {
+            return false;
+        }
+
+        return static::has($field, $data);
     }
 }

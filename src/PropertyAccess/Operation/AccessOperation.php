@@ -20,6 +20,8 @@ class AccessOperation
 
     public const COLLECT = 'collect';
 
+    public const HAS = 'has';
+
     public const WRITE_OPERATIONS = [
         AccessOperation::PUSH,
         AccessOperation::SET,
@@ -29,6 +31,7 @@ class AccessOperation
     public const READ_OPERATIONS = [
         AccessOperation::GET,
         AccessOperation::COLLECT,
+        AccessOperation::HAS,
     ];
 
     /**
@@ -71,6 +74,8 @@ class AccessOperation
                 return PropertyAccessor::merge($this->getPath(), $data, $value, ...$this->getFlags());
             case self::COLLECT:
                 return PropertyAccessor::collect($this->getPath(), $data, ...$this->getFlags());
+            case self::HAS:
+                return PropertyAccessor::has($this->getPath(), $data, ...$this->getFlags());
         }
 
         throw new InvalidOperationException($this->operation);
