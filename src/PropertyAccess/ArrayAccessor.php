@@ -53,6 +53,11 @@ class ArrayAccessor extends Accessor
         }
     }
 
+    public static function has(int|string $key, array $data): bool
+    {
+        return array_key_exists($key, $data);
+    }
+
     public static function collect(array $data): array
     {
         return $data;
@@ -86,5 +91,10 @@ class ArrayAccessor extends Accessor
     protected function collectValues(mixed &$data, AccessContext $context): array
     {
         return static::collect($data);
+    }
+
+    protected function hasProperty(int|string $field, mixed $data, AccessContext $context): bool
+    {
+        return static::has($field, $data);
     }
 }
