@@ -17,11 +17,9 @@ class ArrayConverter extends UnidirectionalConverter
         }
 
         if (!is_array($value)) {
-            if ($this->hasFlags(self::INCLUDE_ARRAYS)) {
-                $value = [$value];
-            } else {
-                $value = ArrayUtil::ensure($value);
-            }
+            $value = ArrayUtil::ensure($value);
+        } elseif ($this->hasFlags(self::INCLUDE_ARRAYS)) {
+            $value = [$value];
         }
 
         if ($this->hasFlags(self::REINDEX)) {
