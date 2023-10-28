@@ -6,7 +6,7 @@ use Dustin\Exception\ErrorCodeException;
 
 class OperationNotSupportedException extends ErrorCodeException
 {
-    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_OPERATION_NOT_SUPPORTED';
+    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS__OPERATION_NOT_SUPPORTED_ERROR';
 
     public function __construct(string $operation)
     {
