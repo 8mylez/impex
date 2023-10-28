@@ -7,7 +7,7 @@ use Dustin\ImpEx\Util\Type;
 
 class InvalidDataException extends ErrorCodeException
 {
-    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_INVALID_DATA';
+    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS__INVALID_DATA_ERROR';
 
     public static function notMergable(mixed $data): self
     {

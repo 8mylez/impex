@@ -7,7 +7,7 @@ use Dustin\ImpEx\PropertyAccess\Path;
 
 class PropertyNotFoundException extends ErrorCodeException
 {
-    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_PROPERTY_NOT_FOUND';
+    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS__PROPERTY_NOT_FOUND_ERROR';
 
     public function __construct(private Path $path, ?string $customMessage = null)
     {
