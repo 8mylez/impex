@@ -7,7 +7,7 @@ use Dustin\ImpEx\PropertyAccess\Path;
 
 class NotAccessableException extends ErrorCodeException
 {
-    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_NOT_ACCESSABLE';
+    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS__NOT_ACCESSABLE_ERROR';
 
     public function __construct(private Path $path, private string $type, private string $operation)
     {

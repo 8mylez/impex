@@ -6,7 +6,7 @@ use Dustin\Exception\ErrorCodeException;
 
 class InvalidPathException extends ErrorCodeException
 {
-    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS_INVALID_PATH';
+    public const ERROR_CODE = 'IMPEX_PROPERTY_ACCESS__INVALID_PATH_ERROR';
 
     public static function unexpectedCharacter(string $path, string $character, int $position): self
     {
