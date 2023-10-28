@@ -3,8 +3,7 @@
 namespace Dustin\ImpEx\Serializer\Converter;
 
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
-use Dustin\ImpEx\Serializer\Exception\NumericConversionException;
-use Dustin\ImpEx\Serializer\Exception\StringConversionException;
+use Dustin\ImpEx\Serializer\Exception\TypeConversionException;
 use Dustin\ImpEx\Util\Type;
 
 /**
@@ -79,14 +78,14 @@ abstract class AttributeConverter
     protected function validateType(mixed $value, string $expectedType, ConversionContext $context): void
     {
         if (!Type::is($value, $expectedType)) {
-            throw new InvalidTypeException($context->getPath(), $context->getRootData(), $expectedType, $value);
+            throw InvalidTypeException::invalidType($context->getPath(), $context->getRootData(), $expectedType, $value);
         }
     }
 
     /**
      * Validates if a value can be converted into a string.
      *
-     * @throws StringConversionException Thrown if the given value cannot be converted to a string (e.g. arrays or objects)
+     * @throws TypeConversionException Thrown if the given value cannot be converted to a string (e.g. arrays or objects)
      */
     protected function validateStringConvertable(mixed $value, ConversionContext $context): void
     {
@@ -94,19 +93,19 @@ abstract class AttributeConverter
             !Type::isStringConvertable(Type::getType($value)) &&
             !(is_object($value) && \method_exists($value, '__toString'))
         ) {
-            throw new StringConversionException($value, $context->getPath(), $context->getRootData());
+            throw TypeConversionException::string($context->getPath(), $context->getRootData(), $value);
         }
     }
 
     /**
      * Validates if a value can be converted into an integer or float.
      *
-     * @throws NumericConversionException Thrown if the given value cannot be converted into a numeric value
+     * @throws TypeConversionException Thrown if the given value cannot be converted into a numeric value
      */
     protected function validateNumericConvertable(mixed $value, ConversionContext $context): void
     {
         if (!Type::isNumericConvertable(Type::getType($value))) {
-            throw new NumericConversionException($value, $context->getPath(), $context->getRootData());
+            throw TypeConversionException::numeric($context->getPath(), $context->getRootData(), $value);
         }
     }
 }

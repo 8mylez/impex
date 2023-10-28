@@ -7,13 +7,18 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
-use Dustin\ImpEx\Serializer\Exception\InvalidArrayException;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Chunker extends BidirectionalConverter
 {
+    /** flags */
     public const STRICT_CHUNK_SIZE = 'strict_chunk_size';
+
+    /** error codes */
+    public const INVALID_ARRAY_SIZE_ERROR = 'IMPEX_CONVERSION__INVALID_ARRAY_SIZE_ERROR';
+
+    public const EMPTY_ARRAY_ERROR = 'IMPEX_CONVERSION__EMPTY_ARRAY_ERROR';
 
     public function __construct(
         private int $chunkSize,
@@ -107,7 +112,7 @@ class Chunker extends BidirectionalConverter
     private function validateChunkSize(array $array, ConversionContext $context, bool $isLast): void
     {
         if (empty($array)) {
-            throw new InvalidArrayException($context->getPath(), $context->getRootData(), 'Array must not be empty', []);
+            throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Array must not be empty.', [], self::EMPTY_ARRAY_ERROR);
         }
 
         $size = count($array);
@@ -116,7 +121,7 @@ class Chunker extends BidirectionalConverter
             ($isLast === false && $size !== $this->chunkSize) ||
             ($isLast === true && $size > $this->chunkSize)
         ) {
-            throw new InvalidArrayException($context->getPath(), $context->getRootData(), 'Array size must match chunk size of {{ chunkSize }}. {{ elementCount }} elements found.', ['chunkSize' => $this->chunkSize, 'elementCount' => $size]);
+            throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Array size must be {{ expectedSize }}. {{ actualSize }} elements were found.', ['expectedSize' => $this->chunkSize, 'actualSize' => $size], self::INVALID_ARRAY_SIZE_ERROR);
         }
     }
 }

@@ -1,10 +1,12 @@
 <?php
 
-namespace Dustin\ImpEx\Serializer\Converter;
+namespace Dustin\ImpEx\Serializer\Converter\Encapsulation;
 
 use Dustin\Encapsulation\AbstractEncapsulation;
 use Dustin\Encapsulation\Encapsulation;
 use Dustin\Encapsulation\EncapsulationInterface;
+use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;

@@ -4,6 +4,8 @@ namespace Dustin\ImpEx\Serializer\Exception;
 
 class AttributeConversionExceptionStack extends AttributeConversionException
 {
+    public const ERROR_CODE = 'IMPEX_CONVERSION__ERRORS';
+
     /**
      * @var array
      */
@@ -13,7 +15,7 @@ class AttributeConversionExceptionStack extends AttributeConversionException
     {
         $this->errors = $errors;
 
-        parent::__construct($attributePath, $data, static::createMessage(...$errors), []);
+        parent::__construct($attributePath, $data, static::createMessage(), [], self::ERROR_CODE);
     }
 
     public function getErrors(): array
@@ -49,7 +51,7 @@ class AttributeConversionExceptionStack extends AttributeConversionException
         return $messages;
     }
 
-    private function createMessage(AttributeConversionException ...$errors): string
+    private function createMessage(): string
     {
         $messages = [sprintf('Caught %s errors.', $this->getErrorCount())];
 

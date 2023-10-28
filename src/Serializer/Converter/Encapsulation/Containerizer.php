@@ -1,14 +1,18 @@
 <?php
 
-namespace Dustin\ImpEx\Serializer\Converter;
+namespace Dustin\ImpEx\Serializer\Converter\Encapsulation;
 
 use Dustin\Encapsulation\Container;
-use Dustin\ImpEx\Serializer\Exception\InvalidContainerElementException;
+use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Containerizer extends BidirectionalConverter
 {
+    public const INVALID_CONTAINER_ELEMENT_TYPE_ERROR = 'IMPEX_CONVERSION__INVALID_CONTAINER_ELEMENT_ERROR';
+
     public function __construct(private string $containerClass = Container::class, string ...$flags)
     {
         parent::__construct(...$flags);
@@ -40,12 +44,12 @@ class Containerizer extends BidirectionalConverter
         $containerClass = $this->containerClass;
         $container = new $containerClass();
 
-        try {
-            foreach ($value as $v) {
+        foreach ($value as $v) {
+            try {
                 $container->add($v);
+            } catch (\InvalidArgumentException $exception) {
+                throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Container of class {{ containerClass }} cannot hold element of type {{ type }}.', ['containerClass' => $containerClass, 'type' => Type::getDebugType($v)], self::INVALID_CONTAINER_ELEMENT_TYPE_ERROR);
             }
-        } catch (\InvalidArgumentException $exception) {
-            throw new InvalidContainerElementException($context->getPath(), $context->getRootData(), $containerClass, Type::getDebugType($v));
         }
 
         return $container;

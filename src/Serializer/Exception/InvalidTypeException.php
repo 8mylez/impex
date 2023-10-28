@@ -6,22 +6,15 @@ use Dustin\ImpEx\Util\Type;
 
 class InvalidTypeException extends AttributeConversionException
 {
-    public const ERROR_CODE = 'IMPEX_INVALID_TYPE_ERROR';
+    public const INVALID_TYPE_ERROR = 'IMPEX_CONVERSION__INVALID_TYPE_ERROR';
 
-    public function __construct(string $path, array $data, string $expectedType, $value)
+    public static function invalidType(string $path, array $data, string $expectedType, mixed $value): self
     {
-        parent::__construct(
+        return new self(
             $path, $data,
-            'Expected value to be {{ expectedValue }}. Got {{ value }}',
-            [
-                'expectedValue' => $expectedType,
-                'value' => Type::getDebugType($value),
-            ]
+            'Expected value to be {{ expectedType }}. Got {{ actualType }}.',
+            ['expectedType' => $expectedType, 'actualType' => Type::getDebugType($value)],
+            self::INVALID_TYPE_ERROR
         );
-    }
-
-    public function getErrorCode(): string
-    {
-        return self::ERROR_CODE;
     }
 }

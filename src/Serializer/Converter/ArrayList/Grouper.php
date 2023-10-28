@@ -10,11 +10,13 @@ use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\PropertyAccess\PropertyAccessor;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Serializer\Exception\GroupKeyNotFoundException;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Util\Type;
 
 class Grouper extends BidirectionalConverter
 {
+    public const GROUP_KEY_NOT_FOUND_ERROR = 'IMPEX_CONVERSION__GROUP_KEY_NOT_FOUND_ERROR';
+
     private Path $groupKey;
 
     public function __construct(string|array|Path $groupKey, string ...$flags)
@@ -68,7 +70,7 @@ class Grouper extends BidirectionalConverter
             try {
                 $groupKey = PropertyAccessor::get($this->groupKey, $record);
             } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
-                throw new GroupKeyNotFoundException($subContext->getPath(), $subContext->getRootData(), $this->groupKey, Type::getDebugType($record));
+                throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Group key {{ path }} could not be fetched from value of type {{ type }}.', ['path' => $this->groupKey, 'type' => Type::getDebugType($record)], self::GROUP_KEY_NOT_FOUND_ERROR);
             }
 
             $this->validateStringConvertable($groupKey, $subContext);

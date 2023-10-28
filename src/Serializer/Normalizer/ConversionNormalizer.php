@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Normalizer;
 
+use Dustin\Exception\ErrorCode;
 use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
@@ -146,6 +147,23 @@ class ConversionNormalizer extends AbstractNormalizer
                     $attributeValue = $converter->normalize($attributeValue, $conversionContext);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
+
+                    continue;
+                } catch (ErrorCode $errorCode) {
+                    $conversionExceptions[] = AttributeConversionException::fromErrorCode(
+                        $conversionContext->getPath(),
+                        $conversionContext->getRootData(),
+                        $errorCode
+                    );
+
+                    continue;
+                } catch (\Throwable $th) {
+                    $conversionExceptions[] = AttributeConversionException::fromException(
+                        $conversionContext->getPath(),
+                        $conversionContext->getRootData(),
+                        $th
+                    );
+
                     continue;
                 }
             }
@@ -231,6 +249,23 @@ class ConversionNormalizer extends AbstractNormalizer
                     $value = $converter->denormalize($value, $conversionContext);
                 } catch (AttributeConversionException $e) {
                     $conversionExceptions[] = $e;
+
+                    continue;
+                } catch (ErrorCode $errorCode) {
+                    $conversionExceptions[] = AttributeConversionException::fromErrorCode(
+                        $conversionContext->getPath(),
+                        $conversionContext->getRootData(),
+                        $errorCode
+                    );
+
+                    continue;
+                } catch (\Throwable $th) {
+                    $conversionExceptions[] = AttributeConversionException::fromException(
+                        $conversionContext->getPath(),
+                        $conversionContext->getRootData(),
+                        $th
+                    );
+
                     continue;
                 }
             }
