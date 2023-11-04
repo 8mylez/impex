@@ -4,11 +4,12 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
-use Dustin\ImpEx\Util\ArrayUtil;
 
 class ArrayConverter extends UnidirectionalConverter
 {
-    public const INCLUDE_ARRAYS = 'include_arrays';
+    public function __construct(private ArrayConversionStrategy $strategy)
+    {
+    }
 
     public function convert(mixed $value, ConversionContext $context): array|null
     {
@@ -16,11 +17,7 @@ class ArrayConverter extends UnidirectionalConverter
             return null;
         }
 
-        if (!is_array($value)) {
-            $value = ArrayUtil::ensure($value);
-        } elseif ($this->hasFlags(self::INCLUDE_ARRAYS)) {
-            $value = [$value];
-        }
+        $value = $this->strategy->convert($value, $context);
 
         if ($this->hasFlags(self::REINDEX)) {
             $value = array_values($value);

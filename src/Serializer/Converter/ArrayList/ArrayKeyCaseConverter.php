@@ -7,33 +7,14 @@ use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
-class Chunker extends BidirectionalConverter
+class ArrayKeyCaseConverter extends BidirectionalConverter
 {
-    public function __construct(private ChunkStrategy $strategy, string ...$flags)
+    public function __construct(private int $normalizedCase = CASE_LOWER, string ...$flags)
     {
         parent::__construct(...$flags);
     }
 
-    public function normalize(mixed $value, ConversionContext $context): array|null
-    {
-        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
-            return $value;
-        }
-
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
-
-        if ($this->hasFlags(self::REVERSE)) {
-            return $this->strategy->merge($value, $context);
-        }
-
-        return $this->strategy->chunk($value, $context);
-    }
-
-    public function denormalize(mixed $value, ConversionContext $context): array|null
+    public function normalize(mixed $value, ConversionContext $context): mixed
     {
         if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
             return null;
@@ -45,10 +26,21 @@ class Chunker extends BidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        if ($this->hasFlags(self::REVERSE)) {
-            return $this->strategy->chunk($value, $context);
+        return array_change_key_case($value, $this->normalizedCase);
+    }
+
+    public function denormalize(mixed $value, ConversionContext $context): mixed
+    {
+        if ($this->hasFlags(self::SKIP_NULL) && $value === null) {
+            return null;
         }
 
-        return $this->strategy->merge($value, $context);
+        if (!$this->hasFlags(self::STRICT)) {
+            $value = ArrayUtil::ensure($value);
+        }
+
+        $this->validateType($value, Type::ARRAY, $context);
+
+        return array_change_key_case($value, $this->normalizedCase === CASE_LOWER ? CASE_UPPER : CASE_LOWER);
     }
 }
