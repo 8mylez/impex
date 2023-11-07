@@ -11,7 +11,7 @@ use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
-class ListConverter extends BidirectionalConverter
+class ElementConverter extends BidirectionalConverter
 {
     public function __construct(
         private AttributeConverter $converter,
