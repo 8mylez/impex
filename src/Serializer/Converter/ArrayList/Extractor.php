@@ -9,16 +9,8 @@ use Dustin\ImpEx\Util\Type;
 
 class Extractor extends UnidirectionalConverter
 {
-    public const MODE_EXCLUDE = 'exclude';
-
-    public const MODE_INCLUDE = 'include';
-
-    public function __construct(private array $keys, private string $mode = self::MODE_INCLUDE, string ...$flags)
+    public function __construct(private ArrayExtractionStrategy $strategy, string ...$flags)
     {
-        if ($mode !== self::MODE_EXCLUDE && $mode !== self::MODE_INCLUDE) {
-            throw new \InvalidArgumentException(sprintf('%s is not a valid mode.', $mode));
-        }
-
         parent::__construct(...$flags);
     }
 
@@ -34,10 +26,6 @@ class Extractor extends UnidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        if ($this->mode === self::MODE_INCLUDE) {
-            return array_intersect_key($value, array_flip($this->keys));
-        }
-
-        return array_diff_key($value, array_flip($this->keys));
+        return $this->strategy->extract($value, $context);
     }
 }
