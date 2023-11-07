@@ -8,15 +8,18 @@ class CaseArrayKeyConversionStrategy extends ArrayKeyConversionStrategy
 {
     public function __construct(private int $normalizedCase = CASE_LOWER)
     {
+        if ($normalizedCase !== CASE_LOWER && $normalizedCase !== CASE_UPPER) {
+            throw new \InvalidArgumentException(sprintf('%s is not a valid case type. Use constants CASE_LOWER and CASE_UPPER.', $normalizedCase));
+        }
     }
 
-    public function normalizeKeys(array $data, ConversionContext $context): array
+    public function normalizeKeys(array $keys, ConversionContext $context): array
     {
-        return array_change_key_case($data, $this->normalizedCase);
+        return array_keys(array_change_key_case(array_flip($keys), $this->normalizedCase));
     }
 
-    public function denormalizeKeys(array $data, ConversionContext $context): array
+    public function denormalizeKeys(array $keys, ConversionContext $context): array
     {
-        return array_change_key_case($data, $this->normalizedCase === CASE_LOWER ? CASE_UPPER : CASE_LOWER);
+        return array_keys(array_change_key_case(array_flip($keys), $this->normalizedCase === CASE_LOWER ? CASE_UPPER : CASE_LOWER));
     }
 }

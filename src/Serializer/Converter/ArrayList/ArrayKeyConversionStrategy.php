@@ -6,7 +6,7 @@ use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
 abstract class ArrayKeyConversionStrategy
 {
-    abstract public function normalizeKeys(array $data, ConversionContext $context): array;
+    abstract public function normalizeKeys(array $keys, ConversionContext $context): array;
 
-    abstract public function denormalizeKeys(array $data, ConversionContext $context): array;
+    abstract public function denormalizeKeys(array $keys, ConversionContext $context): array;
 }

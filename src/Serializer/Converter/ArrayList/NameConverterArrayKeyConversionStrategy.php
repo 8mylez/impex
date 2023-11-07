@@ -11,25 +11,23 @@ class NameConverterArrayKeyConversionStrategy extends ArrayKeyConversionStrategy
     {
     }
 
-    public function normalizeKeys(array $data, ConversionContext $context): array
+    public function normalizeKeys(array $keys, ConversionContext $context): array
     {
-        $converted = [];
-
-        foreach ($data as $key => $value) {
-            $converted[$this->nameConverter->normalize($key)] = $value;
-        }
-
-        return $converted;
+        return array_map(
+            function (string|int $key) {
+                return $this->nameConverter->normalize($key);
+            },
+            $keys
+        );
     }
 
-    public function denormalizeKeys(array $data, ConversionContext $context): array
+    public function denormalizeKeys(array $keys, ConversionContext $context): array
     {
-        $converted = [];
-
-        foreach ($data as $key => $value) {
-            $converted[$this->nameConverter->denormalize($key)] = $value;
-        }
-
-        return $converted;
+        return array_map(
+            function (string|int $key) {
+                return $this->nameConverter->denormalize($key);
+            },
+            $keys
+        );
     }
 }

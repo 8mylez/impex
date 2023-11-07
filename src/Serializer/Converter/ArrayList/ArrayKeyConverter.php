@@ -26,7 +26,9 @@ class ArrayKeyConverter extends BidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        return $this->strategy->normalizeKeys($value, $context);
+        $keys = $this->strategy->normalizeKeys(array_keys($value), $context);
+
+        return array_combine($keys, $value);
     }
 
     public function denormalize(mixed $value, ConversionContext $context): mixed
@@ -41,6 +43,8 @@ class ArrayKeyConverter extends BidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        return $this->strategy->denormalizeKeys($value, $context);
+        $keys = $this->strategy->denormalizeKeys(array_keys($value), $context);
+
+        return array_combine($keys, $value);
     }
 }
