@@ -6,11 +6,10 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
-use Symfony\Component\Serializer\NameConverter\NameConverterInterface;
 
 class ArrayKeyConverter extends BidirectionalConverter
 {
-    public function __construct(private NameConverterInterface $nameConverter, string ...$flags)
+    public function __construct(private ArrayKeyConversionStrategy $strategy, string ...$flags)
     {
         parent::__construct(...$flags);
     }
@@ -27,13 +26,7 @@ class ArrayKeyConverter extends BidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        $converted = [];
-
-        foreach ($value as $key => $v) {
-            $converted[$this->nameConverter->normalize($key)] = $v;
-        }
-
-        return $converted;
+        return $this->strategy->normalizeKeys($value, $context);
     }
 
     public function denormalize(mixed $value, ConversionContext $context): mixed
@@ -48,12 +41,6 @@ class ArrayKeyConverter extends BidirectionalConverter
 
         $this->validateType($value, Type::ARRAY, $context);
 
-        $converted = [];
-
-        foreach ($value as $key => $v) {
-            $converted[$this->nameConverter->denormalize($key)] = $v;
-        }
-
-        return $converted;
+        return $this->strategy->denormalizeKeys($value, $context);
     }
 }
