@@ -47,7 +47,7 @@ class ConverterMapping extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             $converter = $this->getConverter($key);
@@ -55,13 +55,11 @@ class ConverterMapping extends BidirectionalConverter
             try {
                 $converted[$key] = $converter !== null ? $converter->normalize($value, $context->subContext(new Path([$key]))) : $value;
             } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }
@@ -79,7 +77,7 @@ class ConverterMapping extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             $converter = $this->getConverter($key);
@@ -87,13 +85,11 @@ class ConverterMapping extends BidirectionalConverter
             try {
                 $converted[$key] = $converter !== null ? $converter->denormalize($value, $context->subContext(new Path([$key]))) : $value;
             } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }

@@ -32,7 +32,7 @@ class GroupChunkStrategy extends ChunkStrategy
     public function chunk(array $data, ConversionContext $context): array
     {
         $result = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $record) {
             $subContext = $context->subContext(new Path([$key]));
@@ -40,13 +40,13 @@ class GroupChunkStrategy extends ChunkStrategy
             try {
                 $groupKey = PropertyAccessor::get($this->groupKey, $record);
             } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
-                $exceptions[] = new AttributeConversionException($subContext->getPath(), $subContext->getRootData(), 'Group key {{ path }} could not be fetched from value of type {{ type }}.', ['path' => $this->groupKey, 'type' => Type::getDebugType($record)], self::GROUP_KEY_NOT_FOUND_ERROR);
+                $exceptions->add(new AttributeConversionException($subContext->getPath(), $subContext->getRootData(), 'Group key {{ path }} could not be fetched from value of type {{ type }}.', ['path' => $this->groupKey, 'type' => Type::getDebugType($record)], self::GROUP_KEY_NOT_FOUND_ERROR));
 
                 continue;
             }
 
             if (!Type::isStringConvertable(Type::getType($record))) {
-                $exceptions[] = TypeConversionException::string($subContext->getPath(), $subContext->getRootData(), $record);
+                $exceptions->add(TypeConversionException::string($record, $subContext));
 
                 continue;
             }
@@ -54,9 +54,7 @@ class GroupChunkStrategy extends ChunkStrategy
             $result[(string) $groupKey][] = $record;
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $result;
     }

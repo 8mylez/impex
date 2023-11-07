@@ -4,8 +4,9 @@ namespace Dustin\ImpEx\Serializer\Exception;
 
 use Dustin\Exception\ErrorCode;
 use Dustin\Exception\ErrorCodeException;
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 
-class AttributeConversionException extends ErrorCodeException
+class AttributeConversionException extends ErrorCodeException implements AttributeConversionExceptionInterface
 {
     public const UNKNOWN_ERROR = 'IMPEX_CONVERSION__UNKNOWN_ERROR';
 
@@ -19,27 +20,27 @@ class AttributeConversionException extends ErrorCodeException
         parent::__construct($message, $parameters);
     }
 
-    public static function unknown(string $path, array $data, string $message): self
+    public static function unknown(string $message, ConversionContext $context): self
     {
         return new self(
-            $path, $data,
+            $context->getPath(), $context->getRootData(),
             $message, [],
             self::UNKNOWN_ERROR
         );
     }
 
-    public static function fromErrorCode(string $path, array $data, ErrorCode $errorCode): self
+    public static function fromErrorCode(ErrorCode $errorCode, ConversionContext $context): self
     {
         return new self(
-            $path, $data,
+            $context->getPath(), $context->getRootData(),
             $errorCode->getMessage(), [],
             $errorCode->getErrorCode()
         );
     }
 
-    public static function fromException(string $path, array $data, \Throwable $th): self
+    public static function fromException(\Throwable $th, ConversionContext $context): self
     {
-        return static::unknown($path, $data, $th->getMessage());
+        return static::unknown($th->getMessage(), $context);
     }
 
     public function getErrorCode(): string

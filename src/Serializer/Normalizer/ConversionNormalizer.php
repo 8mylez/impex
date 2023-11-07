@@ -8,6 +8,7 @@ use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionInterface;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
@@ -120,7 +121,9 @@ class ConversionNormalizer extends AbstractNormalizer
 
         $attributes = $this->getAttributes($object, $class, $format, $context);
         $data = [];
-        $conversionExceptions = [];
+
+        $rootConversionContext = $this->getConversionContext($context);
+        $conversionExceptions = new AttributeConversionExceptionStack($rootConversionContext?->getPath() ?? '', $rootConversionContext?->getRootData() ?? Value::normalize($object));
 
         foreach ($attributes as $attribute) {
             $attributeContext = $this->getAttributeNormalizationContext($object, $attribute, $context);
@@ -145,23 +148,19 @@ class ConversionNormalizer extends AbstractNormalizer
 
                 try {
                     $attributeValue = $converter->normalize($attributeValue, $conversionContext);
-                } catch (AttributeConversionException $e) {
-                    $conversionExceptions[] = $e;
+                } catch (AttributeConversionExceptionInterface $e) {
+                    $conversionExceptions->add($e);
 
                     continue;
                 } catch (ErrorCode $errorCode) {
-                    $conversionExceptions[] = AttributeConversionException::fromErrorCode(
-                        $conversionContext->getPath(),
-                        $conversionContext->getRootData(),
-                        $errorCode
+                    $conversionExceptions->add(
+                        AttributeConversionException::fromErrorCode($errorCode, $conversionContext)
                     );
 
                     continue;
                 } catch (\Throwable $th) {
-                    $conversionExceptions[] = AttributeConversionException::fromException(
-                        $conversionContext->getPath(),
-                        $conversionContext->getRootData(),
-                        $th
+                    $conversionExceptions->add(
+                        AttributeConversionException::fromException($th, $conversionContext)
                     );
 
                     continue;
@@ -187,11 +186,7 @@ class ConversionNormalizer extends AbstractNormalizer
             $this->setValue($data, $attribute, $attributeValue, $attributeContext);
         }
 
-        if (count($conversionExceptions) > 0) {
-            $conversionContext = $this->getConversionContext($context);
-
-            throw new AttributeConversionExceptionStack($conversionContext?->getPath() ?? '', $conversionContext?->getRootData() ?? Value::normalize($object), ...$conversionExceptions);
-        }
+        $conversionExceptions->throw();
 
         if ($this->preserveEmptyObjects($context) && empty($data)) {
             return new \ArrayObject();
@@ -227,7 +222,8 @@ class ConversionNormalizer extends AbstractNormalizer
             }
         }
 
-        $conversionExceptions = [];
+        $rootConversionContext = $this->getConversionContext($context);
+        $conversionExceptions = new AttributeConversionExceptionStack($rootConversionContext?->getPath() ?? '', $rootConversionContext?->getRootData() ?? $data);
 
         foreach ($attributes as $attribute) {
             $normalizedAttribute = $attribute;
@@ -247,23 +243,19 @@ class ConversionNormalizer extends AbstractNormalizer
 
                 try {
                     $value = $converter->denormalize($value, $conversionContext);
-                } catch (AttributeConversionException $e) {
-                    $conversionExceptions[] = $e;
+                } catch (AttributeConversionExceptionInterface $e) {
+                    $conversionExceptions->add($e);
 
                     continue;
                 } catch (ErrorCode $errorCode) {
-                    $conversionExceptions[] = AttributeConversionException::fromErrorCode(
-                        $conversionContext->getPath(),
-                        $conversionContext->getRootData(),
-                        $errorCode
+                    $conversionExceptions->add(
+                        AttributeConversionException::fromErrorCode($errorCode, $conversionContext)
                     );
 
                     continue;
                 } catch (\Throwable $th) {
-                    $conversionExceptions[] = AttributeConversionException::fromException(
-                        $conversionContext->getPath(),
-                        $conversionContext->getRootData(),
-                        $th
+                    $conversionExceptions->add(
+                        AttributeConversionException::fromException($th, $conversionContext)
                     );
 
                     continue;
@@ -286,11 +278,7 @@ class ConversionNormalizer extends AbstractNormalizer
             $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
         }
 
-        if (count($conversionExceptions) > 0) {
-            $conversionContext = $this->getConversionContext($context);
-
-            throw new AttributeConversionExceptionStack($conversionContext?->getPath() ?? '', $conversionContext?->getRootData() ?? $data, ...$conversionExceptions);
-        }
+        $conversionExceptions->throw();
 
         return $object;
     }

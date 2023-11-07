@@ -12,19 +12,17 @@ class DistinctCountStrategy extends CountStrategy
 {
     public function count(array $data, ConversionContext $context): array
     {
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             $subContext = $context->subContext(new Path([$key]));
 
             if (!Type::isStringConvertable(Type::getType($value))) {
-                $exceptions[] = TypeConversionException::string($subContext->getPath(), $subContext->getRootData(), $value);
+                $exceptions->add(TypeConversionException::string($value, $subContext));
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return array_count_values($data);
     }

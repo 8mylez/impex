@@ -37,7 +37,7 @@ class SizeChunkStrategy extends ChunkStrategy
         $this->validateArrays($arrays, $context);
 
         if ($this->strictChunkSize === true) {
-            $exceptions = [];
+            $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
             $i = 0;
 
             foreach ($arrays as $key => $a) {
@@ -47,13 +47,11 @@ class SizeChunkStrategy extends ChunkStrategy
                 try {
                     $this->validateChunkSize($a, $subContext, $i === count($arrays));
                 } catch (AttributeConversionException $e) {
-                    $exceptions[] = $e;
+                    $exceptions->add($e);
                 }
             }
 
-            if (count($exceptions) > 0) {
-                throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-            }
+            $exceptions->throw();
         }
 
         return array_merge(...$arrays);

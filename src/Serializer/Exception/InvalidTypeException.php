@@ -11,7 +11,7 @@ class InvalidTypeException extends AttributeConversionException
 
     public const INVALID_ARRAY_KEY_ERROR = 'IMPEX_CONVERSION__INVALID_ARRAY_KEY_ERROR';
 
-    public static function invalidType(ConversionContext $context, string $expectedType, mixed $value): self
+    public static function invalidType(string $expectedType, mixed $value, ConversionContext $context): self
     {
         return new self(
             $context->getPath(), $context->getRootData(),
@@ -21,7 +21,7 @@ class InvalidTypeException extends AttributeConversionException
         );
     }
 
-    public static function invalidArrayKey(ConversionContext $context, mixed $value): self
+    public static function invalidArrayKey(mixed $value, ConversionContext $context): self
     {
         return new self(
             $context->getPath(), $context->getRootData(),

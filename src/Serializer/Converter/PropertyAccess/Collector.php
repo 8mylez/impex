@@ -25,7 +25,7 @@ class Collector extends UnidirectionalConverter
             try {
                 $collected = PropertyAccessor::collect($path, $value, ...$this->flags);
             } catch (NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
-                throw AttributeConversionException::fromErrorCode($context->getPath(), $context->getRootData(), $exception);
+                throw AttributeConversionException::fromErrorCode($exception, $context);
             }
 
             $result = array_merge_recursive($result, $collected);

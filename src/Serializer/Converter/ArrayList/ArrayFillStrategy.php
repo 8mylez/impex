@@ -38,17 +38,15 @@ class ArrayFillStrategy extends ArrayConversionStrategy
 
     protected function validateKeys(array $data, ConversionContext $context): void
     {
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             if (!Type::isStringConvertable(Type::getType($value))) {
                 $subContext = $context->subContext(new Path([$key]));
-                $exceptions[] = InvalidTypeException::invalidArrayKey($subContext, $value);
+                $exceptions->add(InvalidTypeException::invalidArrayKey($value, $subContext));
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
     }
 }

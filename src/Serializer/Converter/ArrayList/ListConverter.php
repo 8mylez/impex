@@ -33,19 +33,17 @@ class ListConverter extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             try {
                 $converted[$key] = $this->converter->normalize($value, $context->subContext(new Path([$key])));
             } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }
@@ -63,19 +61,17 @@ class ListConverter extends BidirectionalConverter
         $this->validateType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             try {
                 $converted[$key] = $this->converter->denormalize($value, $context->subContext(new Path([$key])));
             } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }

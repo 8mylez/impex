@@ -2,61 +2,30 @@
 
 namespace Dustin\ImpEx\Serializer\Exception;
 
-class AttributeConversionExceptionStack extends AttributeConversionException
+use Dustin\Exception\ExceptionStack;
+use Dustin\Exception\StackException;
+
+class AttributeConversionExceptionStack extends ExceptionStack
 {
-    public const ERROR_CODE = 'IMPEX_CONVERSION__ERRORS';
-
-    /**
-     * @var array
-     */
-    private $errors = [];
-
-    public function __construct(string $attributePath, array $data, AttributeConversionException ...$errors)
+    public function __construct(
+        private string $attributePath,
+        private array $data,
+        AttributeConversionExceptionInterface ...$errors)
     {
-        $this->errors = $errors;
-
-        parent::__construct($attributePath, $data, static::createMessage(), [], self::ERROR_CODE);
+        parent::__construct(...$errors);
     }
 
-    public function getErrors(): array
+    public function add(AttributeConversionExceptionInterface ...$exceptions): void
     {
-        return $this->errors;
+        parent::add(...$exceptions);
     }
 
-    public function getErrorCount(): int
+    public function throw(): void
     {
-        $count = 0;
-
-        foreach ($this->errors as $error) {
-            $count += $error->getErrorCount();
+        try {
+            parent::throw();
+        } catch (StackException $e) {
+            throw new AttributeConversionStackException($this->attributePath, $this->data, ...$e->getErrors());
         }
-
-        return $count;
-    }
-
-    public function getMessages(): array
-    {
-        $messages = [];
-
-        foreach ($this->errors as $error) {
-            foreach ($error->getMessages() as $message) {
-                if (!$error instanceof self) {
-                    $message = sprintf(' • [%s] - %s', $error->getAttributePath(), trim($message));
-                }
-
-                $messages[] = $message;
-            }
-        }
-
-        return $messages;
-    }
-
-    private function createMessage(): string
-    {
-        $messages = [sprintf('Caught %s errors.', $this->getErrorCount())];
-
-        array_push($messages, ...$this->getMessages());
-
-        return implode("\n", $messages);
     }
 }

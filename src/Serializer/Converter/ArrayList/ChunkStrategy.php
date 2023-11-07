@@ -21,18 +21,16 @@ abstract class ChunkStrategy
 
     protected function validateArrays(array $arrays, ConversionContext $context): void
     {
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($arrays as $key => $a) {
             $subContext = $context->subContext(new Path([$key]));
 
             if (!Type::is($a, Type::ARRAY)) {
-                $exceptions[] = InvalidTypeException::invalidType($subContext->getPath(), $subContext->getRootData(), Type::ARRAY, $a);
+                $exceptions->add(InvalidTypeException::invalidType(Type::ARRAY, $a, $subContext));
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
     }
 }

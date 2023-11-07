@@ -78,7 +78,7 @@ abstract class AttributeConverter
     protected function validateType(mixed $value, string $expectedType, ConversionContext $context): void
     {
         if (!Type::is($value, $expectedType)) {
-            throw InvalidTypeException::invalidType($context->getPath(), $context->getRootData(), $expectedType, $value);
+            throw InvalidTypeException::invalidType($expectedType, $value, $context);
         }
     }
 
@@ -93,7 +93,7 @@ abstract class AttributeConverter
             !Type::isStringConvertable(Type::getType($value)) &&
             !(is_object($value) && \method_exists($value, '__toString'))
         ) {
-            throw TypeConversionException::string($context->getPath(), $context->getRootData(), $value);
+            throw TypeConversionException::string($value, $context);
         }
     }
 
@@ -105,7 +105,7 @@ abstract class AttributeConverter
     protected function validateNumericConvertable(mixed $value, ConversionContext $context): void
     {
         if (!Type::isNumericConvertable(Type::getType($value))) {
-            throw TypeConversionException::numeric($context->getPath(), $context->getRootData(), $value);
+            throw TypeConversionException::numeric($value, $context);
         }
     }
 }

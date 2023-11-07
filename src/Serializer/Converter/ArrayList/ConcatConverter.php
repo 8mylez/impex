@@ -85,18 +85,16 @@ class ConcatConverter extends BidirectionalConverter
 
     private function validateStrings(array $strings, ConversionContext $context): void
     {
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($strings as $key => $v) {
             try {
                 $this->validateStringConvertable($v, $context->subContext(new Path([$key])));
             } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
     }
 }
