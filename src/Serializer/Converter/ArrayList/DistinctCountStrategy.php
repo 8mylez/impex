@@ -15,9 +15,8 @@ class DistinctCountStrategy extends CountStrategy
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
-            $subContext = $context->subContext(new Path([$key]));
-
             if (!Type::isStringConvertable(Type::getType($value))) {
+                $subContext = $context->subContext(new Path([$key]));
                 $exceptions->add(TypeConversionException::string($value, $subContext));
             }
         }

@@ -24,9 +24,8 @@ abstract class ChunkStrategy
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($arrays as $key => $a) {
-            $subContext = $context->subContext(new Path([$key]));
-
             if (!Type::is($a, Type::ARRAY)) {
+                $subContext = $context->subContext(new Path([$key]));
                 $exceptions->add(InvalidTypeException::invalidType(Type::ARRAY, $a, $subContext));
             }
         }
