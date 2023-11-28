@@ -34,18 +34,10 @@ class CaseConverter extends BidirectionalConverter
         $this->validateType($value, Type::STRING, $context);
 
         if ($this->normalizedCase === CASE_LOWER) {
-            if ($this->hasFlags(self::FIRST_LETTER_ONLY)) {
-                return lcfirst($value);
-            }
-
-            return strtolower($value);
+            return $this->toLower($value);
         }
 
-        if ($this->hasFlags(self::FIRST_LETTER_ONLY)) {
-            return ucfirst($value);
-        }
-
-        return strtoupper($value);
+        return $this->toUpper($value);
     }
 
     public function denormalize(mixed $value, ConversionContext $context): mixed
@@ -63,17 +55,27 @@ class CaseConverter extends BidirectionalConverter
         $this->validateType($value, Type::STRING, $context);
 
         if ($this->normalizedCase === CASE_UPPER) {
-            if ($this->hasFlags(self::FIRST_LETTER_ONLY)) {
-                return lcfirst($value);
-            }
-
-            return strtolower($value);
+            return $this->toLower($value);
         }
 
+        return $this->toUpper($value);
+    }
+
+    protected function toUpper(string $value): string
+    {
         if ($this->hasFlags(self::FIRST_LETTER_ONLY)) {
             return ucfirst($value);
         }
 
         return strtoupper($value);
+    }
+
+    protected function toLower(string $value): string
+    {
+        if ($this->hasFlags(self::FIRST_LETTER_ONLY)) {
+            return lcfirst($value);
+        }
+
+        return strtolower($value);
     }
 }
