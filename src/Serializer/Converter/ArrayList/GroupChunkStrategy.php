@@ -45,8 +45,8 @@ class GroupChunkStrategy extends ChunkStrategy
                 continue;
             }
 
-            if (!Type::isStringConvertable(Type::getType($record))) {
-                $exceptions->add(TypeConversionException::string($record, $subContext));
+            if (!Type::isStringConvertable(Type::getType($groupKey))) {
+                $exceptions->add(TypeConversionException::string($groupKey, $subContext));
 
                 continue;
             }
