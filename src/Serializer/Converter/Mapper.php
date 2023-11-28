@@ -2,21 +2,19 @@
 
 namespace Dustin\ImpEx\Serializer\Converter;
 
-use Dustin\Encapsulation\Encapsulation;
-use Dustin\Encapsulation\EncapsulationInterface;
 use Dustin\ImpEx\Util\Type;
 
 class Mapper extends BidirectionalConverter
 {
     public function __construct(
-        private EncapsulationInterface $normalizationMapping,
-        private ?EncapsulationInterface $denormalizationMapping = null,
+        private array $normalizationMapping,
+        private ?array $denormalizationMapping = null,
         string ...$flags
     ) {
         parent::__construct(...$flags);
 
         if ($denormalizationMapping === null) {
-            $this->denormalizationMapping = new Encapsulation(array_flip($normalizationMapping->toArray()));
+            $this->denormalizationMapping = array_flip($normalizationMapping);
         }
     }
 
@@ -26,19 +24,13 @@ class Mapper extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $this->validateStringConvertable($value, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
-            $value = (string) $value;
-        }
-
-        $this->validateType($value, Type::STRING, $context);
-
-        if (!$this->normalizationMapping->has($value)) {
+        if (!array_key_exists($value, $this->normalizationMapping)) {
             return $value;
         }
 
-        return $this->normalizationMapping->get($value);
+        return $this->normalizationMapping[$value];
     }
 
     public function denormalize(mixed $value, ConversionContext $context): mixed
@@ -47,18 +39,12 @@ class Mapper extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $this->validateStringConvertable($value, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
-            $value = (string) $value;
-        }
-
-        $this->validateType($value, Type::STRING, $context);
-
-        if (!$this->denormalizationMapping->has($value)) {
+        if (!array_key_exists($value, $this->denormalizationMapping)) {
             return $value;
         }
 
-        return $this->denormalizationMapping->get($value);
+        return $this->denormalizationMapping[$value];
     }
 }

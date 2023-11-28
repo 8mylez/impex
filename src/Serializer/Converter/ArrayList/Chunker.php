@@ -4,7 +4,6 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Chunker extends BidirectionalConverter
@@ -20,11 +19,7 @@ class Chunker extends BidirectionalConverter
             return $value;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
+        $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->strategy->merge($value, $context);
@@ -39,11 +34,7 @@ class Chunker extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
+        $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->strategy->chunk($value, $context);

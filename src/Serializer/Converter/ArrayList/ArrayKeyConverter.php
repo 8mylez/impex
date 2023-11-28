@@ -4,7 +4,6 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class ArrayKeyConverter extends BidirectionalConverter
@@ -20,11 +19,7 @@ class ArrayKeyConverter extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
+        $this->ensureType($value, Type::ARRAY, $context);
 
         $keys = $this->strategy->normalizeKeys(array_keys($value), $context);
 
@@ -37,11 +32,7 @@ class ArrayKeyConverter extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
+        $this->ensureType($value, Type::ARRAY, $context);
 
         $keys = $this->strategy->denormalizeKeys(array_keys($value), $context);
 

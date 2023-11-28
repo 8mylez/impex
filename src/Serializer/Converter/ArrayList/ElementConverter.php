@@ -8,7 +8,6 @@ use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class ElementConverter extends BidirectionalConverter
@@ -26,11 +25,7 @@ class ElementConverter extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::ensure($data);
-        }
-
-        $this->validateType($data, Type::ARRAY, $context);
+        $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
@@ -54,11 +49,7 @@ class ElementConverter extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::ensure($data);
-        }
-
-        $this->validateType($data, Type::ARRAY, $context);
+        $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());

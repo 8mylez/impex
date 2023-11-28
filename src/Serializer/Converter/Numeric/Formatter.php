@@ -8,8 +8,6 @@ use Dustin\ImpEx\Util\Type;
 
 class Formatter extends UnidirectionalConverter
 {
-    use NumberConversionTrait;
-
     public function __construct(
         private string $decimalSeparator = '.',
         private string $thousandsSeparator = ',',
@@ -25,15 +23,7 @@ class Formatter extends UnidirectionalConverter
             return null;
         }
 
-        $type = Type::getType($value);
-
-        if (!$this->hasFlags(self::STRICT) && !Type::isNumericType($type)) {
-            $this->validateNumericConvertable($value, $context);
-
-            $value = $this->convertToNumeric($value);
-        }
-
-        $this->validateType($value, Type::NUMERIC, $context);
+        $this->ensureType($value, Type::NUMERIC, $context);
 
         return $this->formatNumber($value);
     }

@@ -4,7 +4,6 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Extractor extends UnidirectionalConverter
@@ -20,11 +19,7 @@ class Extractor extends UnidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::ensure($value);
-        }
-
-        $this->validateType($value, Type::ARRAY, $context);
+        $this->ensureType($value, Type::ARRAY, $context);
 
         return $this->strategy->extract($value, $context);
     }

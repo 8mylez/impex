@@ -8,8 +8,6 @@ use Dustin\ImpEx\Util\Type;
 
 class Adder extends BidirectionalConverter
 {
-    use NumberConversionTrait;
-
     public function __construct(private int|float $summand, string ...$flags)
     {
         parent::__construct(...$flags);
@@ -21,13 +19,7 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
-
-            $value = $this->convertToNumeric($value);
-        }
-
-        $this->validateType($value, Type::NUMERIC, $context);
+        $this->ensureType($value, Type::NUMERIC, $context);
 
         return $value + $this->summand;
     }
@@ -38,13 +30,7 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
-
-            $value = $this->convertToNumeric($value);
-        }
-
-        $this->validateType($value, Type::NUMERIC, $context);
+        $this->ensureType($value, Type::NUMERIC, $context);
 
         return $value - $this->summand;
     }

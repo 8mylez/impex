@@ -9,8 +9,6 @@ use Dustin\ImpEx\Util\Type;
 
 class Multiplier extends BidirectionalConverter
 {
-    use NumberConversionTrait;
-
     public const DIVISION_BY_ZERO_ERROR = 'IMPEX_CONVERSION__DIVISION_BY_ZERO_ERROR';
 
     public function __construct(private int|float $factor, string ...$flags)
@@ -24,13 +22,7 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
-
-            $value = $this->convertToNumeric($value);
-        }
-
-        $this->validateType($value, Type::NUMERIC, $context);
+        $this->ensureType($value, Type::NUMERIC, $context);
 
         return $value * $this->factor;
     }
@@ -41,13 +33,7 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
-
-            $value = $this->convertToNumeric($value);
-        }
-
-        $this->validateType($value, Type::NUMERIC, $context);
+        $this->ensureType($value, Type::NUMERIC, $context);
 
         if (floatval($this->factor) === 0.0) {
             throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Division by zero was detected.', [], self::DIVISION_BY_ZERO_ERROR);
