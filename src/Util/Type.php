@@ -40,7 +40,7 @@ class Type
         self::CALLABLE,
     ];
 
-    public static function getType($value): string
+    public static function getType(mixed $value): string
     {
         foreach (self::DATA_TYPES as $type) {
             $isType = 'is_'.$type;
@@ -53,12 +53,12 @@ class Type
         return self::UNKNOWN;
     }
 
-    public static function getDebugType($value): string
+    public static function getDebugType(mixed $value): string
     {
         return get_debug_type($value);
     }
 
-    public static function is($value, string $type): bool
+    public static function is(mixed $value, string $type): bool
     {
         if (class_exists($type) || interface_exists($type)) {
             return $value instanceof $type;
