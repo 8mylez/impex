@@ -33,20 +33,18 @@ class Comparison extends Condition
         self::GREATER_THAN_OR_EQUALS,
     ];
 
-    public function __construct(private string $operator, private mixed $compareValue = null)
+    public function __construct(mixed $primaryCompareValue = null, private string $operator, private mixed $secondaryCompareValue)
     {
         if (!in_array($operator, self::OPERATORS)) {
             throw new \InvalidArgumentException(sprintf("'%s' is not a valid operator.", $operator));
         }
+
+        parent::__construct($primaryCompareValue);
     }
 
-    public function isFullfilled(mixed $value, ConversionContext $context): bool
+    public function match(mixed $value, ConversionContext $context): bool
     {
-        $compareValue = $this->compareValue;
-
-        if (is_callable($compareValue)) {
-            $compareValue = $compareValue($value, $context);
-        }
+        $compareValue = $this->processValue($this->secondaryCompareValue, $context);
 
         switch ($this->operator) {
             case self::EQUALS:

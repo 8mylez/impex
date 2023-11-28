@@ -13,16 +13,18 @@ class HasProperty extends Condition
      */
     private $path;
 
-    public function __construct(string|array|Path $path)
+    public function __construct(mixed $compareValue = null, string|array|Path $path)
     {
         if (!$path instanceof Path) {
             $path = new Path($path);
         }
 
         $this->path = $path;
+
+        parent::__construct($compareValue);
     }
 
-    public function isFullfilled(mixed $value, ConversionContext $context): bool
+    public function match(mixed $value, ConversionContext $context): bool
     {
         return PropertyAccessor::has($this->path, $value);
     }

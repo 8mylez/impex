@@ -7,11 +7,12 @@ use Dustin\ImpEx\Util\Type;
 
 class IsType extends Condition
 {
-    public function __construct(private string $type)
+    public function __construct(mixed $compareValue = null, private string $type)
     {
+        parent::__construct($compareValue);
     }
 
-    public function isFullfilled(mixed $value, ConversionContext $context): bool
+    public function match(mixed $value, ConversionContext $context): bool
     {
         return Type::is($value, $this->type);
     }
