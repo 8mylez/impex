@@ -9,13 +9,19 @@ use Dustin\ImpEx\PropertyAccess\Exception\PropertyNotFoundException;
 use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
 use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
+use Dustin\ImpEx\Serializer\Converter\ProcessValueTrait;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 
 class AccessOperationConverter extends UnidirectionalConverter
 {
+    use ProcessValueTrait;
+
     public function __construct(private AccessOperation $operation, private mixed $writeValue = null)
     {
+        if ($writeValue instanceof AccessOperation && !AccessOperation::isReadOperation($writeValue)) {
+            throw new \LogicException('Operation must be read-operation.');
+        }
     }
 
     public static function get(string|array|Path $path, string ...$flags): self
@@ -50,11 +56,7 @@ class AccessOperationConverter extends UnidirectionalConverter
 
     public function convert(mixed $value, ConversionContext $context): mixed
     {
-        $writeValue = $this->writeValue;
-
-        if (is_callable($writeValue)) {
-            $writeValue = $writeValue($value, $context);
-        }
+        $writeValue = $this->processValue($this->writeValue, $context);
 
         try {
             $this->operation->execute($value, $writeValue);
