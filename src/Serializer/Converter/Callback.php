@@ -4,12 +4,26 @@ namespace Dustin\ImpEx\Serializer\Converter;
 
 class Callback extends BidirectionalConverter
 {
+    /**
+     * @var callable
+     */
+    private $normalizationCallback;
+
+    /**
+     * @var callable
+     */
+    private $denormalizationCallback;
+
     public function __construct(
-        private \Closure $normalizationCallback,
-        private ?\Closure $denormalizationCallback = null
+        callable $normalizationCallback,
+        ?callable $denormalizationCallback = null
     ) {
+        $this->normalizationCallback = $normalizationCallback;
+
         if ($denormalizationCallback === null) {
             $this->denormalizationCallback = $normalizationCallback;
+        } else {
+            $this->denormalizationCallback = $denormalizationCallback;
         }
     }
 
