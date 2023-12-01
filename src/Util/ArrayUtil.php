@@ -31,10 +31,6 @@ class ArrayUtil
             $current = &$nested;
 
             foreach ($path as $field) {
-                if (is_numeric($field)) {
-                    $field = (int) $field;
-                }
-
                 if (!isset($current[$field])) {
                     $current[$field] = [];
                 }
@@ -46,5 +42,29 @@ class ArrayUtil
         }
 
         return $nested;
+    }
+
+    public static function nestedToFlat(array $data): array
+    {
+        return static::nestedToFlatRecursive($data, new Path());
+    }
+
+    private static function nestedToFlatRecursive(array $data, Path $path): array
+    {
+        $result = [];
+
+        foreach ($data as $key => $value) {
+            $subPath = $path->copy()->add($key);
+
+            if (is_array($value)) {
+                $result = array_merge($result, static::nestedToFlatRecursive($value, $subPath));
+
+                continue;
+            }
+
+            $result[(string) $subPath] = $value;
+        }
+
+        return $result;
     }
 }
