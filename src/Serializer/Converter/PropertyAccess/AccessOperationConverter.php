@@ -59,7 +59,7 @@ class AccessOperationConverter extends UnidirectionalConverter
         $writeValue = $this->processValue($this->writeValue, $context);
 
         try {
-            $this->operation->execute($value, $writeValue);
+            return $this->operation->execute($value, $writeValue);
         } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
             throw AttributeConversionException::fromErrorCode($exception, $context);
         }

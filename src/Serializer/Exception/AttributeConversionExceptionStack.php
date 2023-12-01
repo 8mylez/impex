@@ -15,8 +15,14 @@ class AttributeConversionExceptionStack extends ExceptionStack
         parent::__construct(...$errors);
     }
 
-    public function add(AttributeConversionExceptionInterface ...$exceptions): void
+    public function add(\Throwable ...$exceptions): void
     {
+        foreach ($exceptions as $key => $e) {
+            if (!$e instanceof AttributeConversionExceptionInterface) {
+                throw new \InvalidArgumentException(sprintf('Argument #%s must be %s. %s given.', $key, AttributeConversionExceptionInterface::class, get_debug_type($e)));
+            }
+        }
+
         parent::add(...$exceptions);
     }
 

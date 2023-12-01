@@ -90,6 +90,8 @@ abstract class AttributeConverter
         }
 
         $this->validateType($value, $type, $context);
+
+        return $value;
     }
 
     /**
