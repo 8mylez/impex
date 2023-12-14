@@ -23,7 +23,7 @@ class Formatter extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::NUMERIC, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
         return $this->formatNumber($value);
     }

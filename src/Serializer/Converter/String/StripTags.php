@@ -19,7 +19,7 @@ class StripTags extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         return strip_tags($value, $this->allowedTags);
     }

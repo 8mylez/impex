@@ -27,7 +27,7 @@ class EncodingConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         try {
             $result = \mb_convert_encoding($value, $this->normalizedEncoding, $this->internalEncoding);
@@ -50,7 +50,7 @@ class EncodingConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         try {
             $result = \mb_convert_encoding($value, $this->internalEncoding ?? mb_internal_encoding(), $this->normalizedEncoding);

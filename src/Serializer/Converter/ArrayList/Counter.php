@@ -13,7 +13,7 @@ class Counter extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, \Countable::class, $context);
+        $value = $this->ensureType($value, \Countable::class, $context);
 
         return count($value);
     }

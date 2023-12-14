@@ -33,7 +33,7 @@ class Trimmer extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         switch ($this->mode) {
             case self::MODE_BOTH:

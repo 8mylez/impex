@@ -17,7 +17,7 @@ class DistinctCounter extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 

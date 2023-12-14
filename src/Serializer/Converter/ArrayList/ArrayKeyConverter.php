@@ -19,7 +19,7 @@ class ArrayKeyConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         $keys = $this->strategy->normalizeKeys(array_keys($value), $context);
 
@@ -32,7 +32,7 @@ class ArrayKeyConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         $keys = $this->strategy->denormalizeKeys(array_keys($value), $context);
 

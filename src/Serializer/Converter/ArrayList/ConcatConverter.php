@@ -23,12 +23,12 @@ class ConcatConverter extends BidirectionalConverter
         }
 
         if ($this->hasFlags(self::REVERSE)) {
-            $this->ensureType($value, Type::STRING, $context);
+            $value = $this->ensureType($value, Type::STRING, $context);
 
             return $this->explode($value);
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
         $this->validateStrings($value, $context);
 
         return $this->implode($value);
@@ -41,13 +41,13 @@ class ConcatConverter extends BidirectionalConverter
         }
 
         if ($this->hasFlags(self::REVERSE)) {
-            $this->ensureType($value, Type::ARRAY, $context);
+            $value = $this->ensureType($value, Type::ARRAY, $context);
             $this->validateStrings($value, $context);
 
             return $this->implode($value);
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         return $this->explode($value);
     }

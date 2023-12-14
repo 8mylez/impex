@@ -23,7 +23,7 @@ class HtmlEntityEncoder extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->decode($value);
@@ -38,7 +38,7 @@ class HtmlEntityEncoder extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->encode($value);

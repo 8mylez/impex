@@ -31,11 +31,10 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::NUMERIC, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
         $factor = $this->processValue($this->factor, $context);
-
-        $this->ensureType($factor, Type::NUMERIC, $context);
+        $factor = $this->ensureType($factor, Type::NUMERIC, $context);
 
         return $value * $factor;
     }
@@ -46,11 +45,10 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::NUMERIC, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
         $factor = $this->processValue($this->factor, $context);
-
-        $this->ensureType($factor, Type::NUMERIC, $context);
+        $factor = $this->ensureType($factor, Type::NUMERIC, $context);
 
         if (floatval($factor) === 0.0) {
             throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Division by zero was detected.', [], self::DIVISION_BY_ZERO_ERROR);

@@ -24,7 +24,7 @@ class Hasher extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         try {
             return hash($this->algorithm, $value, $this->hasFlags(self::BINARY), $this->options);

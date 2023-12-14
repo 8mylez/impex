@@ -23,7 +23,7 @@ class StringPad extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         return mb_str_pad($value, $this->length, $this->padString, $this->padType);
     }

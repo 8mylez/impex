@@ -19,7 +19,7 @@ class Chunker extends BidirectionalConverter
             return $value;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->strategy->merge($value, $context);
@@ -34,7 +34,7 @@ class Chunker extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->strategy->chunk($value, $context);

@@ -22,7 +22,7 @@ class StringReplace extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         return str_replace($this->normalizeSearch, $this->normalizeReplace, $value);
     }

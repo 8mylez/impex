@@ -19,7 +19,7 @@ class ArrayColumn extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         return array_column($value, $this->key, $this->indexKey);
     }

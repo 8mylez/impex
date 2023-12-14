@@ -26,7 +26,7 @@ class Filter extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         $value = array_filter($value, $this->callback, $this->mode);
 

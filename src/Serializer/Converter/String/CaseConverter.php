@@ -25,7 +25,7 @@ class CaseConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->normalizedCase === CASE_LOWER) {
             return $this->toLower($value);
@@ -40,7 +40,7 @@ class CaseConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->normalizedCase === CASE_UPPER) {
             return $this->toLower($value);

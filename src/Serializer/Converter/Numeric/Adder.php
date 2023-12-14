@@ -28,11 +28,10 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::NUMERIC, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
         $summand = $this->processValue($this->summand, $context);
-
-        $this->ensureType($summand, Type::NUMERIC, $context);
+        $summand = $this->ensureType($summand, Type::NUMERIC, $context);
 
         return $value + $summand;
     }
@@ -43,11 +42,10 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::NUMERIC, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
         $summand = $this->processValue($this->summand, $context);
-
-        $this->ensureType($summand, Type::NUMERIC, $context);
+        $summand = $this->ensureType($summand, Type::NUMERIC, $context);
 
         return $value - $summand;
     }

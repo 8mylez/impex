@@ -19,7 +19,7 @@ class Extractor extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         return $this->strategy->extract($value, $context);
     }

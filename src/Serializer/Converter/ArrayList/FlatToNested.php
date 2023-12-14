@@ -15,7 +15,7 @@ class FlatToNested extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return ArrayUtil::nestedToFlat($value);
@@ -30,7 +30,7 @@ class FlatToNested extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::ARRAY, $context);
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return ArrayUtil::flatToNested($value);

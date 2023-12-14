@@ -16,7 +16,7 @@ class NewLineToBreak extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->removeBreaks($value);
@@ -31,7 +31,7 @@ class NewLineToBreak extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         if ($this->hasFlags(self::REVERSE)) {
             return $this->newLineToBreak($value);

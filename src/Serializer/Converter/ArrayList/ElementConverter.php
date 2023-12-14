@@ -25,7 +25,7 @@ class ElementConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
@@ -49,7 +49,7 @@ class ElementConverter extends BidirectionalConverter
             return null;
         }
 
-        $this->ensureType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
         $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());

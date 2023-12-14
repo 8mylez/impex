@@ -29,7 +29,7 @@ class DateParser extends UnidirectionalConverter
             return null;
         }
 
-        $this->ensureType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         $date = $this->createDateTime($value);
 

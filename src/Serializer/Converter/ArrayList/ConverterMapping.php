@@ -45,7 +45,7 @@ class ConverterMapping extends BidirectionalConverter
             return $this->normalizeWithConverters($data, $context);
         }
 
-        $this->ensureType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         return $this->normalizeWithValue($data, $context);
     }
@@ -60,7 +60,7 @@ class ConverterMapping extends BidirectionalConverter
             return $this->denormalizeWithConverters($data, $context);
         }
 
-        $this->ensureType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         return $this->denormalizeWithValue($data, $context);
     }
