@@ -12,8 +12,12 @@ class HtmlEntityEncoder extends BidirectionalConverter
 
     public const DISABLE_DOUBLE_ENCODE = 'disable_double_encode';
 
-    public function __construct(private int $bitFlags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401, string ...$flags)
+    public function __construct(private ?int $bitFlags = null, string ...$flags)
     {
+        if ($bitFlags === null) {
+            $this->bitFlags = ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401;
+        }
+
         parent::__construct(...$flags);
     }
 
