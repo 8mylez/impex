@@ -2,17 +2,26 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
+use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
+use Dustin\ImpEx\Serializer\Converter\ProcessValueTrait;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Util\Type;
 
 class Multiplier extends BidirectionalConverter
 {
+    use ProcessValueTrait;
+
     public const DIVISION_BY_ZERO_ERROR = 'IMPEX_CONVERSION__DIVISION_BY_ZERO_ERROR';
 
-    public function __construct(private int|float $factor, string ...$flags)
+    private $factor;
+
+    public function __construct(int|float|AccessOperation|AttributeConverter|callable $factor, string ...$flags)
     {
+        $this->factor = $factor;
+
         parent::__construct(...$flags);
     }
 
@@ -24,7 +33,11 @@ class Multiplier extends BidirectionalConverter
 
         $this->ensureType($value, Type::NUMERIC, $context);
 
-        return $value * $this->factor;
+        $factor = $this->processValue($this->factor, $context);
+
+        $this->ensureType($factor, Type::NUMERIC, $context);
+
+        return $value * $factor;
     }
 
     public function denormalize(mixed $value, ConversionContext $context): int|float|null
@@ -35,10 +48,14 @@ class Multiplier extends BidirectionalConverter
 
         $this->ensureType($value, Type::NUMERIC, $context);
 
-        if (floatval($this->factor) === 0.0) {
+        $factor = $this->processValue($this->factor, $context);
+
+        $this->ensureType($factor, Type::NUMERIC, $context);
+
+        if (floatval($factor) === 0.0) {
             throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Division by zero was detected.', [], self::DIVISION_BY_ZERO_ERROR);
         }
 
-        return $value / $this->factor;
+        return $value / $factor;
     }
 }
