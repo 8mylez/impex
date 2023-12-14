@@ -15,10 +15,14 @@ class StringContains extends Condition
 
     public const ENDS_WITH = 2;
 
-    public function __construct(mixed $compareValue = null, private string $needle, private int $mode = self::CONTAINS)
+    public function __construct(mixed $compareValue = null, private string $needle, private int $mode = self::CONTAINS, private bool $ignoreCase = false)
     {
         if (!in_array($mode, [self::CONTAINS, self::STARTS_WITH, self::ENDS_WITH])) {
             throw new \InvalidArgumentException(sprintf('%s is not a valid mode.', $mode));
+        }
+
+        if ($ignoreCase === true) {
+            $this->needle = strtolower($needle);
         }
 
         parent::__construct($compareValue);
@@ -30,13 +34,19 @@ class StringContains extends Condition
             throw InvalidTypeException::invalidType(Type::STRING, $value, $context);
         }
 
+        $haystack = $value;
+
+        if ($this->ignoreCase === true) {
+            $haystack = strtolower($haystack);
+        }
+
         switch ($this->mode) {
             case self::CONTAINS:
-                return str_contains($value, $this->needle);
+                return str_contains($haystack, $this->needle);
             case self::STARTS_WITH:
-                return str_starts_with($value, $this->needle);
+                return str_starts_with($haystack, $this->needle);
             case self::ENDS_WITH:
-                return str_ends_with($value, $this->needle);
+                return str_ends_with($haystack, $this->needle);
         }
     }
 }
