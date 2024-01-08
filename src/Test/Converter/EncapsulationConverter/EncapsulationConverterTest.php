@@ -6,7 +6,7 @@ use Dustin\Encapsulation\Encapsulation;
 use Dustin\Encapsulation\NestedEncapsulation;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Serializer\Converter\EncapsulationConverter;
+use Dustin\ImpEx\Serializer\Converter\Encapsulation\EncapsulationConverter;
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
 use Dustin\ImpEx\Test\Converter\CreateContextTrait;
 use PHPUnit\Framework\TestCase;

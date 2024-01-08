@@ -48,7 +48,7 @@
         "input": [],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\NumericConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
         "constructorParams": {
             "factor": 3,
             "flags": []
@@ -57,7 +57,7 @@
         "input": 15,
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\ZeroDivisionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionException",
         "constructorParams": {
             "factor": 0.0,
             "flags": []

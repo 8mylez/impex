@@ -18,7 +18,7 @@ class FilterTest extends TestCase
     #[DataProvider('filterProvider')]
     public function testFilter($input, $expectedResult, ?callable $callback = null, array $flags = [], ?string $exception = null)
     {
-        $converter = new Filter($callback, ...$flags);
+        $converter = new Filter($callback, 0, ...$flags);
         $context = $this->createConversionContext(ConversionContext::NORMALIZATION);
 
         if ($exception !== null) {

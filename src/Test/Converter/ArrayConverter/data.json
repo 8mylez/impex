@@ -1,13 +1,16 @@
 [
     {
         "input": "foo",
-        "expected": ["foo"],
+        "expected": [
+            "foo"
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": [],
         "strict": true,
@@ -15,55 +18,83 @@
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": null,
         "strict": true,
         "exception": null,
         "constructorParams": {
-            "flags": ["skip_null"]
+            "flags": [
+                "skip_null"
+            ]
         }
-    }, {
+    },
+    {
         "input": {
             "foo": "bar"
         },
-        "expected": ["bar"],
+        "expected": [
+            "bar"
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
-            "flags": ["reindex"]
+            "flags": [
+                "reindex"
+            ]
         }
-    }, {
+    },
+    {
         "input": 123,
-        "expected": [123],
+        "expected": [
+            123
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": true,
-        "expected": [true],
+        "expected": [
+            true
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "flags": []
         }
-    }, {
-        "input": ["foo"],
-        "expected": ["foo"],
+    },
+    {
+        "input": [
+            "foo"
+        ],
+        "expected": [
+            "foo"
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "flags": []
         }
-    }, {
-        "input": ["foo"],
-        "expected": [["foo"]],
+    },
+    {
+        "input": [
+            "foo"
+        ],
+        "expected": [
+            [
+                "foo"
+            ]
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
-            "flags": ["include_arrays"]
+            "flags": [
+                "encase_arrays"
+            ]
         }
     }
 ]

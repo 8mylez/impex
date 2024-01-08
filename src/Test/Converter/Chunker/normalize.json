@@ -1,89 +1,321 @@
 [
     {
-        "input": [1,2,3,4],
-        "expected": [[1,2], [3,4]],
+        "input": [
+            1,
+            2,
+            3,
+            4
+        ],
+        "expected": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4
+            ]
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 1,
-        "expected": [[1]],
+        "expected": [
+            [
+                1
+            ]
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": {
             "foo": "foo",
             "bar": "bar"
         },
         "expected": [
-            {"foo": "foo"},
-            {"bar": "bar"}
+            {
+                "foo": "foo"
+            },
+            {
+                "bar": "bar"
+            }
         ],
         "strict": true,
         "exception": null,
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 1,
             "preserveKeys": true,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 1,
         "expected": null,
         "strict": null,
         "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
-            "flags": ["strict"]
+            "flags": [
+                "strict"
+            ]
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": null,
         "strict": true,
         "exception": null,
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
-            "flags": ["skip_null"]
+            "flags": [
+                "skip_null"
+            ]
         }
-    }, {
-        "input": [[1,2], [3,4]],
-        "expected": [1,2,3,4],
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4
+            ]
+        ],
+        "expected": [
+            1,
+            2,
+            3,
+            4
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
-            "flags": ["reverse"]
+            "flags": [
+                "reverse"
+            ]
         }
-    }, {
-        "input": [1,2,3,4],
+    },
+    {
+        "input": [
+            1,
+            2,
+            3,
+            4
+        ],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionExceptionStack",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionStackException",
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
-            "flags": ["reverse"]
+            "flags": [
+                "reverse"
+            ]
         }
-    }, {
-        "input": [[1,2], [1,2,3]],
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                1,
+                2,
+                3
+            ]
+        ],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionExceptionStack",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionStackException",
         "constructorParams": {
+            "strategy": "size",
             "chunkSize": 2,
             "preserveKeys": false,
-            "flags": ["reverse", "strict_chunk_size"]
+            "strictChunkSize": true,
+            "flags": [
+                "reverse"
+            ]
+        }
+    },
+    {
+        "input": [
+            {
+                "group": "foo"
+            },
+            {
+                "group": "bar"
+            },
+            {
+                "group": "foo"
+            },
+            {
+                "group": "bar"
+            }
+        ],
+        "expected": {
+            "foo": [
+                {
+                    "group": "foo"
+                },
+                {
+                    "group": "foo"
+                }
+            ],
+            "bar": [
+                {
+                    "group": "bar"
+                },
+                {
+                    "group": "bar"
+                }
+            ]
+        },
+        "strict": false,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "group",
+            "groupKey": "group",
+            "flags": []
+        }
+    },
+    {
+        "input": [
+            {
+                "group": {
+                    "inner": "foo"
+                }
+            },
+            {
+                "group": {
+                    "inner": "bar"
+                }
+            },
+            {
+                "group": {
+                    "inner": "foo"
+                }
+            },
+            {
+                "group": {
+                    "inner": "bar"
+                }
+            }
+        ],
+        "expected": {
+            "foo": [
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                }
+            ],
+            "bar": [
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                }
+            ]
+        },
+        "strict": false,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "group",
+            "groupKey": "group.inner",
+            "flags": []
+        }
+    },
+    {
+        "input": [
+            {
+                "group": {
+                    "inner": "foo"
+                }
+            },
+            {
+                "group": {
+                    "abc": "bar"
+                }
+            },
+            {
+                "group": {
+                    "def": "foo"
+                }
+            },
+            {
+                "group": {
+                    "inner": "bar"
+                }
+            }
+        ],
+        "expected": {
+            "foo": [
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                }
+            ],
+            "bar": [
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                }
+            ]
+        },
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionStackException",
+        "constructorParams": {
+            "strategy": "group",
+            "groupKey": "group.inner",
+            "flags": []
         }
     }
 ]
