@@ -1,0 +1,193 @@
+[
+    {
+        "input": "123",
+        "expected": 123,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "123.4",
+        "expected": 123.4,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "123.456,7",
+        "expected": 123456.7,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": 123,
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["strict"]
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "KKK123.4",
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "KKK123.4",
+        "expected": 123.4,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_leading_characters"]
+        }
+    }, {
+        "input": "KKK123KK456",
+        "expected": 123,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_leading_characters"]
+        }
+    }, {
+        "input": "KKK123KK456",
+        "expected": 123456,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_all_characters"]
+        }
+    }, {
+        "input": "-123.4",
+        "expected": -123.4,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "KK-123.4KK56",
+        "expected": -123.4,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_leading_characters"]
+        }
+    }, {
+        "input": "+-123",
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "+-123.4",
+        "expected": -123.4,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_leading_characters"]
+        }
+    }, {
+        "input": "KKK+-123,45,678.9KK",
+        "expected": -123,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_all_characters"]
+        }
+    }, {
+        "input": "KK123.456.789",
+        "expected": 123.456,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["ignore_leading_characters"]
+        }
+    }, {
+        "input": "KK123",
+        "expected": 0,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ".",
+            "thousandSeparator": ",",
+            "flags": ["empty_to_zero"]
+        }
+    }, {
+        "input": "  123 45",
+        "expected": 123.45,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": " ",
+            "thousandSeparator": ",",
+            "flags": []
+        }
+    }, {
+        "input": "123456,7",
+        "expected": 123456.7,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "decimalSeparator": ",",
+            "thousandSeparator": ".",
+            "flags": []
+        }
+    }
+]

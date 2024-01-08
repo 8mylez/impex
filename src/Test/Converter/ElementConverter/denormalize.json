@@ -1,0 +1,27 @@
+[
+    {
+        "input": [[[1,2], [3,4]], [[5,6], [7,8]]],
+        "expected": [[1,2,3,4], [5,6,7,8]],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "0",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "flags": ["strict"]
+        }
+    }
+]

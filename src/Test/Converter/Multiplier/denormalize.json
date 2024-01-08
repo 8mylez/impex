@@ -1,0 +1,66 @@
+[
+    {
+        "input": 15,
+        "expected": 5,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "factor": 3,
+            "flags": []
+        }
+    }, {
+        "input": 10,
+        "expected": 20.0,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "factor": 0.5,
+            "flags": []
+        }
+    }, {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "factor": 2,
+            "flags": ["skip_null"]
+        }
+    }, {
+        "input": "15",
+        "expected": 5,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "factor": 3,
+            "flags": []
+        }
+    }, {
+        "input": "15",
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "factor": 3,
+            "flags": ["strict"]
+        }
+    }, {
+        "input": [],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
+        "constructorParams": {
+            "factor": 3,
+            "flags": []
+        }
+    }, {
+        "input": 15,
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionException",
+        "constructorParams": {
+            "factor": 0.0,
+            "flags": []
+        }
+    }
+]

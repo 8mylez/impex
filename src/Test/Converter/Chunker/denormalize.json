@@ -1,0 +1,285 @@
+[
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4
+            ]
+        ],
+        "expected": [
+            1,
+            2,
+            3,
+            4
+        ],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": []
+        }
+    },
+    {
+        "input": null,
+        "expected": null,
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": [
+                "skip_null"
+            ]
+        }
+    },
+    {
+        "input": 123,
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": [
+                "strict"
+            ]
+        }
+    },
+    {
+        "input": [
+            1,
+            2,
+            3,
+            4
+        ],
+        "expected": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4
+            ]
+        ],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": [
+                "reverse"
+            ]
+        }
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4,
+                5
+            ]
+        ],
+        "expected": [
+            1,
+            2,
+            3,
+            4,
+            5
+        ],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "flags": []
+        }
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4
+            ]
+        ],
+        "expected": [
+            1,
+            2,
+            3,
+            4
+        ],
+        "strict": true,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "strictChunkSize": true,
+            "flags": []
+        }
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3
+            ]
+        ],
+        "expected": [
+            1,
+            2,
+            3
+        ],
+        "strict": null,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "strictChunkSize": true,
+            "flags": []
+        }
+    },
+    {
+        "input": [
+            [
+                1,
+                2
+            ],
+            [
+                3,
+                4,
+                5
+            ]
+        ],
+        "expected": null,
+        "strict": null,
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionStackException",
+        "constructorParams": {
+            "strategy": "size",
+            "chunkSize": 2,
+            "preserveKeys": false,
+            "strictChunkSize": true,
+            "flags": []
+        }
+    },
+    {
+        "input": {
+            "foo": [
+                {
+                    "group": "foo"
+                },
+                {
+                    "group": "foo"
+                }
+            ],
+            "bar": [
+                {
+                    "group": "bar"
+                },
+                {
+                    "group": "bar"
+                }
+            ]
+        },
+        "expected": [
+            {
+                "group": "foo"
+            },
+            {
+                "group": "foo"
+            },
+            {
+                "group": "bar"
+            },
+            {
+                "group": "bar"
+            }
+        ],
+        "strict": null,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "group",
+            "groupKey": "group",
+            "flags": []
+        }
+    },
+    {
+        "input": {
+            "foo": [
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "foo"
+                    }
+                }
+            ],
+            "bar": [
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                },
+                {
+                    "group": {
+                        "inner": "bar"
+                    }
+                }
+            ]
+        },
+        "expected": [
+            {
+                "group": {
+                    "inner": "foo"
+                }
+            },
+            {
+                "group": {
+                    "inner": "foo"
+                }
+            },
+            {
+                "group": {
+                    "inner": "bar"
+                }
+            },
+            {
+                "group": {
+                    "inner": "bar"
+                }
+            }
+        ],
+        "strict": false,
+        "exception": null,
+        "constructorParams": {
+            "strategy": "group",
+            "groupKey": "group.inner",
+            "flags": []
+        }
+    }
+]

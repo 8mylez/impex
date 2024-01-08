@@ -7,6 +7,19 @@
         "psr-4": { "Dustin\\ImpEx\\": "src/" }
     },
     "require": {
-        "php": "^7.4 || ^8"
+        "php": "^8.1",
+        "dustin/encapsulation": "^1.2 || ^2.0",
+        "dustin/exception": "^1.1",
+        "symfony/serializer": "^6.2",
+        "symfony/dependency-injection": "^6.2",
+        "symfony/http-kernel": "^6.2",
+        "symfony/config": "^6.2",
+        "symfony/event-dispatcher": "^6.0",
+        "symfony/yaml": "^6.2",
+        "symfony/property-access": "^6.0",
+        "symfony/validator": "^6.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.4"
     }
 }
