@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
+use Dustin\ImpEx\PropertyAccess\AccessContext;
 use Dustin\ImpEx\PropertyAccess\Exception\InvalidDataException;
 use Dustin\ImpEx\PropertyAccess\Exception\NotAccessableException;
 use Dustin\ImpEx\PropertyAccess\Exception\OperationNotSupportedException;
@@ -38,7 +39,7 @@ class GroupChunkStrategy extends ChunkStrategy
             $subContext = $context->subContext(new Path([$key]));
 
             try {
-                $groupKey = PropertyAccessor::get($this->groupKey, $record);
+                $groupKey = PropertyAccessor::get($this->groupKey, $record, AccessContext::STRICT);
             } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
                 $exceptions->add(new AttributeConversionException($subContext->getPath(), $subContext->getRootData(), 'Group key {{ path }} could not be fetched from value of type {{ type }}.', ['path' => $this->groupKey, 'type' => Type::getDebugType($record)], self::GROUP_KEY_NOT_FOUND_ERROR));
 
