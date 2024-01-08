@@ -5,7 +5,7 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionInterface;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
 use Dustin\ImpEx\Util\Type;
 
@@ -69,7 +69,7 @@ class ConcatConverter extends BidirectionalConverter
         foreach ($strings as $key => $v) {
             try {
                 $this->validateStringConvertable($v, $context->subContext(new Path([$key])));
-            } catch (AttributeConversionException $e) {
+            } catch (AttributeConversionExceptionInterface $e) {
                 $exceptions->add($e);
             }
         }

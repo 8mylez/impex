@@ -11,4 +11,6 @@ interface AttributeConversionExceptionInterface extends ErrorCode
     public function getData(): array;
 
     public function getMessages(): array;
+
+    public function getErrorCount(): int;
 }

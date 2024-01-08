@@ -2,6 +2,7 @@
 
 namespace Dustin\ImpEx\Serializer\Exception;
 
+use Dustin\Exception\ErrorCodeException;
 use Dustin\Exception\StackException;
 
 class AttributeConversionStackException extends StackException implements AttributeConversionExceptionInterface
@@ -10,35 +11,17 @@ class AttributeConversionStackException extends StackException implements Attrib
 
     public function __construct(private string $attributePath, private array $data, AttributeConversionExceptionInterface ...$errors)
     {
-        parent::__construct($this->createMessage(), ...$errors);
+        ErrorCodeException::__construct($this->createMessage(...$errors), []);
     }
 
     public function getErrorCount(): int
     {
-        $count = 0;
-
-        foreach ($this->getErrors() as $error) {
-            $count += $error->getErrorCount();
-        }
-
-        return $count;
+        return $this->countErrors(...$this->getErrors());
     }
 
     public function getMessages(): array
     {
-        $messages = [];
-
-        foreach ($this->getErrors() as $error) {
-            foreach ($error->getMessages() as $message) {
-                if (!$error instanceof self) {
-                    $message = sprintf(' • [%s] - %s', $error->getAttributePath(), trim($message));
-                }
-
-                $messages[] = $message;
-            }
-        }
-
-        return $messages;
+        return $this->getMessagesFromErrors(...$this->getErrors());
     }
 
     public function getAttributePath(): string
@@ -51,12 +34,40 @@ class AttributeConversionStackException extends StackException implements Attrib
         return $this->data;
     }
 
-    private function createMessage(): string
+    private function createMessage(AttributeConversionExceptionInterface ...$errors): string
     {
-        $messages = [sprintf('Caught %s errors.', $this->getErrorCount())];
+        $messages = [sprintf('Caught %s errors.', $this->countErrors(...$errors))];
 
-        array_push($messages, ...$this->getMessages());
+        array_push($messages, ...$this->getMessagesFromErrors(...$errors));
 
         return implode("\n", $messages);
+    }
+
+    private function countErrors(AttributeConversionExceptionInterface ...$errors): int
+    {
+        $count = 0;
+
+        foreach ($errors as $error) {
+            $count += $error->getErrorCount();
+        }
+
+        return $count;
+    }
+
+    private function getMessagesFromErrors(AttributeConversionExceptionInterface ...$errors): array
+    {
+        $messages = [];
+
+        foreach ($errors as $error) {
+            foreach ($error->getMessages() as $message) {
+                if (!$error instanceof self) {
+                    $message = sprintf(' • [%s] - %s', $error->getAttributePath(), trim($message));
+                }
+
+                $messages[] = $message;
+            }
+        }
+
+        return $messages;
     }
 }
