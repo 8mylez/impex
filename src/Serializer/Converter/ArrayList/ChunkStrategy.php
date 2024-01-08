@@ -16,7 +16,7 @@ abstract class ChunkStrategy
     {
         $this->validateArrays($arrays, $context);
 
-        return array_merge(...$arrays);
+        return array_merge(...array_values($arrays));
     }
 
     protected function validateArrays(array $arrays, ConversionContext $context): void
