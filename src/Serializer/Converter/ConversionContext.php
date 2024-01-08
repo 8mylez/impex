@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\Serializer\Converter;
 
 use Dustin\ImpEx\PropertyAccess\Path;
+use Dustin\ImpEx\Util\Value;
 
 class ConversionContext
 {
@@ -20,7 +21,7 @@ class ConversionContext
         private ?array $normalizedData = [],
         private array $normalizationContext = []
     ) {
-        $this->rootData = json_decode(json_encode($normalizedData ?? $object, JSON_UNESCAPED_UNICODE), true);
+        $this->rootData = Value::normalize($normalizedData ?? $object);
     }
 
     public function getObject(): object

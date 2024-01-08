@@ -30,7 +30,7 @@
         "input": 123,
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\DateConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionException",
         "constructorParams": {
             "format": null,
             "flags": []
@@ -48,7 +48,7 @@
         "input": [],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\StringConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
         "constructorParams": {
             "format": "m.Y.d H:i:s",
             "flags": []

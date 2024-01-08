@@ -59,7 +59,7 @@ class FileSequenceLoader implements SequenceLoaderInterface
 
         foreach ($decoded as $id => $data) {
             $data = array_merge(
-                ArrayUtil::cast($data),
+                ArrayUtil::ensure($data),
                 ['id' => $id]
             );
 

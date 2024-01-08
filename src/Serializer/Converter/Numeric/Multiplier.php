@@ -2,17 +2,26 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
+use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Serializer\Exception\ZeroDivisionException;
+use Dustin\ImpEx\Serializer\Converter\ProcessValueTrait;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
 use Dustin\ImpEx\Util\Type;
 
 class Multiplier extends BidirectionalConverter
 {
-    use NumberConversionTrait;
+    use ProcessValueTrait;
 
-    public function __construct(private int|float $factor, string ...$flags)
+    public const DIVISION_BY_ZERO_ERROR = 'IMPEX_CONVERSION__DIVISION_BY_ZERO_ERROR';
+
+    private $factor;
+
+    public function __construct(int|float|AccessOperation|AttributeConverter|callable $factor, string ...$flags)
     {
+        $this->factor = $factor;
+
         parent::__construct(...$flags);
     }
 
@@ -22,15 +31,12 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
-            $value = $this->convertToNumeric($value);
-        }
+        $factor = $this->processValue($this->factor, $context);
+        $factor = $this->ensureType($factor, Type::NUMERIC, $context);
 
-        $this->validateType($value, Type::NUMERIC, $context);
-
-        return $value * $this->factor;
+        return $value * $factor;
     }
 
     public function denormalize(mixed $value, ConversionContext $context): int|float|null
@@ -39,18 +45,15 @@ class Multiplier extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
-            $value = $this->convertToNumeric($value);
+        $factor = $this->processValue($this->factor, $context);
+        $factor = $this->ensureType($factor, Type::NUMERIC, $context);
+
+        if (floatval($factor) === 0.0) {
+            throw new AttributeConversionException($context->getPath(), $context->getRootData(), 'Division by zero was detected.', [], self::DIVISION_BY_ZERO_ERROR);
         }
 
-        $this->validateType($value, Type::NUMERIC, $context);
-
-        if (floatval($this->factor) === 0.0) {
-            throw new ZeroDivisionException($context->getPath(), $context->getRootData());
-        }
-
-        return $value / $this->factor;
+        return $value / $factor;
     }
 }

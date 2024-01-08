@@ -6,9 +6,8 @@ use Dustin\ImpEx\PropertyAccess\Path;
 use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
-use Dustin\ImpEx\Serializer\Exception\AttributeConversionException;
+use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionInterface;
 use Dustin\ImpEx\Serializer\Exception\AttributeConversionExceptionStack;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class ConverterMapping extends BidirectionalConverter
@@ -40,28 +39,22 @@ class ConverterMapping extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::cast($data);
-        }
-
-        $this->validateType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             $converter = $this->getConverter($key);
 
             try {
                 $converted[$key] = $converter !== null ? $converter->normalize($value, $context->subContext(new Path([$key]))) : $value;
-            } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+            } catch (AttributeConversionExceptionInterface $e) {
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }
@@ -72,28 +65,22 @@ class ConverterMapping extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $data = ArrayUtil::cast($data);
-        }
-
-        $this->validateType($data, Type::ARRAY, $context);
+        $data = $this->ensureType($data, Type::ARRAY, $context);
 
         $converted = [];
-        $exceptions = [];
+        $exceptions = new AttributeConversionExceptionStack($context->getPath(), $context->getRootData());
 
         foreach ($data as $key => $value) {
             $converter = $this->getConverter($key);
 
             try {
                 $converted[$key] = $converter !== null ? $converter->denormalize($value, $context->subContext(new Path([$key]))) : $value;
-            } catch (AttributeConversionException $e) {
-                $exceptions[] = $e;
+            } catch (AttributeConversionExceptionInterface $e) {
+                $exceptions->add($e);
             }
         }
 
-        if (count($exceptions) > 0) {
-            throw new AttributeConversionExceptionStack($context->getPath(), $context->getRootData(), ...$exceptions);
-        }
+        $exceptions->throw();
 
         return $converted;
     }

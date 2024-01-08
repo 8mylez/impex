@@ -4,7 +4,6 @@ namespace Dustin\ImpEx\Serializer\Converter\ArrayList;
 
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Converter\UnidirectionalConverter;
-use Dustin\ImpEx\Util\ArrayUtil;
 use Dustin\ImpEx\Util\Type;
 
 class Filter extends UnidirectionalConverter
@@ -14,7 +13,7 @@ class Filter extends UnidirectionalConverter
      */
     private $callback = null;
 
-    public function __construct(?\Closure $callback = null, string ...$flags)
+    public function __construct(?\Closure $callback = null, private int $mode = 0, string ...$flags)
     {
         $this->callback = $callback;
 
@@ -27,13 +26,9 @@ class Filter extends UnidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $value = ArrayUtil::cast($value);
-        }
+        $value = $this->ensureType($value, Type::ARRAY, $context);
 
-        $this->validateType($value, Type::ARRAY, $context);
-
-        $value = array_filter($value, $this->callback);
+        $value = array_filter($value, $this->callback, $this->mode);
 
         if ($this->hasFlags(self::REINDEX)) {
             $value = array_values($value);

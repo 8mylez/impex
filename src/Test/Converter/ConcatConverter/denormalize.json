@@ -1,84 +1,120 @@
 [
     {
         "input": "Hello,world",
-        "expected": ["Hello", "world"],
+        "expected": [
+            "Hello",
+            "world"
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "separator": ",",
             "flags": []
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": null,
         "strict": true,
         "exception": null,
         "constructorParams": {
             "separator": ",",
-            "flags": ["skip_null"]
+            "flags": [
+                "skip_null"
+            ]
         }
-    }, {
+    },
+    {
         "input": "Hello world",
-        "expected": ["Hello world"],
+        "expected": [
+            "Hello world"
+        ],
         "strict": true,
         "exception": null,
         "constructorParams": {
             "separator": ",",
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 123,
         "expected": null,
         "strict": null,
         "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
         "constructorParams": {
             "separator": ",",
-            "flags": ["strict"]
+            "flags": [
+                "strict"
+            ]
         }
-    }, {
-        "input": ["Hello world"],
+    },
+    {
+        "input": [
+            "Hello world"
+        ],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\StringConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
         "constructorParams": {
             "separator": ",",
             "flags": []
         }
-    }, {
-        "input": ["Hello", "world"],
+    },
+    {
+        "input": [
+            "Hello",
+            "world"
+        ],
         "expected": "Hello,world",
         "strict": true,
         "exception": null,
         "constructorParams": {
             "separator": ",",
-            "flags": ["reverse"]
+            "flags": [
+                "reverse"
+            ]
         }
-    }, {
-        "input": [["Hello"], "world"],
+    },
+    {
+        "input": [
+            [
+                "Hello"
+            ],
+            "world"
+        ],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionExceptionStack",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\AttributeConversionStackException",
         "constructorParams": {
             "separator": ",",
-            "flags": ["reverse"]
+            "flags": [
+                "reverse"
+            ]
         }
-    }, {
+    },
+    {
         "input": 123,
         "expected": "123",
         "strict": true,
         "exception": null,
         "constructorParams": {
             "separator": ",",
-            "flags": ["reverse"]
+            "flags": [
+                "reverse"
+            ]
         }
-    }, {
+    },
+    {
         "input": 123,
         "expected": null,
         "strict": null,
         "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
         "constructorParams": {
             "separator": ",",
-            "flags": ["reverse", "strict"]
+            "flags": [
+                "reverse",
+                "strict"
+            ]
         }
     }
 ]

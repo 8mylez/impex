@@ -53,7 +53,7 @@
         "input": [],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\StringConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
         "constructorParams": {
             "decimalSeparator": ".",
             "thousandSeparator": ",",

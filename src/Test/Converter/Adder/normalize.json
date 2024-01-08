@@ -8,7 +8,8 @@
             "summand": 3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 5.1,
         "expected": 5.5,
         "strict": true,
@@ -17,7 +18,8 @@
             "summand": 0.4,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 5.0,
         "expected": 8.0,
         "strict": true,
@@ -26,16 +28,20 @@
             "summand": 3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": null,
         "strict": true,
         "exception": null,
         "constructorParams": {
             "summand": 0,
-            "flags": ["skip_null"]
+            "flags": [
+                "skip_null"
+            ]
         }
-    }, {
+    },
+    {
         "input": "5",
         "expected": 8,
         "strict": true,
@@ -44,7 +50,8 @@
             "summand": 3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": "5.1",
         "expected": 8.1,
         "strict": true,
@@ -53,34 +60,42 @@
             "summand": 3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": "5.1",
         "expected": null,
         "strict": null,
         "exception": "Dustin\\ImpEx\\Serializer\\Exception\\InvalidTypeException",
         "constructorParams": {
             "summand": 3,
-            "flags": ["strict"]
+            "flags": [
+                "strict"
+            ]
         }
-    }, {
+    },
+    {
         "input": 5.1,
         "expected": 8.1,
         "strict": true,
         "exception": null,
         "constructorParams": {
             "summand": 3,
-            "flags": ["strict"]
+            "flags": [
+                "strict"
+            ]
         }
-    }, {
+    },
+    {
         "input": [],
         "expected": null,
         "strict": null,
-        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\NumericConversionException",
+        "exception": "Dustin\\ImpEx\\Serializer\\Exception\\TypeConversionException",
         "constructorParams": {
             "summand": 3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 8,
         "expected": 5,
         "strict": true,
@@ -89,7 +104,8 @@
             "summand": -3,
             "flags": []
         }
-    }, {
+    },
+    {
         "input": "-8.1",
         "expected": -5.1,
         "strict": true,

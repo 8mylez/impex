@@ -11,12 +11,14 @@ class AndCondition extends Condition
      */
     private $conditions = [];
 
-    public function __construct(Condition ...$conditions)
+    public function __construct(mixed $compareValue = null, Condition ...$conditions)
     {
         $this->conditions = $conditions;
+
+        parent::__construct($compareValue);
     }
 
-    public function isFullfilled(mixed $value, ConversionContext $context): bool
+    public function match(mixed $value, ConversionContext $context): bool
     {
         if (empty($this->conditions)) {
             return false;

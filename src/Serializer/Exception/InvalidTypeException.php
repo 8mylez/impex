@@ -2,26 +2,32 @@
 
 namespace Dustin\ImpEx\Serializer\Exception;
 
+use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Util\Type;
 
 class InvalidTypeException extends AttributeConversionException
 {
-    public const ERROR_CODE = 'IMPEX_INVALID_TYPE_ERROR';
+    public const INVALID_TYPE_ERROR = 'IMPEX_CONVERSION__INVALID_TYPE_ERROR';
 
-    public function __construct(string $path, array $data, string $expectedType, $value)
+    public const INVALID_ARRAY_KEY_ERROR = 'IMPEX_CONVERSION__INVALID_ARRAY_KEY_ERROR';
+
+    public static function invalidType(string $expectedType, mixed $value, ConversionContext $context): self
     {
-        parent::__construct(
-            $path, $data,
-            'Expected value to be {{ expectedValue }}. Got {{ value }}',
-            [
-                'expectedValue' => $expectedType,
-                'value' => Type::getDebugType($value),
-            ]
+        return new self(
+            $context->getPath(), $context->getRootData(),
+            'Expected value to be {{ expectedType }}. Got {{ actualType }}.',
+            ['expectedType' => $expectedType, 'actualType' => Type::getDebugType($value)],
+            self::INVALID_TYPE_ERROR
         );
     }
 
-    public function getErrorCode(): string
+    public static function invalidArrayKey(mixed $value, ConversionContext $context): self
     {
-        return self::ERROR_CODE;
+        return new self(
+            $context->getPath(), $context->getRootData(),
+            'Value of type {{ type }} cannot be used as array key.',
+            ['type' => Type::getDebugType($value)],
+            self::INVALID_ARRAY_KEY_ERROR
+        );
     }
 }

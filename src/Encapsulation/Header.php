@@ -38,6 +38,6 @@ class Header extends ArrayEncapsulation
 
     private function getCurrentFlags(): array
     {
-        return ArrayUtil::cast($this->get('flags'));
+        return ArrayUtil::ensure($this->get('flags'));
     }
 }

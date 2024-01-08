@@ -8,8 +8,6 @@ use Dustin\ImpEx\Util\Type;
 
 class Parser extends UnidirectionalConverter
 {
-    use NumberConversionTrait;
-
     /**
      * Flag. If set, zero will returned if no valid number could be found.
      */
@@ -43,13 +41,7 @@ class Parser extends UnidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT)) {
-            $this->validateStringConvertable($value, $context);
-
-            $value = (string) $value;
-        }
-
-        $this->validateType($value, Type::STRING, $context);
+        $value = $this->ensureType($value, Type::STRING, $context);
 
         $value = $this->parseNumber($value);
 

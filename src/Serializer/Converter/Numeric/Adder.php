@@ -2,16 +2,23 @@
 
 namespace Dustin\ImpEx\Serializer\Converter\Numeric;
 
+use Dustin\ImpEx\PropertyAccess\Operation\AccessOperation;
+use Dustin\ImpEx\Serializer\Converter\AttributeConverter;
 use Dustin\ImpEx\Serializer\Converter\BidirectionalConverter;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
+use Dustin\ImpEx\Serializer\Converter\ProcessValueTrait;
 use Dustin\ImpEx\Util\Type;
 
 class Adder extends BidirectionalConverter
 {
-    use NumberConversionTrait;
+    use ProcessValueTrait;
 
-    public function __construct(private int|float $summand, string ...$flags)
+    private $summand;
+
+    public function __construct(int|float|AccessOperation|AttributeConverter|callable $summand, string ...$flags)
     {
+        $this->summand = $summand;
+
         parent::__construct(...$flags);
     }
 
@@ -21,15 +28,12 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
-            $value = $this->convertToNumeric($value);
-        }
+        $summand = $this->processValue($this->summand, $context);
+        $summand = $this->ensureType($summand, Type::NUMERIC, $context);
 
-        $this->validateType($value, Type::NUMERIC, $context);
-
-        return $value + $this->summand;
+        return $value + $summand;
     }
 
     public function denormalize(mixed $value, ConversionContext $context): int|float|null
@@ -38,14 +42,11 @@ class Adder extends BidirectionalConverter
             return null;
         }
 
-        if (!$this->hasFlags(self::STRICT) && !Type::is($value, Type::NUMERIC)) {
-            $this->validateNumericConvertable($value, $context);
+        $value = $this->ensureType($value, Type::NUMERIC, $context);
 
-            $value = $this->convertToNumeric($value);
-        }
+        $summand = $this->processValue($this->summand, $context);
+        $summand = $this->ensureType($summand, Type::NUMERIC, $context);
 
-        $this->validateType($value, Type::NUMERIC, $context);
-
-        return $value - $this->summand;
+        return $value - $summand;
     }
 }

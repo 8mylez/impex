@@ -7,7 +7,8 @@
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 0,
         "expected": false,
         "strict": true,
@@ -15,15 +16,19 @@
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": null,
         "expected": null,
         "strict": true,
         "exception": null,
         "constructorParams": {
-            "flags": ["skip_null"]
+            "flags": [
+                "skip_null"
+            ]
         }
-    }, {
+    },
+    {
         "input": "false",
         "expected": true,
         "strict": true,
@@ -31,7 +36,8 @@
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": 1,
         "expected": true,
         "strict": true,
@@ -39,7 +45,8 @@
         "constructorParams": {
             "flags": []
         }
-    }, {
+    },
+    {
         "input": "1",
         "expected": true,
         "strict": true,

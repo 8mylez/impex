@@ -10,7 +10,7 @@ class IsDirection extends Condition
     {
     }
 
-    public function isFullfilled(mixed $value, ConversionContext $context): bool
+    public function match(mixed $value, ConversionContext $context): bool
     {
         return $context->getDirection() === $this->direction;
     }

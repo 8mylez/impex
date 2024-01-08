@@ -2,59 +2,36 @@
 
 namespace Dustin\ImpEx\Serializer\Exception;
 
-class AttributeConversionExceptionStack extends AttributeConversionException
+use Dustin\Exception\ExceptionStack;
+use Dustin\Exception\StackException;
+
+class AttributeConversionExceptionStack extends ExceptionStack
 {
-    /**
-     * @var array
-     */
-    private $errors = [];
-
-    public function __construct(string $attributePath, array $data, AttributeConversionException ...$errors)
+    public function __construct(
+        private string $attributePath,
+        private array $data,
+        AttributeConversionExceptionInterface ...$errors)
     {
-        $this->errors = $errors;
-
-        parent::__construct($attributePath, $data, static::createMessage(...$errors), []);
+        parent::__construct(...$errors);
     }
 
-    public function getErrors(): array
+    public function add(\Throwable ...$exceptions): void
     {
-        return $this->errors;
-    }
-
-    public function getErrorCount(): int
-    {
-        $count = 0;
-
-        foreach ($this->errors as $error) {
-            $count += $error->getErrorCount();
-        }
-
-        return $count;
-    }
-
-    public function getMessages(): array
-    {
-        $messages = [];
-
-        foreach ($this->errors as $error) {
-            foreach ($error->getMessages() as $message) {
-                if (!$error instanceof self) {
-                    $message = sprintf(' • [%s] - %s', $error->getAttributePath(), trim($message));
-                }
-
-                $messages[] = $message;
+        foreach ($exceptions as $key => $e) {
+            if (!$e instanceof AttributeConversionExceptionInterface) {
+                throw new \InvalidArgumentException(sprintf('Argument #%s must be %s. %s given.', $key, AttributeConversionExceptionInterface::class, get_debug_type($e)));
             }
         }
 
-        return $messages;
+        parent::add(...$exceptions);
     }
 
-    private function createMessage(AttributeConversionException ...$errors): string
+    public function throw(): void
     {
-        $messages = [sprintf('Caught %s errors.', $this->getErrorCount())];
-
-        array_push($messages, ...$this->getMessages());
-
-        return implode("\n", $messages);
+        try {
+            parent::throw();
+        } catch (StackException $e) {
+            throw new AttributeConversionStackException($this->attributePath, $this->data, ...$e->getErrors());
+        }
     }
 }
