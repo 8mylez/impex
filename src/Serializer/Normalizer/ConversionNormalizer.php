@@ -45,7 +45,9 @@ class ConversionNormalizer extends AbstractNormalizer
 
     public const CONVERSION_CONTEXT = 'conversion_context';
 
-    public const PROPERTY_ACCESSORS = 'property_accessors';
+    public const READ_ACCESSORS = 'read_accessors';
+
+    public const WRITE_ACCESSORS = 'write_accessors';
 
     /**
      * Access types.
@@ -460,9 +462,15 @@ class ConversionNormalizer extends AbstractNormalizer
 
     protected function getAccess(string $attribute, array $context, string $access): AccessOperation
     {
-        $operation = $context[self::PROPERTY_ACCESSORS][$attribute] ??
-            $this->defaultContext[self::PROPERTY_ACCESSORS][$attribute] ??
-            new AccessOperation([$attribute], $access === self::ACCESS_READ ? AccessOperation::GET : AccessOperation::SET);
+        if ($access === self::ACCESS_READ) {
+            $operation = $context[self::READ_ACCESSORS][$attribute] ??
+                $this->defaultContext[self::READ_ACCESSORS][$attribute] ??
+                new AccessOperation([$attribute], AccessOperation::GET);
+        } else {
+            $operation = $context[self::WRITE_ACCESSORS][$attribute] ??
+                $this->defaultContext[self::WRITE_ACCESSORS][$attribute] ??
+                new AccessOperation([$attribute], AccessOperation::SET);
+        }
 
         $isOperation = 'is'.ucfirst($access).'Operation';
 
@@ -533,7 +541,8 @@ class ConversionNormalizer extends AbstractNormalizer
             $parentContext[self::ATTRIBUTES],
             $parentContext[self::IGNORED_ATTRIBUTES],
             $parentContext[self::CONVERTERS],
-            $parentContext[self::PROPERTY_ACCESSORS],
+            $parentContext[self::READ_ACCESSORS],
+            $parentContext[self::WRITE_ACCESSORS],
             $parentContext[self::OBJECT_TO_POPULATE],
             $parentContext[self::CALLBACKS],
             $parentContext[self::DEFAULT_CONSTRUCTOR_ARGUMENTS]
@@ -574,12 +583,24 @@ class ConversionNormalizer extends AbstractNormalizer
             }
         }
 
-        if (isset($context[self::PROPERTY_ACCESSORS])) {
-            if (!is_array($context[self::PROPERTY_ACCESSORS])) {
-                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of '%s'.", self::PROPERTY_ACCESSORS, AccessOperation::class));
+        if (isset($context[self::READ_ACCESSORS])) {
+            if (!is_array($context[self::READ_ACCESSORS])) {
+                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of '%s'.", self::READ_ACCESSORS, AccessOperation::class));
             }
 
-            foreach ($context[self::PROPERTY_ACCESSORS] as $attribute => $access) {
+            foreach ($context[self::READ_ACCESSORS] as $attribute => $access) {
+                if (!$access instanceof AccessOperation) {
+                    throw new \InvalidArgumentException(sprintf("Accessor for attribute '%s' must be %s. Got '%s'.", $attribute, AccessOperation::class, Type::getDebugType($access)));
+                }
+            }
+        }
+
+        if (isset($context[self::WRITE_ACCESSORS])) {
+            if (!is_array($context[self::WRITE_ACCESSORS])) {
+                throw new \InvalidArgumentException(sprintf("Context option '%s' must be array of '%s'.", self::WRITE_ACCESSORS, AccessOperation::class));
+            }
+
+            foreach ($context[self::WRITE_ACCESSORS] as $attribute => $access) {
                 if (!$access instanceof AccessOperation) {
                     throw new \InvalidArgumentException(sprintf("Accessor for attribute '%s' must be %s. Got '%s'.", $attribute, AccessOperation::class, Type::getDebugType($access)));
                 }
