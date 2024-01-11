@@ -1,8 +1,7 @@
 <?php
 
-namespace Dustin\ImpEx\Serializer\Converter\String;
+namespace Dustin\ImpEx\Serializer\Converter\Condition;
 
-use Dustin\ImpEx\Serializer\Converter\Condition\Condition;
 use Dustin\ImpEx\Serializer\Converter\ConversionContext;
 use Dustin\ImpEx\Serializer\Exception\InvalidTypeException;
 use Dustin\ImpEx\Util\Type;
