@@ -8,6 +8,7 @@ class NotCondition extends Condition
 {
     public function __construct(private Condition $condition)
     {
+        parent::__construct(null);
     }
 
     public function match(mixed $value, ConversionContext $context): bool
