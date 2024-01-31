@@ -14,8 +14,10 @@ trait ProcessValueTrait
     protected function processValue(mixed $value, ConversionContext $context): mixed
     {
         if ($value instanceof AccessOperation) {
+            $input = $context->getNormalizedData() ?? $context->getObject();
+
             try {
-                return $value->execute($context->getNormalizedData() ?? $context->getObject());
+                return $value->execute($input);
             } catch (InvalidDataException|NotAccessableException|OperationNotSupportedException|PropertyNotFoundException $exception) {
                 throw AttributeConversionException::fromErrorCode($exception, $context);
             }
