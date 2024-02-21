@@ -4,9 +4,7 @@
     <services>
 
         <!-- SequenceRepository -->
-        <service id="Dustin\ImpEx\Sequence\Registry\SequenceRepository">
-            <argument type="tagged" tag="impex.sequence.loader" />
-        </service>
+        <service id="Dustin\ImpEx\Sequence\Registry\SequenceRepository" />
 
         <!-- SectionRepository -->
         <service id="Dustin\ImpEx\Sequence\Registry\SectionRepository" />

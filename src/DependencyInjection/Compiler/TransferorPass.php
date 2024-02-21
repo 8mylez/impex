@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\Reference;
 
 class TransferorPass implements CompilerPassInterface
 {
-    public const TAG_TRANSFEROR = 'impex.handling.transferor';
+    public const TAG_TRANSFEROR = 'impex.sequence.transferor';
 
     public function process(ContainerBuilder $container)
     {
@@ -21,7 +21,7 @@ class TransferorPass implements CompilerPassInterface
     }
 
     /**
-     * Process alls services tagged with 'impex.handling.transferor'.
+     * Process alls services tagged with 'impex.sequence.transferor'.
      */
     public function processTransferors(ContainerBuilder $container, Definition $registryDefinition): void
     {

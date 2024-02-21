@@ -25,7 +25,7 @@ class StringPosition extends UnidirectionalConverter
 
         $value = $this->ensureType($value, Type::STRING, $context);
 
-        $result = strpos($value, $this->needle, $this->offset);
+        $result = mb_strpos($value, $this->needle, $this->offset);
 
         return $result !== false ? $result + $this->add : null;
     }

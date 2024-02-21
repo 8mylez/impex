@@ -4,7 +4,7 @@ namespace Dustin\ImpEx\Serializer\Converter;
 
 class DefaultValue extends BidirectionalConverter
 {
-    private function __construct(
+    public function __construct(
         private mixed $normalizationDefaultValue,
         private mixed $denormalizationDefaultValue
     ) {
