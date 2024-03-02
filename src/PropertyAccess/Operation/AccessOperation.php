@@ -61,6 +61,36 @@ class AccessOperation
         return \in_array($operation, self::READ_OPERATIONS);
     }
 
+    public static function get(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::GET, ...$flags);
+    }
+
+    public static function set(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::SET, ...$flags);
+    }
+
+    public static function push(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::PUSH, ...$flags);
+    }
+
+    public static function merge(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::MERGE, ...$flags);
+    }
+
+    public static function collect(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::COLLECT, ...$flags);
+    }
+
+    public static function has(string|array|Path $path, string ...$flags): self
+    {
+        return new self($path, self::HAS, ...$flags);
+    }
+
     public function execute(mixed &$data, mixed $value = null): mixed
     {
         switch ($this->operation) {

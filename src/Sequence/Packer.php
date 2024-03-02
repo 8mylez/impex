@@ -3,6 +3,7 @@
 namespace Dustin\ImpEx\Sequence;
 
 use Dustin\Encapsulation\Container;
+use Dustin\Encapsulation\EncapsulationInterface;
 
 class Packer extends DirectPass
 {
@@ -11,6 +12,17 @@ class Packer extends DirectPass
         if ($batchSize !== null && $batchSize <= 0) {
             throw new \InvalidArgumentException('Batch size must be greater than zero.');
         }
+    }
+
+    public static function createFrom(EncapsulationInterface $encapsulation, string $field = 'batchSize'): self
+    {
+        $batchSize = $encapsulation->get($field);
+
+        if (!is_int($batchSize) && !is_null($batchSize)) {
+            throw new \UnexpectedValueException('Expected batch size to be int or null. %s given.', get_debug_type($batchSize));
+        }
+
+        return new self($batchSize);
     }
 
     public function passFrom(Transferor $transferor): \Generator
