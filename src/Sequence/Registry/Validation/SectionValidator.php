@@ -27,7 +27,7 @@ class SectionValidator
         if ($type === SectionDefinition::TYPE_SEQUENCE && SequenceDefinitionDetector::isSequenceDefinition($section)) {
             $fields = array_merge($fields, [
                 'class' => [new NotBlank(), new SequenceClass()],
-                'sections' => new All([new Callback([self::class, 'validate'])]),
+                'sections' => [new NotBlank(), new All([new Callback([self::class, 'validate'])])],
             ]);
         }
 

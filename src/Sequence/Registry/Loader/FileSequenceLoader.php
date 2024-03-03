@@ -101,9 +101,7 @@ class FileSequenceLoader implements SequenceLoaderInterface
             'fields' => [
                 'id' => new NotBlank(),
                 'class' => [new NotBlank(), new SequenceClass()],
-                'sections' => new All([
-                    new Callback([SectionValidator::class, 'validate']),
-                ]),
+                'sections' => [new NotBlank(), new All([new Callback([SectionValidator::class, 'validate'])])],
             ],
         ]);
     }
