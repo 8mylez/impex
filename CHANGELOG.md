@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+1.1.0
+---
+
+ * Add ReturnValue converter
+ * Add Prepend converter
+ * Add Append converter
+
 1.0.1
 ---
 

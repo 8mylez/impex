@@ -2,9 +2,15 @@
     "name": "dustin/impex",
     "description": "A Symfony bundle for data imports and exports",
     "license": "MIT",
-    "authors": [{ "name": "Dustin Simon" }],
+    "authors": [
+        {
+            "name": "Dustin Simon"
+        }
+    ],
     "autoload": {
-        "psr-4": { "Dustin\\ImpEx\\": "src/" }
+        "psr-4": {
+            "Dustin\\ImpEx\\": "src/"
+        }
     },
     "require": {
         "php": "^8.1",
