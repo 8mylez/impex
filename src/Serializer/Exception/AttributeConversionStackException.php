@@ -11,6 +11,7 @@ class AttributeConversionStackException extends StackException implements Attrib
 
     public function __construct(private string $attributePath, private array $data, AttributeConversionExceptionInterface ...$errors)
     {
+        parent::__construct(null, ...$errors);
         ErrorCodeException::__construct($this->createMessage(...$errors), []);
     }
 

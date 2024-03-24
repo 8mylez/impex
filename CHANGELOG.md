@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+1.2.1
+---
+
+ * Bugfix: AttributeConversionStackException was not constructed correctly
+
 1.2.0
 ---
 
