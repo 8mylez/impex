@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+1.2.0
+---
+
+ * Fix bug in SequenceBuildException
+ * Packer can now create custom container classes
+ * Add Unpacker
+ * Implement ConversionNormalizer::getSupportedTypes
+
 1.1.0
 ---
 

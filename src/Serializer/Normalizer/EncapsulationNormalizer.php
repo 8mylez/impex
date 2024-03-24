@@ -19,6 +19,8 @@ class EncapsulationNormalizer extends ConversionNormalizer
             return $data instanceof AbstractEncapsulation;
         }
 
+        $this->validateEncapsulationClass($targetClass);
+
         return $data instanceof $targetClass;
     }
 
@@ -30,8 +32,23 @@ class EncapsulationNormalizer extends ConversionNormalizer
             return is_subclass_of($type, AbstractEncapsulation::class);
         }
 
+        $this->validateEncapsulationClass($targetClass);
+
         return is_subclass_of($type, $targetClass) ||
             $type === $targetClass;
+    }
+
+    public function getSupportedTypes(?string $format): array
+    {
+        $targetClass = $this->getEncapsulationClass();
+
+        if ($targetClass === null) {
+            return parent::getSupportedTypes($format);
+        }
+
+        $this->validateEncapsulationClass($targetClass);
+
+        return [$targetClass => false];
     }
 
     /**
@@ -79,5 +96,12 @@ class EncapsulationNormalizer extends ConversionNormalizer
     protected function extractAttributes(object $object, string $format = null, array $context = [])
     {
         return $object->getFields();
+    }
+
+    private function validateEncapsulationClass(string $class): void
+    {
+        if (!is_subclass_of($class, AbstractEncapsulation::class)) {
+            throw new \RuntimeException(sprintf('getEncapsulationClass() must return class name inheriting from %s.', AbstractEncapsulation::class));
+        }
     }
 }
