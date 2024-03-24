@@ -97,6 +97,11 @@ class ConversionNormalizer extends AbstractNormalizer
             (interface_exists($type, false) && $this->classDiscriminatorResolver?->getMappingForClass($type) !== null);
     }
 
+    public function getSupportedTypes(?string $format): array
+    {
+        return ['object' => false];
+    }
+
     /**
      * @return array|\ArrayObject
      *
