@@ -97,6 +97,11 @@ class ConversionNormalizer extends AbstractNormalizer
             (interface_exists($type, false) && $this->classDiscriminatorResolver?->getMappingForClass($type) !== null);
     }
 
+    public function getSupportedTypes(?string $format): array
+    {
+        return ['object' => false];
+    }
+
     /**
      * @return array|\ArrayObject
      *
@@ -277,7 +282,9 @@ class ConversionNormalizer extends AbstractNormalizer
                 }
             }
 
-            $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
+            if (!($value === null && $this->skipNullValues($attributeContext))) {
+                $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
+            }
         }
 
         $conversionExceptions->throw();
