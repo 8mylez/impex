@@ -3,7 +3,7 @@
 namespace Dustin\ImpEx\Sequence\Exception;
 
 use Dustin\Exception\ErrorCodeException;
-use Dustin\ImpEx\Sequence\AbstractSequence;
+use Dustin\ImpEx\Sequence\Sequence;
 
 class SequenceBuildException extends ErrorCodeException
 {
@@ -45,7 +45,7 @@ class SequenceBuildException extends ErrorCodeException
     {
         $exception = new self(
             'Sequence class must inherit from {{ abstractClass }}. {{ class }} given.',
-            ['abstractClass' => AbstractSequence::class, 'class' => $class]
+            ['abstractClass' => Sequence::class, 'class' => $class]
         );
 
         $exception->errorCode = self::ERROR_CODE_INVALID_SEQUENCE_CLASS;
