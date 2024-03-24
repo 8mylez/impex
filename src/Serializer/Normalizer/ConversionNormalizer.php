@@ -277,7 +277,9 @@ class ConversionNormalizer extends AbstractNormalizer
                 }
             }
 
-            $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
+            if (!($value === null && $this->skipNullValues($attributeContext))) {
+                $this->setAttributeValue($object, $attribute, $value, $format, $attributeContext);
+            }
         }
 
         $conversionExceptions->throw();
