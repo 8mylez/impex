@@ -1,6 +1,6 @@
 {
     "name": "dustin/impex",
-    "description": "A Symfony bundle for data imports and exports",
+    "description": "Fork. A Symfony bundle for data imports and exports",
     "license": "MIT",
     "authors": [
         {
