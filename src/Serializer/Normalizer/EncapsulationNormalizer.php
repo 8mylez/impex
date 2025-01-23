@@ -308,7 +308,7 @@ class EncapsulationNormalizer extends AbstractNormalizer implements ContextProvi
      *
      * @return array
      */
-    protected function prepareForDenormalization($data)
+    protected function prepareForDenormalization($data): array
     {
         if ($data instanceof EncapsulationInterface) {
             return $data->toArray();
